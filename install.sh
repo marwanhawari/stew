@@ -3,7 +3,7 @@
 # This install script does 3 things:
 # 1. Create the ~/.stew directory structure
 # 2. Download the stew binary
-# 3. Add ~/.stew/bin to ~/.zshrc and ~/.bashrc
+# 3. Add ~/.stew/bin to PATH in ~/.zshrc or ~/.bashrc
 
 os=""
 arch=""
@@ -50,7 +50,7 @@ mkdir -p "$HOME"/.stew/pkg
 curl -o "$HOME"/.stew/bin/stew${exe} -fsSL https://github.com/marwanhawari/stew/releases/latest/download/stew-${os}-${arch}${exe}
 chmod +x "$HOME"/.stew/bin/stew${exe}
 
-# 3. Add ~/.stew/bin to $PATH in ~/.zshrc or ~/.bashrc
+# 3. Add ~/.stew/bin to PATH in ~/.zshrc or ~/.bashrc
 if [ -f "$HOME"/.zshrc ]
 then
     echo 'export PATH="$HOME/.stew/bin:$PATH"' >> "$HOME"/.zshrc

@@ -34,7 +34,7 @@ curl -fsSL https://raw.githubusercontent.com/marwanhawari/stew/main/install.sh |
 ```sh
 # Install from GitHub releases
 stew install junegunn/fzf              # Install the latest release
-stew install junegunn/fzf@v0.27.1      # Install a specific, tagged version
+stew install junegunn/fzf@0.27.1       # Install a specific, tagged version
 stew install junefunn/fzf sharkdp/fd   # Install multiple binaries in a single command
 
 # Install directly from a URL
