@@ -32,6 +32,7 @@ curl -fsSL https://raw.githubusercontent.com/marwanhawari/stew/main/install.sh |
 ```
 
 # Usage
+### Install
 ```sh
 # Install from GitHub releases
 stew install junegunn/fzf              # Install the latest release
@@ -43,24 +44,41 @@ stew install https://github.com/cli/cli/releases/download/v2.4.0/gh_2.4.0_macOS_
 
 # Install from an Stewfile
 stew install Stewfile
+```
 
-# Browse github releases and assets with a terminal UI
+### Search
+```sh
+# Search for a GitHub repo and browse its contents with a terminal UI
+stew search ripgrep
+```
+
+### Browse
+```sh
+# Browse a specific GitHub repo's releases and assets with a terminal UI
 stew browse sharkdp/hyperfine
+```
 
-# Upgrade a binary to its latest version (only for binaries from GitHub releases)
+### Upgrade
+```sh
+# Upgrade a binary to its latest version. Not for binaries installed from a URL.
 stew upgrade rg           # Upgrade using the name of the binary directly
 stew upgrade --all        # Upgrade all binaries
+```
 
+### Uninstall
+```sh
 # Uninstall a binary
 stew uninstall rg         # Uninstall using the name of the binary directly
 stew uninstall --all      # Uninstall all binaries
+```
 
+### List
+```sh
 # List installed binaries
 stew list                              # Print to console
 stew list > Stewfile                   # Create an Stewfile without pinned tags
 stew list --tags > Stewfile            # Pin tags
 stew list --tags --assets > Stewfile   # Pin tags and assets
-
 ```
 
 # FAQ
