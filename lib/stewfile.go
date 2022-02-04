@@ -11,11 +11,14 @@ import (
 	"github.com/marwanhawari/stew/constants"
 )
 
+// LockFile contains all the data for the lockfile
 type LockFile struct {
 	Os       string        `json:"os"`
 	Arch     string        `json:"arch"`
 	Packages []PackageData `json:"packages"`
 }
+
+// PackageData contains the information for an installed binary
 type PackageData struct {
 	Source string `json:"source"`
 	Owner  string `json:"owner"`
@@ -26,7 +29,7 @@ type PackageData struct {
 	URL    string `json:"url"`
 }
 
-func ReadLockFileJSON(lockFilePath string) (LockFile, error) {
+func readLockFileJSON(lockFilePath string) (LockFile, error) {
 
 	lockFileBytes, err := ioutil.ReadFile(lockFilePath)
 	if err != nil {
@@ -42,6 +45,7 @@ func ReadLockFileJSON(lockFilePath string) (LockFile, error) {
 	return lockFile, nil
 }
 
+// WriteLockFileJSON will write the lockfile JSON file
 func WriteLockFileJSON(lockFileJSON LockFile, outputPath string) error {
 
 	lockFileBytes, err := json.MarshalIndent(lockFileJSON, "", "\t")
@@ -59,6 +63,7 @@ func WriteLockFileJSON(lockFileJSON LockFile, outputPath string) error {
 	return nil
 }
 
+// RemovePackage will remove a package from a LockFile.Packages slice
 func RemovePackage(pkgs []PackageData, index int) ([]PackageData, error) {
 	if len(pkgs) == 0 {
 		return []PackageData{}, NoPackagesInLockfileError{}
@@ -71,6 +76,7 @@ func RemovePackage(pkgs []PackageData, index int) ([]PackageData, error) {
 	return append(pkgs[:index], pkgs[index+1:]...), nil
 }
 
+// ReadStewfileContents will read the contents of the Stewfile
 func ReadStewfileContents(stewfilePath string) ([]string, error) {
 	file, err := os.Open(stewfilePath)
 	if err != nil {
@@ -92,6 +98,7 @@ func ReadStewfileContents(stewfilePath string) ([]string, error) {
 	return packages, nil
 }
 
+// NewLockFile creates a new instance of the LockFile struct
 func NewLockFile(stewLockFilePath, userOS, userArch string) (LockFile, error) {
 	var lockFile LockFile
 	lockFileExists, err := PathExists(stewLockFilePath)
@@ -101,7 +108,7 @@ func NewLockFile(stewLockFilePath, userOS, userArch string) (LockFile, error) {
 	if !lockFileExists {
 		lockFile = LockFile{Os: userOS, Arch: userArch, Packages: []PackageData{}}
 	} else {
-		lockFile, err = ReadLockFileJSON(stewLockFilePath)
+		lockFile, err = readLockFileJSON(stewLockFilePath)
 		if err != nil {
 			return LockFile{}, err
 		}
@@ -109,6 +116,7 @@ func NewLockFile(stewLockFilePath, userOS, userArch string) (LockFile, error) {
 	return lockFile, nil
 }
 
+// SystemInfo contains system specific info like OS, arch, and ~/.stew paths
 type SystemInfo struct {
 	Os               string
 	Arch             string
@@ -119,8 +127,9 @@ type SystemInfo struct {
 	StewTmpPath      string
 }
 
+// NewSystemInfo creates a new instance of the SystemInfo struct
 func NewSystemInfo() (SystemInfo, error) {
-	stewPath, err := GetStewPath()
+	stewPath, err := getStewPath()
 	if err != nil {
 		return SystemInfo{}, err
 	}
@@ -131,20 +140,21 @@ func NewSystemInfo() (SystemInfo, error) {
 	systemInfo.StewPkgPath = path.Join(stewPath, "pkg")
 	systemInfo.StewLockFilePath = path.Join(stewPath, "Stewfile.lock.json")
 	systemInfo.StewTmpPath = path.Join(stewPath, "tmp")
-	systemInfo.Os = GetOS()
-	systemInfo.Arch = GetArch()
+	systemInfo.Os = getOS()
+	systemInfo.Arch = getArch()
 
 	return systemInfo, nil
 }
 
+// DeleteAssetAndBinary will delete the asset from the ~/.stew/pkg path and delete the binary from the ~/.stew/bin path
 func DeleteAssetAndBinary(stewPkgPath, stewBinPath, asset, binary string) error {
 	assetPath := path.Join(stewPkgPath, asset)
-	pkgPath := path.Join(stewBinPath, binary)
+	binPath := path.Join(stewBinPath, binary)
 	err := os.RemoveAll(assetPath)
 	if err != nil {
 		return err
 	}
-	err = os.RemoveAll(pkgPath)
+	err = os.RemoveAll(binPath)
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,7 @@ import (
 	stew "github.com/marwanhawari/stew/lib"
 )
 
+// Search is executed when you run `stew search`
 func Search(cliInput string) {
 	sp := constants.LoadingSpinner
 

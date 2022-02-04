@@ -9,6 +9,7 @@ import (
 	stew "github.com/marwanhawari/stew/lib"
 )
 
+// Browse is executed when you run `stew browse`
 func Browse(cliInput string) {
 	sp := constants.LoadingSpinner
 

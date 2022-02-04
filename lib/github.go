@@ -8,18 +8,23 @@ import (
 	"github.com/marwanhawari/stew/constants"
 )
 
+// GithubProject contains information about the GitHub project including GitHub releases
 type GithubProject struct {
 	Owner    string
 	Repo     string
 	Releases GithubAPIResponse
 }
 
+// GithubAPIResponse is the response from the GitHub releases API
 type GithubAPIResponse []GithubRelease
 
+// GithubRelease contains information about a GitHub release, including the associated assets
 type GithubRelease struct {
 	TagName string        `json:"tag_name"`
 	Assets  []GithubAsset `json:"assets"`
 }
+
+// GithubAsset contains information about a specific GitHub asset
 type GithubAsset struct {
 	Name        string `json:"name"`
 	DownloadURL string `json:"browser_download_url"`
@@ -27,7 +32,7 @@ type GithubAsset struct {
 	ContentType string `json:"content_type"`
 }
 
-func ReadGithubJSON(jsonString string) (GithubAPIResponse, error) {
+func readGithubJSON(jsonString string) (GithubAPIResponse, error) {
 	var ghProject GithubAPIResponse
 	err := json.Unmarshal([]byte(jsonString), &ghProject)
 	if err != nil {
@@ -39,7 +44,7 @@ func ReadGithubJSON(jsonString string) (GithubAPIResponse, error) {
 func getGithubJSON(owner, repo string) (string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%v/%v/releases?per_page=100", owner, repo)
 
-	response, err := GetHTTPResponseBody(url)
+	response, err := getHTTPResponseBody(url)
 	if err != nil {
 		return "", err
 	}
@@ -47,13 +52,14 @@ func getGithubJSON(owner, repo string) (string, error) {
 	return response, nil
 }
 
+// NewGithubProject creates a new instance of the GithubProject struct
 func NewGithubProject(owner, repo string) (GithubProject, error) {
 	ghJSON, err := getGithubJSON(owner, repo)
 	if err != nil {
 		return GithubProject{}, err
 	}
 
-	ghAPIResponse, err := ReadGithubJSON(ghJSON)
+	ghAPIResponse, err := readGithubJSON(ghJSON)
 	if err != nil {
 		return GithubProject{}, err
 	}
@@ -63,6 +69,7 @@ func NewGithubProject(owner, repo string) (GithubProject, error) {
 	return ghProject, nil
 }
 
+// GetGithubReleasesTags gets a string slice of the releases for a GithubProject
 func GetGithubReleasesTags(ghProject GithubProject) ([]string, error) {
 	releasesTags := []string{}
 
@@ -70,7 +77,7 @@ func GetGithubReleasesTags(ghProject GithubProject) ([]string, error) {
 		releasesTags = append(releasesTags, release.TagName)
 	}
 
-	err := ReleasesFound(releasesTags, ghProject.Owner, ghProject.Repo)
+	err := releasesFound(releasesTags, ghProject.Owner, ghProject.Repo)
 	if err != nil {
 		return []string{}, err
 	}
@@ -79,13 +86,14 @@ func GetGithubReleasesTags(ghProject GithubProject) ([]string, error) {
 
 }
 
-func ReleasesFound(releaseTags []string, owner string, repo string) error {
+func releasesFound(releaseTags []string, owner string, repo string) error {
 	if len(releaseTags) == 0 {
 		return ReleasesNotFoundError{Owner: owner, Repo: repo}
 	}
 	return nil
 }
 
+// GetGithubReleasesAssets gets a string slice of the assets for a GithubRelease
 func GetGithubReleasesAssets(ghProject GithubProject, tag string) ([]string, error) {
 
 	releaseAssets := []string{}
@@ -98,7 +106,7 @@ func GetGithubReleasesAssets(ghProject GithubProject, tag string) ([]string, err
 		}
 	}
 
-	err := AssetsFound(releaseAssets, tag)
+	err := assetsFound(releaseAssets, tag)
 	if err != nil {
 		return []string{}, err
 	}
@@ -107,13 +115,14 @@ func GetGithubReleasesAssets(ghProject GithubProject, tag string) ([]string, err
 
 }
 
-func AssetsFound(releaseAssets []string, releaseTag string) error {
+func assetsFound(releaseAssets []string, releaseTag string) error {
 	if len(releaseAssets) == 0 {
 		return AssetsNotFoundError{Tag: releaseTag}
 	}
 	return nil
 }
 
+// DetectAsset will automatically detect a release asset matching your systems OS/arch or prompt you to manually select an asset
 func DetectAsset(userOS string, userArch string, releaseAssets []string) (string, error) {
 	var detectedOSAssets []string
 	var reOS *regexp.Regexp
@@ -199,12 +208,14 @@ func darwinARMFallback(darwinAssets []string) (string, error) {
 	return altAssets[0], nil
 }
 
+// GithubSearch contains information about the GitHub search including the GitHub search results
 type GithubSearch struct {
 	SearchQuery string
 	Count       int                  `json:"total_count"`
 	Items       []GithubSearchResult `json:"items"`
 }
 
+// GithubSearchResult contains information about the GitHub search result
 type GithubSearchResult struct {
 	FullName    string `json:"full_name"`
 	Stars       int    `json:"stargazers_count"`
@@ -215,7 +226,7 @@ type GithubSearchResult struct {
 func getGithubSearchJSON(searchQuery string) (string, error) {
 	url := fmt.Sprintf("https://api.github.com/search/repositories?q=%v", searchQuery)
 
-	response, err := GetHTTPResponseBody(url)
+	response, err := getHTTPResponseBody(url)
 	if err != nil {
 		return "", err
 	}
@@ -223,7 +234,7 @@ func getGithubSearchJSON(searchQuery string) (string, error) {
 	return response, nil
 }
 
-func ReadGithubSearchJSON(jsonString string) (GithubSearch, error) {
+func readGithubSearchJSON(jsonString string) (GithubSearch, error) {
 	var ghSearch GithubSearch
 	err := json.Unmarshal([]byte(jsonString), &ghSearch)
 	if err != nil {
@@ -232,13 +243,14 @@ func ReadGithubSearchJSON(jsonString string) (GithubSearch, error) {
 	return ghSearch, nil
 }
 
+// NewGithubSearch creates a new instance of the GithubSearch struct
 func NewGithubSearch(searchQuery string) (GithubSearch, error) {
 	ghJSON, err := getGithubSearchJSON(searchQuery)
 	if err != nil {
 		return GithubSearch{}, err
 	}
 
-	ghSearch, err := ReadGithubSearchJSON(ghJSON)
+	ghSearch, err := readGithubSearchJSON(ghJSON)
 	if err != nil {
 		return GithubSearch{}, err
 	}
@@ -248,6 +260,7 @@ func NewGithubSearch(searchQuery string) (GithubSearch, error) {
 	return ghSearch, nil
 }
 
+// FormatSearchResults formats the GitHub search results for the terminal UI
 func FormatSearchResults(ghSearch GithubSearch) []string {
 
 	var formattedSearchResults []string
@@ -259,6 +272,7 @@ func FormatSearchResults(ghSearch GithubSearch) []string {
 	return formattedSearchResults
 }
 
+// ValidateGithubSearchQuery makes sure the GitHub search query is valid
 func ValidateGithubSearchQuery(searchQuery string) error {
 
 	reSearch, err := regexp.Compile(constants.RegexGithubSearch)

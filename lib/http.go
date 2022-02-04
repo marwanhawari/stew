@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func GetHTTPResponseBody(url string) (string, error) {
+func getHTTPResponseBody(url string) (string, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

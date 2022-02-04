@@ -4,6 +4,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 )
 
+// PromptSelect launches the selection UI
 func PromptSelect(message string, options []string) (string, error) {
 	result := ""
 	prompt := &survey.Select{
@@ -20,6 +21,7 @@ func PromptSelect(message string, options []string) (string, error) {
 	return result, nil
 }
 
+// WarningPromptSelect launches the selection UI with a warning styling
 func WarningPromptSelect(message string, options []string) (string, error) {
 	result := ""
 	prompt := &survey.Select{
@@ -37,6 +39,7 @@ func WarningPromptSelect(message string, options []string) (string, error) {
 	return result, nil
 }
 
+// WarningPromptConfirm launches the confirm UI with a warning styling
 func WarningPromptConfirm(message string) (bool, error) {
 	result := false
 	prompt := &survey.Confirm{

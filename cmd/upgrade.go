@@ -9,9 +9,10 @@ import (
 	stew "github.com/marwanhawari/stew/lib"
 )
 
+// Upgrade is executed when you run `stew upgrade`
 func Upgrade(cliFlag bool, binaryName string) {
 	if cliFlag && binaryName != "" {
-		stew.CatchAndExit(stew.UninstallCLIInputError{})
+		stew.CatchAndExit(stew.CLIFlagAndInputError{})
 	} else if !cliFlag {
 		err := stew.ValidateCLIInput(binaryName)
 		stew.CatchAndExit(err)

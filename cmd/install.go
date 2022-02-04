@@ -10,6 +10,7 @@ import (
 	stew "github.com/marwanhawari/stew/lib"
 )
 
+// Install is executed when you run `stew install`
 func Install(cliInputs []string) {
 	var err error
 	for _, cliInput := range cliInputs {

@@ -16,7 +16,7 @@ import (
 	progressbar "github.com/schollz/progressbar/v3"
 )
 
-func IsArchiveFile(filePath string) bool {
+func isArchiveFile(filePath string) bool {
 	fileExtension := filepath.Ext(filePath)
 	if fileExtension == ".br" || fileExtension == ".bz2" || fileExtension == ".zip" || fileExtension == ".gz" || fileExtension == ".lz4" || fileExtension == ".sz" || fileExtension == ".xz" || fileExtension == ".zst" || fileExtension == ".tar" || fileExtension == ".rar" {
 		return true
@@ -24,7 +24,7 @@ func IsArchiveFile(filePath string) bool {
 	return false
 }
 
-func IsExecutableFile(filePath string) (bool, error) {
+func isExecutableFile(filePath string) (bool, error) {
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
 		return false, err
@@ -36,10 +36,11 @@ func IsExecutableFile(filePath string) (bool, error) {
 	return isExecutable, nil
 }
 
+// CatchAndExit will catch errors and immediately exit
 func CatchAndExit(err error) {
 	if err != nil {
 		fmt.Println(err)
-		stewPath, _ := GetStewPath()
+		stewPath, _ := getStewPath()
 		stewTmpPath := path.Join(stewPath, "tmp")
 		err = os.RemoveAll(stewTmpPath)
 		if err != nil {
@@ -49,22 +50,21 @@ func CatchAndExit(err error) {
 	}
 }
 
+// PathExists checks if a given path exists
 func PathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
 
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
-		} else {
-			return false, err
 		}
+		return false, err
 	}
 
 	return true, nil
 }
 
-func GetStewPath() (string, error) {
-
+func getStewPath() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
@@ -76,12 +76,13 @@ func GetStewPath() (string, error) {
 	if err != nil {
 		return "", err
 	} else if !exists {
-		return "", StewPathNotFoundError{StewPath: stewPath}
+		return "", StewpathNotFoundError{StewPath: stewPath}
 	}
 
 	return stewPath, nil
 }
 
+// DownloadFile will download a file from url to a given path
 func DownloadFile(downloadPath string, url string) error {
 	sp := constants.LoadingSpinner
 	sp.Start()
@@ -122,7 +123,7 @@ func DownloadFile(downloadPath string, url string) error {
 
 }
 
-func CopyFile(srcFile, destFile string) error {
+func copyFile(srcFile, destFile string) error {
 	srcContents, err := os.Open(srcFile)
 	if err != nil {
 		return err
@@ -148,7 +149,7 @@ func CopyFile(srcFile, destFile string) error {
 	return nil
 }
 
-func WalkDir(rootDir string) ([]string, error) {
+func walkDir(rootDir string) ([]string, error) {
 	allFilePaths := []string{}
 	err := filepath.Walk(rootDir, func(filePath string, fileInfo os.FileInfo, err error) error {
 		if !fileInfo.IsDir() {
@@ -159,14 +160,14 @@ func WalkDir(rootDir string) ([]string, error) {
 	return allFilePaths, err
 }
 
-func GetBinary(filePaths []string, repo string) (string, string, error) {
+func getBinary(filePaths []string, repo string) (string, string, error) {
 	binaryFile := ""
 	binaryName := ""
 	var err error
 	executableFiles := []string{}
 	for _, fullPath := range filePaths {
 		fileNameBase := filepath.Base(fullPath)
-		fileIsExecutable, err := IsExecutableFile(fullPath)
+		fileIsExecutable, err := isExecutableFile(fullPath)
 		if err != nil {
 			return "", "", err
 		}
@@ -199,6 +200,7 @@ func GetBinary(filePaths []string, repo string) (string, string, error) {
 	return binaryFile, binaryName, nil
 }
 
+// ValidateCLIInput makes sure the CLI input isn't empty
 func ValidateCLIInput(cliInput string) error {
 	if cliInput == "" {
 		return EmptyCLIInputError{}
@@ -207,6 +209,7 @@ func ValidateCLIInput(cliInput string) error {
 	return nil
 }
 
+// CLIInput contains information about the parsed CLI input
 type CLIInput struct {
 	IsGithubInput bool
 	Owner         string
@@ -216,6 +219,7 @@ type CLIInput struct {
 	DownloadURL   string
 }
 
+// ParseCLIInput creates a new instance of the CLIInput struct
 func ParseCLIInput(cliInput string) (CLIInput, error) {
 	err := ValidateCLIInput(cliInput)
 	if err != nil {
@@ -232,9 +236,9 @@ func ParseCLIInput(cliInput string) (CLIInput, error) {
 	}
 	var parsedInput CLIInput
 	if reGithub.MatchString(cliInput) {
-		parsedInput, err = ParseGithubInput(cliInput)
+		parsedInput, err = parseGithubInput(cliInput)
 	} else if reURL.MatchString(cliInput) {
-		parsedInput, err = ParseURLInput(cliInput)
+		parsedInput, err = parseURLInput(cliInput)
 	} else {
 		return CLIInput{}, UnrecognizedInputError{}
 	}
@@ -246,7 +250,7 @@ func ParseCLIInput(cliInput string) (CLIInput, error) {
 
 }
 
-func ParseGithubInput(cliInput string) (CLIInput, error) {
+func parseGithubInput(cliInput string) (CLIInput, error) {
 	parsedInput := CLIInput{}
 	parsedInput.IsGithubInput = true
 	trimmedString := strings.Trim(strings.Trim(strings.Trim(strings.TrimSpace(cliInput), "/"), "@"), "::")
@@ -270,10 +274,11 @@ func ParseGithubInput(cliInput string) (CLIInput, error) {
 
 }
 
-func ParseURLInput(cliInput string) (CLIInput, error) {
+func parseURLInput(cliInput string) (CLIInput, error) {
 	return CLIInput{IsGithubInput: false, Asset: path.Base(cliInput), DownloadURL: cliInput}, nil
 }
 
+// Contains checks if a string slice contains a given target
 func Contains(slice []string, target string) (int, bool) {
 	for index, element := range slice {
 		if target == element {
@@ -283,42 +288,43 @@ func Contains(slice []string, target string) (int, bool) {
 	return -1, false
 }
 
-func GetOS() string {
+func getOS() string {
 	return runtime.GOOS
 }
 
-func GetArch() string {
+func getArch() string {
 	return runtime.GOARCH
 }
 
-func ExtractBinary(downloadedFilePath, tmpExtractionPath string) error {
+func extractBinary(downloadedFilePath, tmpExtractionPath string) error {
 	var err error
-	isArchive := IsArchiveFile(downloadedFilePath)
+	isArchive := isArchiveFile(downloadedFilePath)
 	if isArchive {
 		err = archiver.Unarchive(downloadedFilePath, tmpExtractionPath)
 	} else {
-		err = CopyFile(downloadedFilePath, path.Join(tmpExtractionPath, filepath.Base(downloadedFilePath)))
+		err = copyFile(downloadedFilePath, path.Join(tmpExtractionPath, filepath.Base(downloadedFilePath)))
 	}
 	return err
 }
 
+// InstallBinary will extract the binary and copy it to the ~/.stew/bin path
 func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo, lockFile *LockFile, overwriteFromUpgrade bool) (string, error) {
 
 	tmpExtractionPath := systemInfo.StewTmpPath
 	assetDownloadPath := systemInfo.StewPkgPath
 	binaryInstallPath := systemInfo.StewBinPath
 
-	err := ExtractBinary(downloadedFilePath, tmpExtractionPath)
+	err := extractBinary(downloadedFilePath, tmpExtractionPath)
 	if err != nil {
 		return "", err
 	}
 
-	allFilePaths, err := WalkDir(tmpExtractionPath)
+	allFilePaths, err := walkDir(tmpExtractionPath)
 	if err != nil {
 		return "", err
 	}
 
-	binaryFile, binaryName, err := GetBinary(allFilePaths, repo)
+	binaryFile, binaryName, err := getBinary(allFilePaths, repo)
 	if err != nil {
 		return "", err
 	}
@@ -367,7 +373,7 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 		}
 	}
 
-	err = CopyFile(binaryFile, path.Join(binaryInstallPath, binaryName))
+	err = copyFile(binaryFile, path.Join(binaryInstallPath, binaryName))
 	if err != nil {
 		return "", err
 	}

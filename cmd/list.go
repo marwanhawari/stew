@@ -6,6 +6,7 @@ import (
 	stew "github.com/marwanhawari/stew/lib"
 )
 
+// List is executed when you run `stew list`
 func List(cliTagsFlag bool, cliAssetsFlag bool) {
 
 	systemInfo, err := stew.NewSystemInfo()
