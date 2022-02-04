@@ -8,16 +8,17 @@
 </p>
 <p align="center">
   <img src="https://github.com/marwanhawari/stew/actions/workflows/test.yml/badge.svg" alt="build status"/>
+  <img src="https://goreportcard.com/badge/github.com/marwanhawari/stew" alt="go report card"/>
   <img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="code of conduct"/>
   <img src="https://img.shields.io/github/license/marwanhawari/stew?color=blue" alt="license"/>
 </p>
 
 
 # Features
+* Install binaries from GitHub releases or directly from URLs
 * Easily distribute binaries across teams and private repositories.
 * Get the latest releases ahead of other package managers.
 * Rapidly browse, install, and experiment with different projects.
-* Install binaries from GitHub releases or directly from URLs
 * Isolated `~/.stew/` directory.
 * No need for `sudo`.
 * Portable [`Stewfile`](https://github.com/marwanhawari/stew/blob/main/examples/Stewfile) with optional pinned versioning.

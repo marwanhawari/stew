@@ -198,3 +198,77 @@ func darwinARMFallback(darwinAssets []string) (string, error) {
 
 	return altAssets[0], nil
 }
+
+type GithubSearch struct {
+	SearchQuery string
+	Count       int                  `json:"total_count"`
+	Items       []GithubSearchResult `json:"items"`
+}
+
+type GithubSearchResult struct {
+	FullName    string `json:"full_name"`
+	Stars       int    `json:"stargazers_count"`
+	Language    string `json:"language"`
+	Description string `json:"description"`
+}
+
+func getGithubSearchJSON(searchQuery string) (string, error) {
+	url := fmt.Sprintf("https://api.github.com/search/repositories?q=%v", searchQuery)
+
+	response, err := GetHTTPResponseBody(url)
+	if err != nil {
+		return "", err
+	}
+
+	return response, nil
+}
+
+func ReadGithubSearchJSON(jsonString string) (GithubSearch, error) {
+	var ghSearch GithubSearch
+	err := json.Unmarshal([]byte(jsonString), &ghSearch)
+	if err != nil {
+		return GithubSearch{}, err
+	}
+	return ghSearch, nil
+}
+
+func NewGithubSearch(searchQuery string) (GithubSearch, error) {
+	ghJSON, err := getGithubSearchJSON(searchQuery)
+	if err != nil {
+		return GithubSearch{}, err
+	}
+
+	ghSearch, err := ReadGithubSearchJSON(ghJSON)
+	if err != nil {
+		return GithubSearch{}, err
+	}
+
+	ghSearch.SearchQuery = searchQuery
+
+	return ghSearch, nil
+}
+
+func FormatSearchResults(ghSearch GithubSearch) []string {
+
+	var formattedSearchResults []string
+	for _, searchResult := range ghSearch.Items {
+		formatted := fmt.Sprintf("%v [⭐️%v] %v", searchResult.FullName, searchResult.Stars, searchResult.Description)
+		formattedSearchResults = append(formattedSearchResults, formatted)
+	}
+
+	return formattedSearchResults
+}
+
+func ValidateGithubSearchQuery(searchQuery string) error {
+
+	reSearch, err := regexp.Compile(constants.RegexGithubSearch)
+	if err != nil {
+		return err
+	}
+
+	if !reSearch.MatchString(searchQuery) {
+		return InvalidGithubSearchQueryError{SearchQuery: searchQuery}
+	}
+
+	return nil
+}

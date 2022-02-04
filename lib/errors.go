@@ -6,12 +6,13 @@ import (
 	"github.com/marwanhawari/stew/constants"
 )
 
+// NonZeroStatusCodeError occurs if a non-zero status code is received from an HTTP request
 type NonZeroStatusCodeError struct {
 	StatusCode int
 }
 
 func (e NonZeroStatusCodeError) Error() string {
-	return fmt.Sprintf("%v Received non-zero status code from HTTP request: %v", constants.RedColor("Error:"), constants.YellowColor(e.StatusCode))
+	return fmt.Sprintf("%v Received non-zero status code from HTTP request: %v", constants.RedColor("Error:"), constants.RedColor(e.StatusCode))
 }
 
 type ReleasesNotFoundError struct {
@@ -20,7 +21,7 @@ type ReleasesNotFoundError struct {
 }
 
 func (e ReleasesNotFoundError) Error() string {
-	return fmt.Sprintf("%v Could not find any releases for %v", constants.RedColor("Error:"), constants.YellowColor("https://github.com/"+e.Owner+"/"+e.Repo))
+	return fmt.Sprintf("%v Could not find any releases for %v", constants.RedColor("Error:"), constants.RedColor("https://github.com/"+e.Owner+"/"+e.Repo))
 }
 
 type AssetsNotFoundError struct {
@@ -28,7 +29,7 @@ type AssetsNotFoundError struct {
 }
 
 func (e AssetsNotFoundError) Error() string {
-	return fmt.Sprintf("%v Could not find any assets for release %v", constants.RedColor("Error:"), constants.YellowColor(e.Tag))
+	return fmt.Sprintf("%v Could not find any assets for release %v", constants.RedColor("Error:"), constants.RedColor(e.Tag))
 }
 
 type NoPackagesInLockfileError struct {
@@ -50,7 +51,7 @@ type ExitUserSelectionError struct {
 }
 
 func (e ExitUserSelectionError) Error() string {
-	return fmt.Sprintf("%v Exited from user selection: %v", constants.RedColor("Error:"), constants.YellowColor(e.Err))
+	return fmt.Sprintf("%v Exited from user selection: %v", constants.RedColor("Error:"), constants.RedColor(e.Err))
 }
 
 type StewPathNotFoundError struct {
@@ -66,7 +67,7 @@ type NonZeroStatusCodeDownloadError struct {
 }
 
 func (e NonZeroStatusCodeDownloadError) Error() string {
-	return fmt.Sprintf("%v Received non-zero status code from HTTP request when attempting to download a file: %v", constants.RedColor("Error:"), constants.YellowColor(e.StatusCode))
+	return fmt.Sprintf("%v Received non-zero status code from HTTP request when attempting to download a file: %v", constants.RedColor("Error:"), constants.RedColor(e.StatusCode))
 }
 
 type EmptyCLIInputError struct {
@@ -135,4 +136,20 @@ type AlreadyInstalledLatestTagError struct {
 
 func (e AlreadyInstalledLatestTagError) Error() string {
 	return fmt.Sprintf("%v The latest tag %v is already installed", constants.RedColor("Error:"), constants.RedColor(e.Tag))
+}
+
+type NoGithubSearchResultsError struct {
+	SearchQuery string
+}
+
+func (e NoGithubSearchResultsError) Error() string {
+	return fmt.Sprintf("%v No GitHub search results found for search query %v", constants.RedColor("Error:"), constants.RedColor(e.SearchQuery))
+}
+
+type InvalidGithubSearchQueryError struct {
+	SearchQuery string
+}
+
+func (e InvalidGithubSearchQueryError) Error() string {
+	return fmt.Sprintf("%v The search query %v contains invalid characters", constants.RedColor("Error:"), constants.RedColor(e.SearchQuery))
 }

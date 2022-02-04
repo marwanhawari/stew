@@ -24,6 +24,15 @@ func main() {
 				},
 			},
 			{
+				Name:    "search",
+				Usage:   "Search for a project on GitHub",
+				Aliases: []string{"s"},
+				Action: func(c *cli.Context) error {
+					cmd.Search(c.Args().First())
+					return nil
+				},
+			},
+			{
 				Name:    "browse",
 				Usage:   "Browse releases and assets in a GitHub repo",
 				Aliases: []string{"b"},
