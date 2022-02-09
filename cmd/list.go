@@ -9,8 +9,9 @@ import (
 // List is executed when you run `stew list`
 func List(cliTagsFlag bool, cliAssetsFlag bool) {
 
-	systemInfo, err := stew.NewSystemInfo()
+	stewPath, err := stew.GetStewPath()
 	stew.CatchAndExit(err)
+	systemInfo := stew.NewSystemInfo(stewPath)
 
 	userOS := systemInfo.Os
 	userArch := systemInfo.Arch

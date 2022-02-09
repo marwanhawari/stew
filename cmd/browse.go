@@ -13,8 +13,9 @@ import (
 func Browse(cliInput string) {
 	sp := constants.LoadingSpinner
 
-	systemInfo, err := stew.NewSystemInfo()
+	stewPath, err := stew.GetStewPath()
 	stew.CatchAndExit(err)
+	systemInfo := stew.NewSystemInfo(stewPath)
 
 	userOS := systemInfo.Os
 	userArch := systemInfo.Arch

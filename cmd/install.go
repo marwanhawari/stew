@@ -28,8 +28,9 @@ func Install(cliInputs []string) {
 	for _, cliInput := range cliInputs {
 		sp := constants.LoadingSpinner
 
-		systemInfo, err := stew.NewSystemInfo()
+		stewPath, err := stew.GetStewPath()
 		stew.CatchAndExit(err)
+		systemInfo := stew.NewSystemInfo(stewPath)
 
 		userOS := systemInfo.Os
 		userArch := systemInfo.Arch

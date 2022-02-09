@@ -16,8 +16,9 @@ func Uninstall(cliFlag bool, binaryName string) {
 		stew.CatchAndExit(err)
 	}
 
-	systemInfo, err := stew.NewSystemInfo()
+	stewPath, err := stew.GetStewPath()
 	stew.CatchAndExit(err)
+	systemInfo := stew.NewSystemInfo(stewPath)
 
 	userOS := systemInfo.Os
 	userArch := systemInfo.Arch

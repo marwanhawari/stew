@@ -65,7 +65,7 @@ type StewpathNotFoundError struct {
 }
 
 func (e StewpathNotFoundError) Error() string {
-	return fmt.Sprintf("%v Could not find the stew path at %v", constants.RedColor("Error:"), e.StewPath)
+	return fmt.Sprintf("%v Could not find the stew path at %v", constants.RedColor("Error:"), constants.RedColor(e.StewPath))
 }
 
 // NonZeroStatusCodeDownloadError occurs if a non-zero status code is received when trying to download a file

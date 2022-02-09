@@ -128,12 +128,7 @@ type SystemInfo struct {
 }
 
 // NewSystemInfo creates a new instance of the SystemInfo struct
-func NewSystemInfo() (SystemInfo, error) {
-	stewPath, err := getStewPath()
-	if err != nil {
-		return SystemInfo{}, err
-	}
-
+func NewSystemInfo(stewPath string) SystemInfo {
 	var systemInfo SystemInfo
 	systemInfo.StewPath = stewPath
 	systemInfo.StewBinPath = path.Join(stewPath, "bin")
@@ -143,7 +138,7 @@ func NewSystemInfo() (SystemInfo, error) {
 	systemInfo.Os = getOS()
 	systemInfo.Arch = getArch()
 
-	return systemInfo, nil
+	return systemInfo
 }
 
 // DeleteAssetAndBinary will delete the asset from the ~/.stew/pkg path and delete the binary from the ~/.stew/bin path

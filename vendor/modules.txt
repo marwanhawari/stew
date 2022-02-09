@@ -3,6 +3,8 @@
 github.com/AlecAivazis/survey/v2
 github.com/AlecAivazis/survey/v2/core
 github.com/AlecAivazis/survey/v2/terminal
+# github.com/Netflix/go-expect v0.0.0-20220104043353-73e0943537d2
+## explicit; go 1.13
 # github.com/briandowns/spinner v1.18.0
 ## explicit; go 1.14
 github.com/briandowns/spinner
@@ -28,6 +30,8 @@ github.com/golang/snappy
 # github.com/gookit/color v1.5.0
 ## explicit; go 1.13
 github.com/gookit/color
+# github.com/hinshun/vt10x v0.0.0-20220127042424-3ca73d0126d7
+## explicit; go 1.14
 # github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 ## explicit
 github.com/kballard/go-shellquote

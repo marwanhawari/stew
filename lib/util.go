@@ -40,7 +40,7 @@ func isExecutableFile(filePath string) (bool, error) {
 func CatchAndExit(err error) {
 	if err != nil {
 		fmt.Println(err)
-		stewPath, _ := getStewPath()
+		stewPath, _ := GetStewPath()
 		stewTmpPath := path.Join(stewPath, "tmp")
 		err = os.RemoveAll(stewTmpPath)
 		if err != nil {
@@ -64,7 +64,8 @@ func PathExists(path string) (bool, error) {
 	return true, nil
 }
 
-func getStewPath() (string, error) {
+// GetStewPath will return the path to the top-level stew directory
+func GetStewPath() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
@@ -329,6 +330,7 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 		return "", err
 	}
 
+	// Check if the binary already exists
 	for index, pkg := range lockFile.Packages {
 		previousAssetPath := path.Join(assetDownloadPath, pkg.Asset)
 		newAssetPath := downloadedFilePath
