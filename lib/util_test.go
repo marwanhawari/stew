@@ -340,12 +340,58 @@ func Test_getBinary(t *testing.T) {
 			testBinaryFilePath := path.Join(tempDir, tt.binaryName)
 			ioutil.WriteFile(testBinaryFilePath, []byte("An executable file"), 0755)
 			testNonBinaryFilePath := path.Join(tempDir, "testNonBinary")
-			ioutil.WriteFile(testNonBinaryFilePath, []byte("An executable file"), 0644)
+			ioutil.WriteFile(testNonBinaryFilePath, []byte("Not an executable file"), 0644)
 
 			testFilePaths := []string{testBinaryFilePath, testNonBinaryFilePath}
 
 			wantBinaryFile := path.Join(tempDir, tt.binaryName)
 			wantBinaryName := path.Base(wantBinaryFile)
+
+			got, got1, err := getBinary(testFilePaths, tt.args.repo)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getBinary() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != wantBinaryFile {
+				t.Errorf("getBinary() got = %v, want %v", got, wantBinaryFile)
+			}
+			if got1 != wantBinaryName {
+				t.Errorf("getBinary() got1 = %v, want %v", got1, wantBinaryName)
+			}
+		})
+	}
+}
+
+func Test_getBinaryError(t *testing.T) {
+	type args struct {
+		repo string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		binaryName string
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			args: args{
+				repo: "testBinary",
+			},
+			binaryName: "testBinary",
+			wantErr:    true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tempDir := t.TempDir()
+
+			testNonBinaryFilePath := path.Join(tempDir, "testNonBinary")
+			ioutil.WriteFile(testNonBinaryFilePath, []byte("Not an executable file"), 0644)
+
+			testFilePaths := []string{testNonBinaryFilePath}
+
+			wantBinaryFile := ""
+			wantBinaryName := ""
 
 			got, got1, err := getBinary(testFilePaths, tt.args.repo)
 			if (err != nil) != tt.wantErr {

@@ -155,11 +155,23 @@ func TestRemovePackage(t *testing.T) {
 			want:    []PackageData{},
 			wantErr: true,
 		},
+		{
+			name: "test5",
+			args: args{
+				index: 0,
+			},
+			want:    []PackageData{},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			testLockfilePackages := make([]PackageData, len(testLockfile.Packages))
-			copy(testLockfilePackages, testLockfile.Packages)
+			var testLockfilePackages []PackageData
+
+			if tt.name != "test5" {
+				testLockfilePackages = make([]PackageData, len(testLockfile.Packages))
+				copy(testLockfilePackages, testLockfile.Packages)
+			}
 
 			got, err := RemovePackage(testLockfilePackages, tt.args.index)
 			if (err != nil) != tt.wantErr {
@@ -239,6 +251,44 @@ func TestNewLockFile(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewLockFile() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewLockFileDoesntExist(t *testing.T) {
+	type args struct {
+		userOS   string
+		userArch string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "test1",
+			args: args{
+				userOS:   testLockfile.Os,
+				userArch: testLockfile.Arch,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			tempDir := t.TempDir()
+			lockFilePath := path.Join(tempDir, "Stewfile.lock.json")
+
+			got, err := NewLockFile(lockFilePath, tt.args.userOS, tt.args.userArch)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewLockFile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			want := LockFile{Os: tt.args.userOS, Arch: tt.args.userArch, Packages: []PackageData{}}
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("NewLockFile() = %v, want %v", got, want)
 			}
 		})
 	}

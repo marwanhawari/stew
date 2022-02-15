@@ -21,9 +21,15 @@ jobs:
         go-version: ${{ matrix.go-version }}
 
     - name: Test and calculate coverage
-      run: go test -v ./... --coverprofile coverage.out
+      run: go test -v ./lib --coverprofile coverage.out
     - name: Read the coverage
       run: go tool cover --func coverage.out
+    - name: Install goveralls
+      run: go install github.com/mattn/goveralls@latest
+    - name: Send coverage
+      env:
+        COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: goveralls -coverprofile=coverage.out -service=github
 
   goreleaser:
     needs: [test]

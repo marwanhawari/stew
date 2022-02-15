@@ -7,10 +7,27 @@
   An independent package manager for compiled binaries.
 </p>
 <p align="center">
-  <img src="https://github.com/marwanhawari/stew/actions/workflows/test.yml/badge.svg" alt="build status"/>
-  <img src="https://goreportcard.com/badge/github.com/marwanhawari/stew" alt="go report card"/>
-  <img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="code of conduct"/>
-  <img src="https://img.shields.io/github/license/marwanhawari/stew?color=blue" alt="license"/>
+
+  <a href="https://github.com/marwanhawari/stew/actions/">
+    <img src="https://github.com/marwanhawari/stew/actions/workflows/test.yml/badge.svg" alt="build status"/>
+  </a>
+  
+  <a href="https://goreportcard.com/report/github.com/marwanhawari/stew">
+    <img src="https://goreportcard.com/badge/github.com/marwanhawari/stew" alt="go report card"/>
+  </a>
+
+  <a href='https://coveralls.io/github/marwanhawari/stew?branch=main'>
+    <img src='https://coveralls.io/repos/github/marwanhawari/stew/badge.svg?branch=main' alt='Coverage Status'/>
+  </a>
+
+  <a href="https://pkg.go.dev/github.com/marwanhawari/stew">
+    <img src="https://pkg.go.dev/badge/github.com/marwanhawari/stew.svg" alt="pkg.go.dev reference"/>
+  </a>
+    
+  <a href="https://github.com/marwanhawari/stew/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/marwanhawari/stew?color=blue" alt="license"/>
+  </a>
+  
 </p>
 
 

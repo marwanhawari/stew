@@ -479,6 +479,26 @@ func TestDetectAsset(t *testing.T) {
 			want:    "",
 			wantErr: true,
 		},
+		{
+			name: "test6",
+			args: args{
+				userOS:        "windows",
+				userArch:      "386",
+				releaseAssets: append(testReleaseAssets, "ppath-v0.0.1-windows-386.tar.gz"),
+			},
+			want:    "ppath-v0.0.1-windows-386.tar.gz",
+			wantErr: false,
+		},
+		{
+			name: "test7",
+			args: args{
+				userOS:        "windows",
+				userArch:      "unexpectedArch",
+				releaseAssets: append(testReleaseAssets, "ppath-v0.0.1-windows-unexpectedArch.tar.gz"),
+			},
+			want:    "ppath-v0.0.1-windows-unexpectedArch.tar.gz",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
