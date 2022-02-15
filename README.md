@@ -23,9 +23,9 @@
   <a href="https://pkg.go.dev/github.com/marwanhawari/stew">
     <img src="https://pkg.go.dev/badge/github.com/marwanhawari/stew.svg" alt="pkg.go.dev reference"/>
   </a>
-    
-  <a href="https://github.com/marwanhawari/stew/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/marwanhawari/stew?color=blue" alt="license"/>
+
+  <a href="https://github.com/avelino/awesome-go">
+    <img src="https://awesome.re/mentioned-badge.svg" alt="Mentioned in Awesome Go"/>
   </a>
   
 </p>
