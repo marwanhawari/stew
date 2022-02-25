@@ -224,7 +224,7 @@ type GithubSearchResult struct {
 }
 
 func getGithubSearchJSON(searchQuery string) (string, error) {
-	url := fmt.Sprintf("https://api.github.com/search/repositories?q=%v", searchQuery)
+	url := fmt.Sprintf("https://api.github.com/search/repositories?q=%v%v", searchQuery, "+fork:true")
 
 	response, err := getHTTPResponseBody(url)
 	if err != nil {
