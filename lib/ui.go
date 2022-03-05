@@ -56,7 +56,7 @@ func WarningPromptConfirm(message string) (bool, error) {
 	return result, nil
 }
 
-// WarningPromptInput launches the input UI with a warning styling
+// warningPromptInput launches the input UI with a warning styling
 func warningPromptInput(message string, defaultInput string) (string, error) {
 	result := ""
 	prompt := &survey.Input{
