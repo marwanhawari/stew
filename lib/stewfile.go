@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/marwanhawari/stew/constants"
 )
@@ -131,10 +131,10 @@ type SystemInfo struct {
 func NewSystemInfo(stewPath string) SystemInfo {
 	var systemInfo SystemInfo
 	systemInfo.StewPath = stewPath
-	systemInfo.StewBinPath = path.Join(stewPath, "bin")
-	systemInfo.StewPkgPath = path.Join(stewPath, "pkg")
-	systemInfo.StewLockFilePath = path.Join(stewPath, "Stewfile.lock.json")
-	systemInfo.StewTmpPath = path.Join(stewPath, "tmp")
+	systemInfo.StewBinPath = filepath.Join(stewPath, "bin")
+	systemInfo.StewPkgPath = filepath.Join(stewPath, "pkg")
+	systemInfo.StewLockFilePath = filepath.Join(stewPath, "Stewfile.lock.json")
+	systemInfo.StewTmpPath = filepath.Join(stewPath, "tmp")
 	systemInfo.Os = getOS()
 	systemInfo.Arch = getArch()
 
@@ -143,8 +143,8 @@ func NewSystemInfo(stewPath string) SystemInfo {
 
 // DeleteAssetAndBinary will delete the asset from the ~/.stew/pkg path and delete the binary from the ~/.stew/bin path
 func DeleteAssetAndBinary(stewPkgPath, stewBinPath, asset, binary string) error {
-	assetPath := path.Join(stewPkgPath, asset)
-	binPath := path.Join(stewBinPath, binary)
+	assetPath := filepath.Join(stewPkgPath, asset)
+	binPath := filepath.Join(stewBinPath, binary)
 	err := os.RemoveAll(assetPath)
 	if err != nil {
 		return err

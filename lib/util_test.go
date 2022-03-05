@@ -3,7 +3,7 @@ package stew
 import (
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"testing"
@@ -72,7 +72,7 @@ func Test_isExecutableFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			testExecutableFilePath := path.Join(tempDir, tt.args.filePath)
+			testExecutableFilePath := filepath.Join(tempDir, tt.args.filePath)
 			if tt.want {
 				ioutil.WriteFile(testExecutableFilePath, []byte("An executable file"), 0755)
 			} else {
@@ -121,7 +121,7 @@ func TestPathExists(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			testFilePath := path.Join(tempDir, tt.args.path)
+			testFilePath := filepath.Join(tempDir, tt.args.path)
 			if tt.want {
 				ioutil.WriteFile(testFilePath, []byte("A test file"), 0644)
 			}
@@ -151,7 +151,7 @@ func TestGetStewPath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			homeDir, _ := os.UserHomeDir()
-			testStewPath := path.Join(homeDir, ".stew")
+			testStewPath := filepath.Join(homeDir, ".stew")
 			stewPathExists, _ := PathExists(testStewPath)
 			if !stewPathExists {
 				os.MkdirAll(testStewPath, 0755)
@@ -200,7 +200,7 @@ func TestDownloadFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			testDownloadPath := path.Join(tempDir, path.Base(tt.args.url))
+			testDownloadPath := filepath.Join(tempDir, filepath.Base(tt.args.url))
 			if err := DownloadFile(testDownloadPath, tt.args.url); (err != nil) != tt.wantErr {
 				t.Errorf("DownloadFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -235,8 +235,8 @@ func Test_copyFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			srcFilePath := path.Join(tempDir, tt.args.srcFile)
-			destFilePath := path.Join(tempDir, tt.args.destFile)
+			srcFilePath := filepath.Join(tempDir, tt.args.srcFile)
+			destFilePath := filepath.Join(tempDir, tt.args.destFile)
 
 			ioutil.WriteFile(srcFilePath, []byte("A test file"), 0644)
 
@@ -280,11 +280,11 @@ func Test_walkDir(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 
-			ioutil.WriteFile(path.Join(tempDir, "testFile.txt"), []byte("A test file"), 0644)
-			os.MkdirAll(path.Join(tempDir, "bin"), 0755)
-			ioutil.WriteFile(path.Join(tempDir, "bin", "binDirTestFile.txt"), []byte("Another test file"), 0644)
+			ioutil.WriteFile(filepath.Join(tempDir, "testFile.txt"), []byte("A test file"), 0644)
+			os.MkdirAll(filepath.Join(tempDir, "bin"), 0755)
+			ioutil.WriteFile(filepath.Join(tempDir, "bin", "binDirTestFile.txt"), []byte("Another test file"), 0644)
 
-			want := []string{path.Join(tempDir, "bin", "binDirTestFile.txt"), path.Join(tempDir, "testFile.txt")}
+			want := []string{filepath.Join(tempDir, "bin", "binDirTestFile.txt"), filepath.Join(tempDir, "testFile.txt")}
 
 			got, err := walkDir(tempDir)
 			if (err != nil) != tt.wantErr {
@@ -337,15 +337,15 @@ func Test_getBinary(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 
-			testBinaryFilePath := path.Join(tempDir, tt.binaryName)
+			testBinaryFilePath := filepath.Join(tempDir, tt.binaryName)
 			ioutil.WriteFile(testBinaryFilePath, []byte("An executable file"), 0755)
-			testNonBinaryFilePath := path.Join(tempDir, "testNonBinary")
+			testNonBinaryFilePath := filepath.Join(tempDir, "testNonBinary")
 			ioutil.WriteFile(testNonBinaryFilePath, []byte("Not an executable file"), 0644)
 
 			testFilePaths := []string{testBinaryFilePath, testNonBinaryFilePath}
 
-			wantBinaryFile := path.Join(tempDir, tt.binaryName)
-			wantBinaryName := path.Base(wantBinaryFile)
+			wantBinaryFile := filepath.Join(tempDir, tt.binaryName)
+			wantBinaryName := filepath.Base(wantBinaryFile)
 
 			got, got1, err := getBinary(testFilePaths, tt.args.repo)
 			if (err != nil) != tt.wantErr {
@@ -385,7 +385,7 @@ func Test_getBinaryError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 
-			testNonBinaryFilePath := path.Join(tempDir, "testNonBinary")
+			testNonBinaryFilePath := filepath.Join(tempDir, "testNonBinary")
 			ioutil.WriteFile(testNonBinaryFilePath, []byte("Not an executable file"), 0644)
 
 			testFilePaths := []string{testNonBinaryFilePath}
@@ -702,8 +702,8 @@ func Test_extractBinary(t *testing.T) {
 		{
 			name: "test1",
 			args: args{
-				downloadedFilePath: path.Join(t.TempDir(), "ppath-v0.0.3-darwin-arm64.tar.gz"),
-				tmpExtractionPath:  path.Join(t.TempDir(), "tmp"),
+				downloadedFilePath: filepath.Join(t.TempDir(), "ppath-v0.0.3-darwin-arm64.tar.gz"),
+				tmpExtractionPath:  filepath.Join(t.TempDir(), "tmp"),
 			},
 			url:     "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
 			wantErr: false,
@@ -735,7 +735,7 @@ func TestInstallBinary(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			stewPath := path.Join(tempDir, ".stew")
+			stewPath := filepath.Join(tempDir, ".stew")
 
 			repo := "ppath"
 			systemInfo := NewSystemInfo(stewPath)
@@ -759,7 +759,7 @@ func TestInstallBinary(t *testing.T) {
 				},
 			}
 
-			downloadedFilePath := path.Join(systemInfo.StewPkgPath, "ppath-v0.0.3-darwin-arm64.tar.gz")
+			downloadedFilePath := filepath.Join(systemInfo.StewPkgPath, "ppath-v0.0.3-darwin-arm64.tar.gz")
 			err := DownloadFile(downloadedFilePath, "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz")
 
 			if err != nil {
@@ -794,7 +794,7 @@ func TestInstallBinary_Fail(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			stewPath := path.Join(tempDir, ".stew")
+			stewPath := filepath.Join(tempDir, ".stew")
 
 			repo := "ppath"
 			systemInfo := NewSystemInfo(stewPath)
@@ -818,7 +818,7 @@ func TestInstallBinary_Fail(t *testing.T) {
 				},
 			}
 
-			downloadedFilePath := path.Join(systemInfo.StewPkgPath, "ppath-v0.0.3-darwin-arm64.tar.gz")
+			downloadedFilePath := filepath.Join(systemInfo.StewPkgPath, "ppath-v0.0.3-darwin-arm64.tar.gz")
 			err := DownloadFile(downloadedFilePath, "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz")
 
 			if err != nil {

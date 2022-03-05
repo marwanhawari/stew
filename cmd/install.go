@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/marwanhawari/stew/constants"
@@ -102,7 +102,7 @@ func Install(cliInputs []string) {
 			fmt.Println(constants.GreenColor(asset))
 		}
 
-		downloadPath := path.Join(stewPkgPath, asset)
+		downloadPath := filepath.Join(stewPkgPath, asset)
 		downloadPathExists, err := stew.PathExists(downloadPath)
 		stew.CatchAndExit(err)
 		if downloadPathExists {

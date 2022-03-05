@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/marwanhawari/stew/constants"
 	stew "github.com/marwanhawari/stew/lib"
@@ -89,7 +89,7 @@ func Upgrade(cliFlag bool, binaryName string) {
 
 			downloadURL := githubProject.Releases[tagIndex].Assets[assetIndex].DownloadURL
 
-			downloadPath := path.Join(stewPkgPath, asset)
+			downloadPath := filepath.Join(stewPkgPath, asset)
 			downloadPathExists, err := stew.PathExists(downloadPath)
 			stew.CatchAndExit(err)
 			if downloadPathExists {
