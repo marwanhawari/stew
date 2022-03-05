@@ -194,7 +194,7 @@ func getBinary(filePaths []string, repo string) (string, string, error) {
 				return "", "", err
 			}
 			binaryName = filepath.Base(binaryFile)
-			binaryName, err = renameBinary(binaryName)
+			binaryName, err = PromptRenameBinary(binaryName)
 			if err != nil {
 				return "", "", nil
 			}
@@ -311,7 +311,7 @@ func extractBinary(downloadedFilePath, tmpExtractionPath string) error {
 	} else {
 		originalBinaryName := filepath.Base(downloadedFilePath)
 
-		renamedBinaryName, err := renameBinary(originalBinaryName)
+		renamedBinaryName, err := PromptRenameBinary(originalBinaryName)
 		if err != nil {
 			return err
 		}
@@ -403,8 +403,8 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 	return binaryName, nil
 }
 
-// renameBinary takes in the original name of the binary and will return the new name of the binary.
-func renameBinary(originalBinaryName string) (string, error) {
+// PromptRenameBinary takes in the original name of the binary and will return the new name of the binary.
+func PromptRenameBinary(originalBinaryName string) (string, error) {
 	renamedBinaryName, err := warningPromptInput("Rename the binary?", originalBinaryName)
 	if err != nil {
 		return "", err

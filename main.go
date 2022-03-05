@@ -72,6 +72,15 @@ func main() {
 				},
 			},
 			{
+				Name:    "rename",
+				Usage:   "Rename an installed binary using a prompt UI. [Ex: stew rename fzf]",
+				Aliases: []string{"re"},
+				Action: func(c *cli.Context) error {
+					cmd.Rename(c.Args().First())
+					return nil
+				},
+			},
+			{
 				Name:    "list",
 				Usage:   "List installed binaries [Ex: stew list]",
 				Aliases: []string{"ls"},
