@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/marwanhawari/stew/constants"
 	stew "github.com/marwanhawari/stew/lib"
@@ -57,7 +57,7 @@ func Browse(cliInput string) {
 	assetIndex, _ := stew.Contains(releaseAssets, asset)
 
 	downloadURL := githubProject.Releases[tagIndex].Assets[assetIndex].DownloadURL
-	downloadPath := path.Join(stewPkgPath, asset)
+	downloadPath := filepath.Join(stewPkgPath, asset)
 	downloadPathExists, err := stew.PathExists(downloadPath)
 	stew.CatchAndExit(err)
 

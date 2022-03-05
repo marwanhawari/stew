@@ -3,7 +3,7 @@ package stew
 import (
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"testing"
@@ -69,7 +69,7 @@ func Test_readLockFileJSON(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			lockFilePath := path.Join(tempDir, "Stewfile.lock.json")
+			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
 			WriteLockFileJSON(testLockfile, lockFilePath)
 
 			got, err := readLockFileJSON(lockFilePath)
@@ -97,7 +97,7 @@ func TestWriteLockFileJSON(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			lockFilePath := path.Join(tempDir, "Stewfile.lock.json")
+			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
 
 			if err := WriteLockFileJSON(testLockfile, lockFilePath); (err != nil) != tt.wantErr {
 				t.Errorf("WriteLockFileJSON() error = %v, wantErr %v", err, tt.wantErr)
@@ -201,7 +201,7 @@ func TestReadStewfileContents(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			tempDir := t.TempDir()
-			testStewfilePath := path.Join(tempDir, "Stewfile")
+			testStewfilePath := filepath.Join(tempDir, "Stewfile")
 			ioutil.WriteFile(testStewfilePath, []byte(testStewfileContents), 0644)
 
 			got, err := ReadStewfileContents(testStewfilePath)
@@ -241,7 +241,7 @@ func TestNewLockFile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			tempDir := t.TempDir()
-			lockFilePath := path.Join(tempDir, "Stewfile.lock.json")
+			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
 			WriteLockFileJSON(testLockfile, lockFilePath)
 
 			got, err := NewLockFile(lockFilePath, tt.args.userOS, tt.args.userArch)
@@ -279,7 +279,7 @@ func TestNewLockFileDoesntExist(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			tempDir := t.TempDir()
-			lockFilePath := path.Join(tempDir, "Stewfile.lock.json")
+			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
 
 			got, err := NewLockFile(lockFilePath, tt.args.userOS, tt.args.userArch)
 			if (err != nil) != tt.wantErr {
@@ -309,10 +309,10 @@ func TestNewSystemInfo(t *testing.T) {
 				Os:               runtime.GOOS,
 				Arch:             runtime.GOARCH,
 				StewPath:         tempDir,
-				StewBinPath:      path.Join(tempDir, "bin"),
-				StewPkgPath:      path.Join(tempDir, "pkg"),
-				StewLockFilePath: path.Join(tempDir, "Stewfile.lock.json"),
-				StewTmpPath:      path.Join(tempDir, "tmp"),
+				StewBinPath:      filepath.Join(tempDir, "bin"),
+				StewPkgPath:      filepath.Join(tempDir, "pkg"),
+				StewLockFilePath: filepath.Join(tempDir, "Stewfile.lock.json"),
+				StewTmpPath:      filepath.Join(tempDir, "tmp"),
 			}
 
 			got := NewSystemInfo(tempDir)
@@ -336,10 +336,10 @@ func TestDeleteAssetAndBinary(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			os.MkdirAll(path.Join(tempDir, "pkg"), 0755)
-			testStewAssetPath := path.Join(tempDir, "pkg", "testAsset.tar.gz")
-			os.MkdirAll(path.Join(tempDir, "bin"), 0755)
-			testStewBinaryPath := path.Join(tempDir, "bin", "testBinary")
+			os.MkdirAll(filepath.Join(tempDir, "pkg"), 0755)
+			testStewAssetPath := filepath.Join(tempDir, "pkg", "testAsset.tar.gz")
+			os.MkdirAll(filepath.Join(tempDir, "bin"), 0755)
+			testStewBinaryPath := filepath.Join(tempDir, "bin", "testBinary")
 
 			ioutil.WriteFile(testStewAssetPath, []byte("This is a test asset"), 0644)
 			ioutil.WriteFile(testStewBinaryPath, []byte("This is a test binary"), 0644)
@@ -351,7 +351,7 @@ func TestDeleteAssetAndBinary(t *testing.T) {
 				t.Errorf("Either the asset or the binary does not exist yet")
 			}
 
-			if err := DeleteAssetAndBinary(path.Dir(testStewAssetPath), path.Dir(testStewBinaryPath), path.Base(testStewAssetPath), path.Base(testStewBinaryPath)); (err != nil) != tt.wantErr {
+			if err := DeleteAssetAndBinary(filepath.Dir(testStewAssetPath), filepath.Dir(testStewBinaryPath), filepath.Base(testStewAssetPath), filepath.Base(testStewBinaryPath)); (err != nil) != tt.wantErr {
 				t.Errorf("DeleteAssetAndBinary() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
