@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -41,7 +40,7 @@ func CatchAndExit(err error) {
 	if err != nil {
 		fmt.Println(err)
 		stewPath, _ := GetStewPath()
-		stewTmpPath := path.Join(stewPath, "tmp")
+		stewTmpPath := filepath.Join(stewPath, "tmp")
 		err = os.RemoveAll(stewTmpPath)
 		if err != nil {
 			fmt.Println(err)
@@ -195,6 +194,10 @@ func getBinary(filePaths []string, repo string) (string, string, error) {
 				return "", "", err
 			}
 			binaryName = filepath.Base(binaryFile)
+			binaryName, err = renameBinary(binaryName)
+			if err != nil {
+				return "", "", nil
+			}
 		}
 	}
 
@@ -276,7 +279,7 @@ func parseGithubInput(cliInput string) (CLIInput, error) {
 }
 
 func parseURLInput(cliInput string) (CLIInput, error) {
-	return CLIInput{IsGithubInput: false, Asset: path.Base(cliInput), DownloadURL: cliInput}, nil
+	return CLIInput{IsGithubInput: false, Asset: filepath.Base(cliInput), DownloadURL: cliInput}, nil
 }
 
 // Contains checks if a string slice contains a given target
@@ -298,14 +301,26 @@ func getArch() string {
 }
 
 func extractBinary(downloadedFilePath, tmpExtractionPath string) error {
-	var err error
 	isArchive := isArchiveFile(downloadedFilePath)
 	if isArchive {
-		err = archiver.Unarchive(downloadedFilePath, tmpExtractionPath)
+		err := archiver.Unarchive(downloadedFilePath, tmpExtractionPath)
+		if err != nil {
+			return err
+		}
+
 	} else {
-		err = copyFile(downloadedFilePath, path.Join(tmpExtractionPath, filepath.Base(downloadedFilePath)))
+		originalBinaryName := filepath.Base(downloadedFilePath)
+
+		renamedBinaryName, err := renameBinary(originalBinaryName)
+		if err != nil {
+			return err
+		}
+		err = copyFile(downloadedFilePath, filepath.Join(tmpExtractionPath, renamedBinaryName))
+		if err != nil {
+			return err
+		}
 	}
-	return err
+	return nil
 }
 
 // InstallBinary will extract the binary and copy it to the ~/.stew/bin path
@@ -332,7 +347,7 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 
 	// Check if the binary already exists
 	for index, pkg := range lockFile.Packages {
-		previousAssetPath := path.Join(assetDownloadPath, pkg.Asset)
+		previousAssetPath := filepath.Join(assetDownloadPath, pkg.Asset)
 		newAssetPath := downloadedFilePath
 		var overwrite bool
 		if pkg.Binary == binaryName {
@@ -375,7 +390,7 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 		}
 	}
 
-	err = copyFile(binaryFile, path.Join(binaryInstallPath, binaryName))
+	err = copyFile(binaryFile, filepath.Join(binaryInstallPath, binaryName))
 	if err != nil {
 		return "", err
 	}
@@ -386,4 +401,13 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 	}
 
 	return binaryName, nil
+}
+
+// renameBinary takes in the original name of the binary and will return the new name of the binary.
+func renameBinary(originalBinaryName string) (string, error) {
+	renamedBinaryName, err := warningPromptInput("Rename the binary?", originalBinaryName)
+	if err != nil {
+		return "", err
+	}
+	return renamedBinaryName, nil
 }

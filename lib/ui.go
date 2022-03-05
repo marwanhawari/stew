@@ -55,3 +55,21 @@ func WarningPromptConfirm(message string) (bool, error) {
 
 	return result, nil
 }
+
+// WarningPromptInput launches the input UI with a warning styling
+func warningPromptInput(message string, defaultInput string) (string, error) {
+	result := ""
+	prompt := &survey.Input{
+		Message: message,
+		Default: defaultInput,
+	}
+	err := survey.AskOne(prompt, &result, survey.WithIcons(func(icons *survey.IconSet) {
+		icons.Question.Text = "!"
+		icons.Question.Format = "yellow+hb"
+	}))
+	if err != nil {
+		return "", ExitUserSelectionError{Err: err}
+	}
+
+	return result, nil
+}
