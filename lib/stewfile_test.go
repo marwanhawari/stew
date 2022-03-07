@@ -293,34 +293,38 @@ func TestNewLockFileDoesntExist(t *testing.T) {
 	}
 }
 
-// func TestNewSystemInfo(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 	}{
-// 		{
-// 			name: "test1",
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			tempDir := t.TempDir()
-// 			testSystemInfo := SystemInfo{
-// 				Os:               runtime.GOOS,
-// 				Arch:             runtime.GOARCH,
-// 				StewPath:         tempDir,
-// 				StewBinPath:      filepath.Join(tempDir, "bin"),
-// 				StewPkgPath:      filepath.Join(tempDir, "pkg"),
-// 				StewLockFilePath: filepath.Join(tempDir, "Stewfile.lock.json"),
-// 				StewTmpPath:      filepath.Join(tempDir, "tmp"),
-// 			}
+func TestNewSystemInfo(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{
+			name: "test1",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tempDir := t.TempDir()
 
-// 			got := NewSystemInfo(tempDir)
-// 			if !reflect.DeepEqual(got, testSystemInfo) {
-// 				t.Errorf("NewSystemInfo() = %v, want %v", got, testSystemInfo)
-// 			}
-// 		})
-// 	}
-// }
+			testStewConfig := StewConfig{
+				StewPath:    tempDir,
+				StewBinPath: filepath.Join(tempDir, "bin"),
+			}
+
+			testSystemInfo := SystemInfo{
+				StewPath:         tempDir,
+				StewBinPath:      filepath.Join(tempDir, "bin"),
+				StewPkgPath:      filepath.Join(tempDir, "pkg"),
+				StewLockFilePath: filepath.Join(tempDir, "Stewfile.lock.json"),
+				StewTmpPath:      filepath.Join(tempDir, "tmp"),
+			}
+
+			got := NewSystemInfo(testStewConfig)
+			if !reflect.DeepEqual(got, testSystemInfo) {
+				t.Errorf("NewSystemInfo() = %v, want %v", got, testSystemInfo)
+			}
+		})
+	}
+}
 
 func TestDeleteAssetAndBinary(t *testing.T) {
 	tests := []struct {

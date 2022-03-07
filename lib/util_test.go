@@ -137,41 +137,6 @@ func TestPathExists(t *testing.T) {
 	}
 }
 
-// func TestGetStewPath(t *testing.T) {
-// 	tests := []struct {
-// 		name    string
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name:    "test1",
-// 			wantErr: false,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			homeDir, _ := os.UserHomeDir()
-// 			testStewPath := filepath.Join(homeDir, ".stew")
-// 			stewPathExists, _ := PathExists(testStewPath)
-// 			if !stewPathExists {
-// 				os.MkdirAll(testStewPath, 0755)
-// 			}
-
-// 			got, err := GetStewPath()
-// 			if !stewPathExists {
-// 				os.RemoveAll(testStewPath)
-// 			}
-
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("GetStewPath() error = %v, wantErr %v", err, tt.wantErr)
-// 				return
-// 			}
-// 			if got != testStewPath {
-// 				t.Errorf("GetStewPath() = %v, want %v", got, testStewPath)
-// 			}
-// 		})
-// 	}
-// }
-
 func TestDownloadFile(t *testing.T) {
 	type args struct {
 		url string
@@ -681,120 +646,130 @@ func Test_extractBinary(t *testing.T) {
 	}
 }
 
-// func TestInstallBinary(t *testing.T) {
-// 	tests := []struct {
-// 		name    string
-// 		want    string
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name:    "test1",
-// 			want:    "ppath",
-// 			wantErr: false,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			tempDir := t.TempDir()
-// 			stewPath := filepath.Join(tempDir, ".stew")
+func TestInstallBinary(t *testing.T) {
+	tests := []struct {
+		name    string
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "test1",
+			want:    "ppath",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tempDir := t.TempDir()
 
-// 			repo := "ppath"
-// 			systemInfo := NewSystemInfo(stewPath)
-// 			os.MkdirAll(systemInfo.StewBinPath, 0755)
-// 			os.MkdirAll(systemInfo.StewPkgPath, 0755)
-// 			os.MkdirAll(systemInfo.StewTmpPath, 0755)
+			repo := "ppath"
 
-// 			lockFile := LockFile{
-// 				Os:   "darwin",
-// 				Arch: "arm64",
-// 				Packages: []PackageData{
-// 					{
-// 						Source: "github",
-// 						Owner:  "marwanhawari",
-// 						Repo:   "ppath",
-// 						Tag:    "v0.0.3",
-// 						Asset:  "ppath-v0.0.3-darwin-arm64.tar.gz",
-// 						Binary: "ppath",
-// 						URL:    "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
-// 					},
-// 				},
-// 			}
+			testStewConfig := StewConfig{
+				StewPath:    tempDir,
+				StewBinPath: filepath.Join(tempDir, "bin"),
+			}
 
-// 			downloadedFilePath := filepath.Join(systemInfo.StewPkgPath, "ppath-v0.0.3-darwin-arm64.tar.gz")
-// 			err := DownloadFile(downloadedFilePath, "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz")
+			systemInfo := NewSystemInfo(testStewConfig)
+			os.MkdirAll(systemInfo.StewBinPath, 0755)
+			os.MkdirAll(systemInfo.StewPkgPath, 0755)
+			os.MkdirAll(systemInfo.StewTmpPath, 0755)
 
-// 			if err != nil {
-// 				t.Errorf("Could not download file to %v", downloadedFilePath)
-// 			}
+			lockFile := LockFile{
+				Os:   "darwin",
+				Arch: "arm64",
+				Packages: []PackageData{
+					{
+						Source: "github",
+						Owner:  "marwanhawari",
+						Repo:   "ppath",
+						Tag:    "v0.0.3",
+						Asset:  "ppath-v0.0.3-darwin-arm64.tar.gz",
+						Binary: "ppath",
+						URL:    "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
+					},
+				},
+			}
 
-// 			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, true)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
-// 				return
-// 			}
-// 			if got != tt.want {
-// 				t.Errorf("InstallBinary() = %v, want %v", got, tt.want)
-// 			}
+			downloadedFilePath := filepath.Join(systemInfo.StewPkgPath, "ppath-v0.0.3-darwin-arm64.tar.gz")
+			err := DownloadFile(downloadedFilePath, "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz")
 
-// 		})
-// 	}
-// }
+			if err != nil {
+				t.Errorf("Could not download file to %v", downloadedFilePath)
+			}
 
-// func TestInstallBinary_Fail(t *testing.T) {
-// 	tests := []struct {
-// 		name    string
-// 		want    string
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name:    "test1",
-// 			want:    "",
-// 			wantErr: true,
-// 		},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			tempDir := t.TempDir()
-// 			stewPath := filepath.Join(tempDir, ".stew")
+			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, true)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("InstallBinary() = %v, want %v", got, tt.want)
+			}
 
-// 			repo := "ppath"
-// 			systemInfo := NewSystemInfo(stewPath)
-// 			os.MkdirAll(systemInfo.StewBinPath, 0755)
-// 			os.MkdirAll(systemInfo.StewPkgPath, 0755)
-// 			os.MkdirAll(systemInfo.StewTmpPath, 0755)
+		})
+	}
+}
 
-// 			lockFile := LockFile{
-// 				Os:   "darwin",
-// 				Arch: "arm64",
-// 				Packages: []PackageData{
-// 					{
-// 						Source: "github",
-// 						Owner:  "marwanhawari",
-// 						Repo:   "ppath",
-// 						Tag:    "v0.0.3",
-// 						Asset:  "ppath-v0.0.3-darwin-arm64.tar.gz",
-// 						Binary: "ppath",
-// 						URL:    "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
-// 					},
-// 				},
-// 			}
+func TestInstallBinary_Fail(t *testing.T) {
+	tests := []struct {
+		name    string
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "test1",
+			want:    "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tempDir := t.TempDir()
 
-// 			downloadedFilePath := filepath.Join(systemInfo.StewPkgPath, "ppath-v0.0.3-darwin-arm64.tar.gz")
-// 			err := DownloadFile(downloadedFilePath, "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz")
+			repo := "ppath"
 
-// 			if err != nil {
-// 				t.Errorf("Could not download file to %v", downloadedFilePath)
-// 			}
+			testStewConfig := StewConfig{
+				StewPath:    tempDir,
+				StewBinPath: filepath.Join(tempDir, "bin"),
+			}
 
-// 			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, false)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
-// 				return
-// 			}
-// 			if got != tt.want {
-// 				t.Errorf("InstallBinary() = %v, want %v", got, tt.want)
-// 			}
+			systemInfo := NewSystemInfo(testStewConfig)
+			os.MkdirAll(systemInfo.StewBinPath, 0755)
+			os.MkdirAll(systemInfo.StewPkgPath, 0755)
+			os.MkdirAll(systemInfo.StewTmpPath, 0755)
 
-// 		})
-// 	}
-// }
+			lockFile := LockFile{
+				Os:   "darwin",
+				Arch: "arm64",
+				Packages: []PackageData{
+					{
+						Source: "github",
+						Owner:  "marwanhawari",
+						Repo:   "ppath",
+						Tag:    "v0.0.3",
+						Asset:  "ppath-v0.0.3-darwin-arm64.tar.gz",
+						Binary: "ppath",
+						URL:    "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
+					},
+				},
+			}
+
+			downloadedFilePath := filepath.Join(systemInfo.StewPkgPath, "ppath-v0.0.3-darwin-arm64.tar.gz")
+			err := DownloadFile(downloadedFilePath, "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz")
+
+			if err != nil {
+				t.Errorf("Could not download file to %v", downloadedFilePath)
+			}
+
+			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, false)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("InstallBinary() = %v, want %v", got, tt.want)
+			}
+
+		})
+	}
+}
