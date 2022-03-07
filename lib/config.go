@@ -73,9 +73,9 @@ func GetStewConfigFilePath(userOS string) (string, error) {
 	default:
 		xdgConfigHomePath := os.Getenv("XDG_CONFIG_HOME")
 		if xdgConfigHomePath == "" {
-			stewConfigFilePath = filepath.Join(xdgConfigHomePath, "stew", "config.json")
-		} else {
 			stewConfigFilePath = filepath.Join(homeDir, ".config", "stew", "config.json")
+		} else {
+			stewConfigFilePath = filepath.Join(xdgConfigHomePath, "stew", "config.json")
 		}
 	}
 

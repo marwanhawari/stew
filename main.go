@@ -73,7 +73,7 @@ func main() {
 			},
 			{
 				Name:    "rename",
-				Usage:   "Rename an installed binary using a prompt UI. [Ex: stew rename fzf]",
+				Usage:   "Rename an installed binary using an interactive UI. [Ex: stew rename fzf]",
 				Aliases: []string{"re"},
 				Action: func(c *cli.Context) error {
 					cmd.Rename(c.Args().First())
@@ -96,6 +96,14 @@ func main() {
 				},
 				Action: func(c *cli.Context) error {
 					cmd.List(c.Bool("tags"), c.Bool("assets"))
+					return nil
+				},
+			},
+			{
+				Name:  "config",
+				Usage: "Configure the stew file paths using an interactive UI. [Ex: stew config]",
+				Action: func(c *cli.Context) error {
+					cmd.Config()
 					return nil
 				},
 			},

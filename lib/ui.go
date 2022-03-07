@@ -21,6 +21,23 @@ func PromptSelect(message string, options []string) (string, error) {
 	return result, nil
 }
 
+// PromptInput launches the input UI
+func PromptInput(message string, defaultInput string) (string, error) {
+	result := ""
+	prompt := &survey.Input{
+		Message: message,
+		Default: defaultInput,
+	}
+	err := survey.AskOne(prompt, &result, survey.WithIcons(func(icons *survey.IconSet) {
+		icons.Question.Text = "*"
+	}))
+	if err != nil {
+		return "", ExitUserSelectionError{Err: err}
+	}
+
+	return result, nil
+}
+
 // WarningPromptSelect launches the selection UI with a warning styling
 func WarningPromptSelect(message string, options []string) (string, error) {
 	result := ""
