@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"testing"
 )
 
@@ -133,41 +132,6 @@ func TestPathExists(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("PathExists() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestGetStewPath(t *testing.T) {
-	tests := []struct {
-		name    string
-		wantErr bool
-	}{
-		{
-			name:    "test1",
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			homeDir, _ := os.UserHomeDir()
-			testStewPath := filepath.Join(homeDir, ".stew")
-			stewPathExists, _ := PathExists(testStewPath)
-			if !stewPathExists {
-				os.MkdirAll(testStewPath, 0755)
-			}
-
-			got, err := GetStewPath()
-			if !stewPathExists {
-				os.RemoveAll(testStewPath)
-			}
-
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetStewPath() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != testStewPath {
-				t.Errorf("GetStewPath() = %v, want %v", got, testStewPath)
 			}
 		})
 	}
@@ -650,44 +614,6 @@ func TestContains(t *testing.T) {
 	}
 }
 
-func Test_getOS(t *testing.T) {
-	tests := []struct {
-		name string
-		want string
-	}{
-		{
-			name: "test1",
-			want: runtime.GOOS,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := getOS(); got != tt.want {
-				t.Errorf("getOS() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_getArch(t *testing.T) {
-	tests := []struct {
-		name string
-		want string
-	}{
-		{
-			name: "test1",
-			want: runtime.GOARCH,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := getArch(); got != tt.want {
-				t.Errorf("getArch() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_extractBinary(t *testing.T) {
 	type args struct {
 		downloadedFilePath string
@@ -735,10 +661,15 @@ func TestInstallBinary(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			stewPath := filepath.Join(tempDir, ".stew")
 
 			repo := "ppath"
-			systemInfo := NewSystemInfo(stewPath)
+
+			testStewConfig := StewConfig{
+				StewPath:    tempDir,
+				StewBinPath: filepath.Join(tempDir, "bin"),
+			}
+
+			systemInfo := NewSystemInfo(testStewConfig)
 			os.MkdirAll(systemInfo.StewBinPath, 0755)
 			os.MkdirAll(systemInfo.StewPkgPath, 0755)
 			os.MkdirAll(systemInfo.StewTmpPath, 0755)
@@ -794,10 +725,15 @@ func TestInstallBinary_Fail(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			stewPath := filepath.Join(tempDir, ".stew")
 
 			repo := "ppath"
-			systemInfo := NewSystemInfo(stewPath)
+
+			testStewConfig := StewConfig{
+				StewPath:    tempDir,
+				StewBinPath: filepath.Join(tempDir, "bin"),
+			}
+
+			systemInfo := NewSystemInfo(testStewConfig)
 			os.MkdirAll(systemInfo.StewBinPath, 0755)
 			os.MkdirAll(systemInfo.StewPkgPath, 0755)
 			os.MkdirAll(systemInfo.StewTmpPath, 0755)

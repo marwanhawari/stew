@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	stew "github.com/marwanhawari/stew/lib"
 )
@@ -9,12 +10,12 @@ import (
 // List is executed when you run `stew list`
 func List(cliTagsFlag bool, cliAssetsFlag bool) {
 
-	stewPath, err := stew.GetStewPath()
-	stew.CatchAndExit(err)
-	systemInfo := stew.NewSystemInfo(stewPath)
+	userOS, userArch, _, systemInfo, err := stew.Initialize()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-	userOS := systemInfo.Os
-	userArch := systemInfo.Arch
 	stewLockFilePath := systemInfo.StewLockFilePath
 
 	lockFile, err := stew.NewLockFile(stewLockFilePath, userOS, userArch)

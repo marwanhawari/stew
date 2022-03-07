@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"testing"
 )
 
@@ -305,9 +304,13 @@ func TestNewSystemInfo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
+
+			testStewConfig := StewConfig{
+				StewPath:    tempDir,
+				StewBinPath: filepath.Join(tempDir, "bin"),
+			}
+
 			testSystemInfo := SystemInfo{
-				Os:               runtime.GOOS,
-				Arch:             runtime.GOARCH,
 				StewPath:         tempDir,
 				StewBinPath:      filepath.Join(tempDir, "bin"),
 				StewPkgPath:      filepath.Join(tempDir, "pkg"),
@@ -315,7 +318,7 @@ func TestNewSystemInfo(t *testing.T) {
 				StewTmpPath:      filepath.Join(tempDir, "tmp"),
 			}
 
-			got := NewSystemInfo(tempDir)
+			got := NewSystemInfo(testStewConfig)
 			if !reflect.DeepEqual(got, testSystemInfo) {
 				t.Errorf("NewSystemInfo() = %v, want %v", got, testSystemInfo)
 			}

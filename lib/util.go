@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 
 	"github.com/marwanhawari/stew/constants"
@@ -39,12 +38,6 @@ func isExecutableFile(filePath string) (bool, error) {
 func CatchAndExit(err error) {
 	if err != nil {
 		fmt.Println(err)
-		stewPath, _ := GetStewPath()
-		stewTmpPath := filepath.Join(stewPath, "tmp")
-		err = os.RemoveAll(stewTmpPath)
-		if err != nil {
-			fmt.Println(err)
-		}
 		os.Exit(1)
 	}
 }
@@ -61,25 +54,6 @@ func PathExists(path string) (bool, error) {
 	}
 
 	return true, nil
-}
-
-// GetStewPath will return the path to the top-level stew directory
-func GetStewPath() (string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-
-	stewPath := filepath.Join(homeDir, ".stew")
-
-	exists, err := PathExists(stewPath)
-	if err != nil {
-		return "", err
-	} else if !exists {
-		return "", StewpathNotFoundError{StewPath: stewPath}
-	}
-
-	return stewPath, nil
 }
 
 // DownloadFile will download a file from url to a given path
@@ -292,14 +266,6 @@ func Contains(slice []string, target string) (int, bool) {
 	return -1, false
 }
 
-func getOS() string {
-	return runtime.GOOS
-}
-
-func getArch() string {
-	return runtime.GOARCH
-}
-
 func extractBinary(downloadedFilePath, tmpExtractionPath string) error {
 	isArchive := isArchiveFile(downloadedFilePath)
 	if isArchive {
@@ -410,4 +376,18 @@ func PromptRenameBinary(originalBinaryName string) (string, error) {
 		return "", err
 	}
 	return renamedBinaryName, nil
+}
+
+// ResolveTilde will resolve the full path for an input path beginning with ~
+func ResolveTilde(filePath string) (string, error) {
+	if strings.HasPrefix(filePath, "~") {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+
+		return filepath.Join(homeDir, filePath[2:]), nil
+	}
+
+	return filePath, nil
 }
