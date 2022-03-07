@@ -12,15 +12,15 @@ import (
 // Rename is executed when you run `stew rename`
 func Rename(cliInput string) {
 
-	err := stew.ValidateCLIInput(cliInput)
+	userOS, userArch, _, systemInfo, err := stew.Initialize()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	err = stew.ValidateCLIInput(cliInput)
 	stew.CatchAndExit(err)
 
-	stewPath, err := stew.GetStewPath()
-	stew.CatchAndExit(err)
-	systemInfo := stew.NewSystemInfo(stewPath)
-
-	userOS := systemInfo.Os
-	userArch := systemInfo.Arch
 	stewBinPath := systemInfo.StewBinPath
 	stewLockFilePath := systemInfo.StewLockFilePath
 

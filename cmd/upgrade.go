@@ -11,6 +11,13 @@ import (
 
 // Upgrade is executed when you run `stew upgrade`
 func Upgrade(cliFlag bool, binaryName string) {
+
+	userOS, userArch, _, systemInfo, err := stew.Initialize()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	if cliFlag && binaryName != "" {
 		stew.CatchAndExit(stew.CLIFlagAndInputError{})
 	} else if !cliFlag {
@@ -20,12 +27,6 @@ func Upgrade(cliFlag bool, binaryName string) {
 
 	sp := constants.LoadingSpinner
 
-	stewPath, err := stew.GetStewPath()
-	stew.CatchAndExit(err)
-	systemInfo := stew.NewSystemInfo(stewPath)
-
-	userOS := systemInfo.Os
-	userArch := systemInfo.Arch
 	stewPkgPath := systemInfo.StewPkgPath
 	stewTmpPath := systemInfo.StewTmpPath
 	stewLockFilePath := systemInfo.StewLockFilePath

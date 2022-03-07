@@ -13,6 +13,13 @@ import (
 // Install is executed when you run `stew install`
 func Install(cliInputs []string) {
 	var err error
+
+	userOS, userArch, _, systemInfo, err := stew.Initialize()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	for _, cliInput := range cliInputs {
 		if strings.Contains(cliInput, "Stewfile") {
 			cliInputs, err = stew.ReadStewfileContents(cliInput)
@@ -28,12 +35,6 @@ func Install(cliInputs []string) {
 	for _, cliInput := range cliInputs {
 		sp := constants.LoadingSpinner
 
-		stewPath, err := stew.GetStewPath()
-		stew.CatchAndExit(err)
-		systemInfo := stew.NewSystemInfo(stewPath)
-
-		userOS := systemInfo.Os
-		userArch := systemInfo.Arch
 		stewBinPath := systemInfo.StewBinPath
 		stewPkgPath := systemInfo.StewPkgPath
 		stewLockFilePath := systemInfo.StewLockFilePath

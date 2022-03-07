@@ -116,31 +116,6 @@ func NewLockFile(stewLockFilePath, userOS, userArch string) (LockFile, error) {
 	return lockFile, nil
 }
 
-// SystemInfo contains system specific info like OS, arch, and ~/.stew paths
-type SystemInfo struct {
-	Os               string
-	Arch             string
-	StewPath         string
-	StewBinPath      string
-	StewPkgPath      string
-	StewLockFilePath string
-	StewTmpPath      string
-}
-
-// NewSystemInfo creates a new instance of the SystemInfo struct
-func NewSystemInfo(stewPath string) SystemInfo {
-	var systemInfo SystemInfo
-	systemInfo.StewPath = stewPath
-	systemInfo.StewBinPath = filepath.Join(stewPath, "bin")
-	systemInfo.StewPkgPath = filepath.Join(stewPath, "pkg")
-	systemInfo.StewLockFilePath = filepath.Join(stewPath, "Stewfile.lock.json")
-	systemInfo.StewTmpPath = filepath.Join(stewPath, "tmp")
-	systemInfo.Os = getOS()
-	systemInfo.Arch = getArch()
-
-	return systemInfo
-}
-
 // DeleteAssetAndBinary will delete the asset from the ~/.stew/pkg path and delete the binary from the ~/.stew/bin path
 func DeleteAssetAndBinary(stewPkgPath, stewBinPath, asset, binary string) error {
 	assetPath := filepath.Join(stewPkgPath, asset)

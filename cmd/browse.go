@@ -11,14 +11,15 @@ import (
 
 // Browse is executed when you run `stew browse`
 func Browse(cliInput string) {
+
+	userOS, userArch, _, systemInfo, err := stew.Initialize()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	sp := constants.LoadingSpinner
 
-	stewPath, err := stew.GetStewPath()
-	stew.CatchAndExit(err)
-	systemInfo := stew.NewSystemInfo(stewPath)
-
-	userOS := systemInfo.Os
-	userArch := systemInfo.Arch
 	stewBinPath := systemInfo.StewBinPath
 	stewPkgPath := systemInfo.StewPkgPath
 	stewLockFilePath := systemInfo.StewLockFilePath

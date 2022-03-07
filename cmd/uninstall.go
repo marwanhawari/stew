@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/marwanhawari/stew/constants"
 	stew "github.com/marwanhawari/stew/lib"
@@ -9,6 +10,13 @@ import (
 
 // Uninstall is executed when you run `stew uninstall`
 func Uninstall(cliFlag bool, binaryName string) {
+
+	userOS, userArch, _, systemInfo, err := stew.Initialize()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	if cliFlag && binaryName != "" {
 		stew.CatchAndExit(stew.CLIFlagAndInputError{})
 	} else if !cliFlag {
@@ -16,12 +24,6 @@ func Uninstall(cliFlag bool, binaryName string) {
 		stew.CatchAndExit(err)
 	}
 
-	stewPath, err := stew.GetStewPath()
-	stew.CatchAndExit(err)
-	systemInfo := stew.NewSystemInfo(stewPath)
-
-	userOS := systemInfo.Os
-	userArch := systemInfo.Arch
 	stewBinPath := systemInfo.StewBinPath
 	stewPkgPath := systemInfo.StewPkgPath
 	stewLockFilePath := systemInfo.StewLockFilePath
