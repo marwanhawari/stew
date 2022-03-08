@@ -9,6 +9,7 @@ os=""
 arch=""
 exe=""
 defaultStewPath=""
+defaultStewBinPath=""
 configPath=""
 
 # Detect os
@@ -22,6 +23,8 @@ case "$(uname -s)" in
         else
             defaultStewPath="$XDG_DATA_HOME/stew"
         fi
+
+        defaultStewBinPath="$HOME/.local/bin"
 
         if [ -z "$XDG_CONFIG_HOME" ]
         then
@@ -39,6 +42,8 @@ case "$(uname -s)" in
             defaultStewPath="$XDG_DATA_HOME/stew"
         fi
 
+        defaultStewBinPath="$HOME/.local/bin"
+
         if [ -z "$XDG_CONFIG_HOME" ]
         then
             configPath="$HOME/.config/stew"
@@ -50,6 +55,7 @@ case "$(uname -s)" in
         os="windows"
         exe=".exe"
         defaultStewPath="$HOME/AppData/Local/stew"
+        defaultStewBinPath="$HOME/AppData/Local/stew/bin"
         configPath="$HOME/AppData/Local/stew/Config"
         ;;
 esac
@@ -97,10 +103,10 @@ else
     fi
 fi
 
-read -r -t 60 -p "Set the stewBinPath. This is where the binaries will be installed by stew. (${defaultStewPath}/bin): " stewBinPathInput
+read -r -t 60 -p "Set the stewBinPath. This is where the binaries will be installed by stew. (${defaultStewBinPath}): " stewBinPathInput
 if [ -z "$stewBinPathInput" ]
 then
-    stewBinPath="${defaultStewPath}/bin"
+    stewBinPath="${defaultStewBinPath}"
 else
     stewBinPath="${stewBinPathInput/#~/$HOME}"
     stewBinPath="${stewBinPath/#\$HOME/$HOME}"
@@ -111,7 +117,6 @@ else
     fi
 fi
 
-mkdir -p "${stewPath}/bin"
 mkdir -p "${stewPath}/pkg"
 mkdir -p "${stewBinPath}"
 mkdir -p "${configPath}"
@@ -119,7 +124,7 @@ mkdir -p "${configPath}"
 echo "{
 	\"stewPath\": \"${stewPath}\",
 	\"stewBinPath\": \"${stewBinPath}\"
-}" > "${configPath}/config.json"
+}" > "${configPath}/stew.config.json"
 
 # 2. Download the stew binary
 curl -o "${stewBinPath}/stew${exe}" -fsSL https://github.com/marwanhawari/stew/releases/latest/download/stew-${os}-${arch}${exe}

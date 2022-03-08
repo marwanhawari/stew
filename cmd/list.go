@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	stew "github.com/marwanhawari/stew/lib"
 )
@@ -11,10 +10,7 @@ import (
 func List(cliTagsFlag bool, cliAssetsFlag bool) {
 
 	userOS, userArch, _, systemInfo, err := stew.Initialize()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	stew.CatchAndExit(err)
 
 	stewLockFilePath := systemInfo.StewLockFilePath
 

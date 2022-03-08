@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/marwanhawari/stew/constants"
 	stew "github.com/marwanhawari/stew/lib"
@@ -10,28 +11,32 @@ import (
 
 func Config() {
 
-	userOS, _, stewConfig, _, err := stew.Initialize()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
+	userOS := runtime.GOOS
 	stewConfigFilePath, err := stew.GetStewConfigFilePath(userOS)
 	stew.CatchAndExit(err)
-
-	inputStewPath, err := stew.PromptInput("Set the stewPath. This will contain all stew data other than the binaries.", stewConfig.StewPath)
-	stew.CatchAndExit(err)
-	inputStewBinPath, err := stew.PromptInput("Set the stewBinPath. This is where the binaries will be installed by stew.", stewConfig.StewBinPath)
+	configExists, err := stew.PathExists(stewConfigFilePath)
 	stew.CatchAndExit(err)
 
-	fullStewPath, err := stew.ResolveTilde(inputStewPath)
+	if !configExists {
+		_, err := stew.NewStewConfig(userOS)
+		stew.CatchAndExit(err)
+		return
+	}
+
+	defaultStewPath, err := stew.GetDefaultStewPath(userOS)
 	stew.CatchAndExit(err)
-	fullStewBinPath, err := stew.ResolveTilde(inputStewBinPath)
+	defaultStewBinPath, err := stew.GetDefaultStewBinPath(userOS)
 	stew.CatchAndExit(err)
 
-	newStewConfig := stew.StewConfig{StewPath: fullStewPath, StewBinPath: fullStewBinPath}
+	newStewPath, newStewBinPath, err := stew.PromptConfig(defaultStewPath, defaultStewBinPath)
+	stew.CatchAndExit(err)
+
+	newStewConfig := stew.StewConfig{StewPath: newStewPath, StewBinPath: newStewBinPath}
 	err = stew.WriteStewConfigJSON(newStewConfig, stewConfigFilePath)
 	stew.CatchAndExit(err)
 
 	fmt.Printf("📄 Updated %v\n", constants.GreenColor(stewConfigFilePath))
+
+	pathVariable := os.Getenv("PATH")
+	stew.ValidateStewBinPath(newStewBinPath, pathVariable)
 }
