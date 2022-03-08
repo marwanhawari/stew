@@ -378,16 +378,33 @@ func PromptRenameBinary(originalBinaryName string) (string, error) {
 	return renamedBinaryName, nil
 }
 
-// ResolveTilde will resolve the full path for an input path beginning with ~
-func ResolveTilde(filePath string) (string, error) {
-	if strings.HasPrefix(filePath, "~") {
+// ResolvePath will resolve the full path for an input path
+func ResolvePath(filePath string) (string, error) {
+	var resolvedPath string
+	var err error
+	resolvedPath = filePath
+
+	resolvedPath = strings.ReplaceAll(resolvedPath, "\"", "")
+
+	if strings.HasPrefix(resolvedPath, "~") {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			return "", err
 		}
 
-		return filepath.Join(homeDir, filePath[2:]), nil
+		resolvedPath = filepath.Join(homeDir, strings.TrimLeft(resolvedPath, "~"))
 	}
 
-	return filePath, nil
+	resolvedPath = os.ExpandEnv(resolvedPath)
+
+	if !filepath.IsAbs(resolvedPath) {
+		resolvedPath, err = filepath.Abs(resolvedPath)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	resolvedPath = strings.TrimRight(resolvedPath, "/")
+
+	return resolvedPath, nil
 }

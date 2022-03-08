@@ -13,10 +13,7 @@ import (
 func Upgrade(cliFlag bool, binaryName string) {
 
 	userOS, userArch, _, systemInfo, err := stew.Initialize()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	stew.CatchAndExit(err)
 
 	if cliFlag && binaryName != "" {
 		stew.CatchAndExit(stew.CLIFlagAndInputError{})

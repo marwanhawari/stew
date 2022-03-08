@@ -2,10 +2,14 @@ package stew
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
+
+	"github.com/marwanhawari/stew/constants"
 )
 
 // GetDefaultStewPath will return the default path to the top-level stew directory
@@ -46,13 +50,8 @@ func GetDefaultStewBinPath(userOS string) (string, error) {
 	case "windows":
 		stewBinPath = filepath.Join(homeDir, "AppData", "Local", "stew", "bin")
 	default:
-		xdgDataHomePath := os.Getenv("XDG_DATA_HOME")
-		if xdgDataHomePath == "" {
-			stewBinPath = filepath.Join(homeDir, ".local", "share", "stew", "bin")
-		} else {
-			stewBinPath = filepath.Join(xdgDataHomePath, "stew", "bin")
+		stewBinPath = filepath.Join(homeDir, ".local", "bin")
 
-		}
 	}
 
 	return stewBinPath, nil
@@ -69,13 +68,13 @@ func GetStewConfigFilePath(userOS string) (string, error) {
 	var stewConfigFilePath string
 	switch userOS {
 	case "windows":
-		stewConfigFilePath = filepath.Join(homeDir, "AppData", "Local", "stew", "Config", "config.json")
+		stewConfigFilePath = filepath.Join(homeDir, "AppData", "Local", "stew", "Config", "stew.config.json")
 	default:
 		xdgConfigHomePath := os.Getenv("XDG_CONFIG_HOME")
 		if xdgConfigHomePath == "" {
-			stewConfigFilePath = filepath.Join(homeDir, ".config", "stew", "config.json")
+			stewConfigFilePath = filepath.Join(homeDir, ".config", "stew", "stew.config.json")
 		} else {
-			stewConfigFilePath = filepath.Join(xdgConfigHomePath, "stew", "config.json")
+			stewConfigFilePath = filepath.Join(xdgConfigHomePath, "stew", "stew.config.json")
 		}
 	}
 
@@ -146,15 +145,26 @@ func NewStewConfig(userOS string) (StewConfig, error) {
 		if err != nil {
 			return StewConfig{}, err
 		}
+
+		if stewConfig.StewPath == "" {
+			stewConfig.StewPath = defaultStewPath
+		}
+
+		if stewConfig.StewBinPath == "" {
+			stewConfig.StewBinPath = defaultStewBinPath
+		}
+	} else {
+		selectedStewPath, selectedStewBinPath, err := PromptConfig(defaultStewPath, defaultStewBinPath)
+		if err != nil {
+			return StewConfig{}, err
+		}
+		stewConfig.StewPath = selectedStewPath
+		stewConfig.StewBinPath = selectedStewBinPath
+		fmt.Printf("📄 Updated %v\n", constants.GreenColor(stewConfigFilePath))
 	}
 
-	if stewConfig.StewPath == "" {
-		stewConfig.StewPath = defaultStewPath
-	}
-
-	if stewConfig.StewBinPath == "" {
-		stewConfig.StewBinPath = defaultStewBinPath
-	}
+	pathVariable := os.Getenv("PATH")
+	ValidateStewBinPath(stewConfig.StewBinPath, pathVariable)
 
 	err = createStewDirsAndFiles(stewConfig, stewConfigFilePath)
 	if err != nil {
@@ -168,10 +178,6 @@ func createStewDirsAndFiles(stewConfig StewConfig, stewConfigFilePath string) er
 	var err error
 
 	err = os.MkdirAll(stewConfig.StewPath, 0755)
-	if err != nil {
-		return err
-	}
-	err = os.MkdirAll(filepath.Join(stewConfig.StewPath, "bin"), 0755)
 	if err != nil {
 		return err
 	}
@@ -228,4 +234,37 @@ func Initialize() (string, string, StewConfig, SystemInfo, error) {
 	systemInfo := NewSystemInfo(stewConfig)
 
 	return userOS, userArch, stewConfig, systemInfo, nil
+}
+
+// PromptConfig launches an interactive UI for setting the stew config values. It returns the resolved stewPath and stewBinPath.
+func PromptConfig(suggestedStewPath, suggestedStewBinPath string) (string, string, error) {
+	inputStewPath, err := PromptInput("Set the stewPath. This will contain all stew data other than the binaries.", suggestedStewPath)
+	if err != nil {
+		return "", "", err
+	}
+	inputStewBinPath, err := PromptInput("Set the stewBinPath. This is where the binaries will be installed by stew.", suggestedStewBinPath)
+	if err != nil {
+		return "", "", err
+	}
+
+	fullStewPath, err := ResolvePath(inputStewPath)
+	if err != nil {
+		return "", "", err
+	}
+	fullStewBinPath, err := ResolvePath(inputStewBinPath)
+	if err != nil {
+		return "", "", err
+	}
+
+	return fullStewPath, fullStewBinPath, nil
+}
+
+func ValidateStewBinPath(stewBinPath, pathVariable string) bool {
+	if !strings.Contains(pathVariable, stewBinPath) {
+		fmt.Printf("%v The stewBinPath %v is not in your PATH variable.\nYou need to add %v to PATH.\n", constants.YellowColor("WARNING:"), constants.YellowColor(stewBinPath), constants.YellowColor(stewBinPath))
+		fmt.Printf("Add the following line to your ~/.zshrc or ~/.bashrc file then start a new terminal session:\n\nexport PATH=\"%v:$PATH\"\n\n", stewBinPath)
+		return false
+	}
+
+	return true
 }
