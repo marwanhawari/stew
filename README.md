@@ -36,16 +36,41 @@
 * Easily distribute binaries across teams and private repositories.
 * Get the latest releases ahead of other package managers.
 * Rapidly browse, install, and experiment with different projects.
-* Isolated `~/.stew/` directory.
+* [Configure](https://github.com/marwanhawari/stew/blob/main/config.md) where to install binaries.
 * No need for `sudo`.
 * Portable [`Stewfile`](https://github.com/marwanhawari/stew/blob/main/examples/Stewfile) with optional pinned versioning.
 
 ![demo](https://github.com/marwanhawari/stew/raw/main/assets/demo.gif)
 
 # Installation
-Stew supports Linux, macOS, and Windows:
+Stew supports Linux, macOS, and Windows.
+
+### Install a pre-compiled binary:
+
+* Install using `curl`:
 ```
-curl -fsSL https://raw.githubusercontent.com/marwanhawari/stew/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/marwanhawari/stew/main/install.sh | bash
+```
+
+* Install using `brew`:
+```
+brew install marwanhawari/tap/stew
+```
+
+* Download a pre-compiled binary from the [releases page](https://github.com/marwanhawari/stew/releases).
+
+### Install from source:
+
+* Install the latest released version:
+```
+go install github.com/marwanhawari/stew@latest
+```
+
+* Install the latest unreleased source:
+```
+git clone https://github.com/marwanhawari/stew
+cd stew
+go install .
 ```
 
 # Usage
@@ -89,6 +114,12 @@ stew uninstall rg         # Uninstall using the name of the binary directly
 stew uninstall --all      # Uninstall all binaries
 ```
 
+### Rename
+```sh
+# Rename an installed binary using an interactive UI
+stew rename rg            # Rename using the name of the binary directly
+```
+
 ### List
 ```sh
 # List installed binaries
@@ -98,19 +129,28 @@ stew list --tags > Stewfile            # Pin tags
 stew list --tags --assets > Stewfile   # Pin tags and assets
 ```
 
+### Config
+```sh
+# Configure the stew file paths using an interactive UI
+stew config           # Automatically updates the stew.config.json
+```
+
 # FAQ
 ### Why couldn't `stew` automatically find any binaries for X repo?
 The repo probably uses an unconventional naming scheme for their binaries. You can always manually select the release asset.
 
-### I've installed `stew` but the command is still not found.
-The `stew` [install script](https://github.com/marwanhawari/stew/blob/main/install.sh) attempts to add `~/.stew/bin` to `PATH` in your `.zshrc` or `.bashrc` file. You will also need to start a new terminal session for the changes to take effect. Make sure that `~/.stew/bin` is in your `PATH` environment variable.
-
 ### Will `stew` work with private GitHub repositories?
 Yes, `stew` will automatically detect if you have a `GITHUB_TOKEN` environment variable and allow you to access binaries from your private repositories.
 
-### How do I uninstall `stew`?
-Simply run `rm -rf $HOME/.stew/` and optionally remove this line
-```
-export PATH="$HOME/.stew/bin:$PATH"
-```
-from your `.zshrc` or `.bashrc` file.
+### Where does `stew` install binaries?
+The default installation path will depend on your OS:
+| Linux/macOS | Windows |
+| ------------ | ---------- |
+| `~/.local/bin` | `~/AppData/Local/stew/bin` |
+
+However, this location can be [configured](https://github.com/marwanhawari/stew/blob/main/config.md).
+
+Make sure that the installation path is in your `PATH` environment variable. Otherwise, you won't be able to use any of the binaries installed by `stew`.
+
+### I've installed `stew` but the command is still not found.
+If you install `stew` with the [curl install script](https://github.com/marwanhawari/stew/blob/main/install.sh), the `stew` binary will be installed in the `stewBinPath` you provided. The install script also attempts to add the `stewBinPath` to `PATH` in your `.zshrc` or `.bashrc` file. You will need to start a new terminal session for the changes to take effect. Make sure that the `stewBinPath` is in your `PATH` environment variable.
