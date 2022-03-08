@@ -49,7 +49,7 @@ Stew supports Linux, macOS, and Windows.
 
 * Install using `curl`:
 ```
-curl -fsSL https://raw.githubusercontent.com/marwanhawari/stew/main/install.sh | bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/marwanhawari/stew/main/install.sh)"
 ```
 
 * Install using `brew`:

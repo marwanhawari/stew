@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # This install script does 3 things:
 # 1. Create the stew directory structure
@@ -90,6 +90,7 @@ stewPath=""
 stewBinPath=""
 
 read -r -t 60 -p "Set the stewPath. This will contain all stew data other than the binaries. (${defaultStewPath}): " stewPathInput
+
 if [ -z "$stewPathInput" ]
 then
     stewPath="${defaultStewPath}"
@@ -104,6 +105,7 @@ else
 fi
 
 read -r -t 60 -p "Set the stewBinPath. This is where the binaries will be installed by stew. (${defaultStewBinPath}): " stewBinPathInput
+
 if [ -z "$stewBinPathInput" ]
 then
     stewBinPath="${defaultStewBinPath}"
