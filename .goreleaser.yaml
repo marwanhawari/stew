@@ -19,3 +19,14 @@ checksum:
   name_template: "checksums.txt"
 changelog:
   skip: true
+brews:
+  - tap:
+      owner: marwanhawari
+      name: homebrew-tap
+    folder: Formula
+    commit_author:
+      name: Marwan Hawari
+      email: marwan.hawari@gmail.com
+    license: "MIT"
+    homepage: "https://github.com/marwanhawari/stew"
+    description: "An independent package manager for compiled binaries"
