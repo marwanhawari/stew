@@ -43,35 +43,58 @@
 ![demo](https://github.com/marwanhawari/stew/raw/main/assets/demo.gif)
 
 # Installation
-Stew supports Linux, macOS, and Windows.
+Stew supports macOS, Linux, and Windows.
 
-### Install a pre-compiled binary:
+### Install using a package manager
+<details>
+  <summary>macOS</summary>
 
-* Install using `curl`:
-```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/marwanhawari/stew/main/install.sh)"
-```
+  ```sh
+  brew install marwanhawari/tap/stew
+  ```
+</details>
 
-* Install using `brew`:
-```
-brew install marwanhawari/tap/stew
-```
+<details>
+  <summary>Debian/Ubuntu</summary>
 
-* Download a pre-compiled binary from the [releases page](https://github.com/marwanhawari/stew/releases).
+  ```sh
+  apt update && apt install -y software-properties-common
+  add-apt-repository ppa:marwanhawari/stew
+  apt update && apt install -y stew
+  ```
+</details>
 
-### Install from source:
+<details>
+  <summary>Arch</summary>
 
-* Install the latest released version:
-```
-go install github.com/marwanhawari/stew@latest
-```
+  ```sh
+  git clone https://aur.archlinux.org/stew.git
+  cd stew
+  makepkg -sric
+  ```
+</details>
 
-* Install the latest unreleased source:
-```
-git clone https://github.com/marwanhawari/stew
-cd stew
-go install .
-```
+### Download a compiled binary
+Compiled binaries can be downloaded from the [releases page](https://github.com/marwanhawari/stew/releases).
+
+### Install using Go
+<details>
+  <summary>Install the latest released version</summary>
+
+  ```sh
+  go install github.com/marwanhawari/stew@latest
+  ```
+</details>
+
+<details>
+  <summary>Install the latest unreleased source</summary>
+
+  ```sh
+  git clone https://github.com/marwanhawari/stew
+  cd stew
+  go install .
+  ```
+</details>
 
 # Usage
 ### Install

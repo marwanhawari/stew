@@ -13,12 +13,24 @@ builds:
       - "amd64"
       - "386"
 archives:
-  - format: "binary"
-    name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+  - name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
 checksum:
   name_template: "checksums.txt"
 changelog:
   skip: true
+nfpms:
+  - builds:
+      - stew
+    vendor: marwanhawari
+    homepage: "https://github.com/marwanhawari/stew"
+    maintainer: "Marwan Hawari <marwan.hawari@gmail.com>"
+    description: "An independent package manager for compiled binaries"
+    license: MIT
+    formats:
+      - apk
+      - deb
+      - rpm
+    bindir: /usr/bin
 brews:
   - tap:
       owner: marwanhawari
