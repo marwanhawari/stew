@@ -15,9 +15,6 @@ The default locations for these are:
 | `stewBinPath` | `~/.local/bin` | `~/AppData/Local/stew/bin` |
 
 There are multiple ways to configure these:
-* When first installing `stew`:
-    * If you install with the [curl install script](https://github.com/marwanhawari/stew/blob/main/install.sh) you will be immediately prompted to set these. This will create a `stew.config.json` file.
-    * If you install the `stew` binary itself (without the curl install script - i.e. with `brew` or by downloading it directly from the releases page), `stew` will look for a `stew.config.json` file. If it cannot find one, then you will be prompted to set the configuration values.
-
+* When you first run `stew`, it will look for a `stew.config.json` file. If it cannot find one, then you will be prompted to set the configuration values.
 * After `stew` is installed, you can use the `stew config` command to set the configuration values.
 * At any time, you can manually create or edit the `stew.config.json` file. It should have values for `stewPath` and `stewBinPath`. 

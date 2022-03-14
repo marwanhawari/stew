@@ -32,12 +32,13 @@
 
 
 # Features
-* Install binaries from GitHub releases or directly from URLs
+* Install binaries from GitHub releases or directly from URLs.
 * Easily distribute binaries across teams and private repositories.
 * Get the latest releases ahead of other package managers.
 * Rapidly browse, install, and experiment with different projects.
 * [Configure](https://github.com/marwanhawari/stew/blob/main/config.md) where to install binaries.
 * No need for `sudo`.
+* Just a single binary with 0 dependencies.
 * Portable [`Stewfile`](https://github.com/marwanhawari/stew/blob/main/examples/Stewfile) with optional pinned versioning.
 
 ![demo](https://github.com/marwanhawari/stew/raw/main/assets/demo.gif)
@@ -174,6 +175,3 @@ The default installation path will depend on your OS:
 However, this location can be [configured](https://github.com/marwanhawari/stew/blob/main/config.md).
 
 Make sure that the installation path is in your `PATH` environment variable. Otherwise, you won't be able to use any of the binaries installed by `stew`.
-
-### I've installed `stew` but the command is still not found.
-If you install `stew` with the [curl install script](https://github.com/marwanhawari/stew/blob/main/install.sh), the `stew` binary will be installed in the `stewBinPath` you provided. The install script also attempts to add the `stewBinPath` to `PATH` in your `.zshrc` or `.bashrc` file. You will need to start a new terminal session for the changes to take effect. Make sure that the `stewBinPath` is in your `PATH` environment variable.
