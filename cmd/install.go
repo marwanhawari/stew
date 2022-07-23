@@ -18,6 +18,12 @@ func Install(cliInputs []string) {
 	stew.CatchAndExit(err)
 
 	for _, cliInput := range cliInputs {
+		if strings.Contains(cliInput, "Stewfile.lock.json") {
+			cliInputs, err = stew.ReadStewLockFileContents(cliInput)
+			stew.CatchAndExit(err)
+			break
+		}
+
 		if strings.Contains(cliInput, "Stewfile") {
 			cliInputs, err = stew.ReadStewfileContents(cliInput)
 			stew.CatchAndExit(err)

@@ -53,6 +53,47 @@ var testStewfileSlice []string = []string{
 	"marwanhawari/ppath@v0.0.3",
 }
 
+var testStewLockFileContents string = `{
+	"os": "darwin",
+	"arch": "arm64",
+	"packages": [
+	{
+		"source": "github",
+		"owner": "cli",
+		"repo": "cli",
+		"tag": "v2.4.0",
+		"asset": "gh_2.4.0_macOS_amd64.tar.gz",
+		"binary": "gh",
+		"url": "https://github.com/cli/cli/releases/download/v2.4.0/gh_2.4.0_macOS_amd64.tar.gz"
+	},
+	{
+		"source": "github",
+		"owner": "junegunn",
+		"repo": "fzf",
+		"tag": "0.29.0",
+		"asset": "fzf-0.29.0-darwin_arm64.zip",
+		"binary": "fzf",
+		"url": "https://github.com/junegunn/fzf/releases/download/0.29.0/fzf-0.29.0-darwin_arm64.zip"
+	},
+	{
+		"source": "other",
+		"owner": "",
+		"repo": "",
+		"tag": "",
+		"asset": "hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz",
+		"binary": "hyperfine",
+		"url": "https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz"
+	}
+	]
+}
+`
+
+var testStewLockFileSlice []string = []string{
+	"cli/cli@v2.4.0::gh_2.4.0_macOS_amd64.tar.gz",
+	"junegunn/fzf@0.29.0::fzf-0.29.0-darwin_arm64.zip",
+	"https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz",
+}
+
 func Test_readLockFileJSON(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -210,6 +251,37 @@ func TestReadStewfileContents(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ReadStewfileContents() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestReadStewLockFileContents(t *testing.T) {
+	tests := []struct {
+		name    string
+		want    []string
+		wantErr bool
+	}{
+		{
+			name:    "test1",
+			want:    testStewLockFileSlice,
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tempDir := t.TempDir()
+			testStewLockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
+			ioutil.WriteFile(testStewLockFilePath, []byte(testStewLockFileContents), 0644)
+
+			got, err := ReadStewLockFileContents(testStewLockFilePath)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReadStewLockFileContents() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ReadStewLockFileContents() = %v, want %v", got, tt.want)
 			}
 		})
 	}
