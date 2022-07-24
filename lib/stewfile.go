@@ -98,6 +98,27 @@ func ReadStewfileContents(stewfilePath string) ([]string, error) {
 	return packages, nil
 }
 
+func ReadStewLockFileContents(lockFilePath string) ([]string, error) {
+
+	lockFile, err := readLockFileJSON(lockFilePath)
+	if err != nil {
+		return []string{}, err
+	}
+
+	var packages []string
+	for _, pkg := range lockFile.Packages {
+		switch pkg.Source {
+		case "other":
+			packages = append(packages, pkg.URL)
+		case "github":
+			path := fmt.Sprintf("%s/%s@%s::%s", pkg.Owner, pkg.Repo, pkg.Tag, pkg.Asset)
+			packages = append(packages, path)
+		}
+	}
+
+	return packages, nil
+}
+
 // NewLockFile creates a new instance of the LockFile struct
 func NewLockFile(stewLockFilePath, userOS, userArch string) (LockFile, error) {
 	var lockFile LockFile
