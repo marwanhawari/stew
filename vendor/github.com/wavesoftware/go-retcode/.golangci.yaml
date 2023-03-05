@@ -1,0 +1,36 @@
+run:
+  timeout: 5m
+  build-tags:
+    - e2e
+
+linters:
+  disable-all: false
+  presets:
+    - bugs
+    - unused
+    - complexity
+    - format
+    - performance
+    - style
+  enable:
+    - gci
+  disable:
+    - paralleltest
+    - nlreturn
+    - exhaustivestruct
+    - wsl
+    - godox
+    - scopelint
+    - maligned
+    - interfacer
+    - golint
+    - ireturn
+    - varnamelen
+    - gochecknoglobals
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - wrapcheck
+

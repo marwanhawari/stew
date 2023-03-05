@@ -1,41 +1,12 @@
-package stew
+package stew_test
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/marwanhawari/stew/constants"
+	stew "github.com/marwanhawari/stew/lib"
 )
-
-func TestNonZeroStatusCodeError_Error(t *testing.T) {
-	type fields struct {
-		StatusCode int
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   string
-	}{
-		{
-			name: "test1",
-			fields: fields{
-				StatusCode: 1,
-			},
-			want: fmt.Sprintf("%v Received non-zero status code from HTTP request: %v", constants.RedColor("Error:"), constants.RedColor(1)),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			e := NonZeroStatusCodeError{
-				StatusCode: tt.fields.StatusCode,
-			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("NonZeroStatusCodeError.Error() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 
 func TestReleasesNotFoundError_Error(t *testing.T) {
 	type fields struct {
@@ -58,7 +29,7 @@ func TestReleasesNotFoundError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := ReleasesNotFoundError{
+			e := stew.ReleasesNotFoundError{
 				Owner: tt.fields.Owner,
 				Repo:  tt.fields.Repo,
 			}
@@ -88,7 +59,7 @@ func TestAssetsNotFoundError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := AssetsNotFoundError{
+			e := stew.AssetsNotFoundError{
 				Tag: tt.fields.Tag,
 			}
 			if got := e.Error(); got != tt.want {
@@ -110,7 +81,7 @@ func TestNoPackagesInLockfileError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := NoPackagesInLockfileError{}
+			e := stew.NoPackagesInLockfileError{}
 			if got := e.Error(); got != tt.want {
 				t.Errorf("NoPackagesInLockfileError.Error() = %v, want %v", got, tt.want)
 			}
@@ -130,38 +101,9 @@ func TestIndexOutOfBoundsInLockfileError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := IndexOutOfBoundsInLockfileError{}
+			e := stew.IndexOutOfBoundsInLockfileError{}
 			if got := e.Error(); got != tt.want {
 				t.Errorf("IndexOutOfBoundsInLockfileError.Error() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestExitUserSelectionError_Error(t *testing.T) {
-	type fields struct {
-		Err error
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   string
-	}{
-		{
-			name: "test1",
-			fields: fields{
-				Err: errors.New("testErr"),
-			},
-			want: fmt.Sprintf("%v Exited from user selection: %v", constants.RedColor("Error:"), constants.RedColor(errors.New("testErr"))),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			e := ExitUserSelectionError{
-				Err: tt.fields.Err,
-			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("ExitUserSelectionError.Error() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -186,7 +128,7 @@ func TestStewpathNotFoundError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := StewpathNotFoundError{
+			e := stew.StewpathNotFoundError{
 				StewPath: tt.fields.StewPath,
 			}
 			if got := e.Error(); got != tt.want {
@@ -215,7 +157,7 @@ func TestNonZeroStatusCodeDownloadError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := NonZeroStatusCodeDownloadError{
+			e := stew.NonZeroStatusCodeDownloadError{
 				StatusCode: tt.fields.StatusCode,
 			}
 			if got := e.Error(); got != tt.want {
@@ -237,7 +179,7 @@ func TestEmptyCLIInputError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := EmptyCLIInputError{}
+			e := stew.EmptyCLIInputError{}
 			if got := e.Error(); got != tt.want {
 				t.Errorf("EmptyCLIInputError.Error() = %v, want %v", got, tt.want)
 			}
@@ -257,7 +199,7 @@ func TestCLIFlagAndInputError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := CLIFlagAndInputError{}
+			e := stew.CLIFlagAndInputError{}
 			if got := e.Error(); got != tt.want {
 				t.Errorf("CLIFlagAndInputError.Error() = %v, want %v", got, tt.want)
 			}
@@ -284,7 +226,7 @@ func TestAssetAlreadyDownloadedError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := AssetAlreadyDownloadedError{
+			e := stew.AssetAlreadyDownloadedError{
 				Asset: tt.fields.Asset,
 			}
 			if got := e.Error(); got != tt.want {
@@ -313,7 +255,7 @@ func TestAbortBinaryOverwriteError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := AbortBinaryOverwriteError{
+			e := stew.AbortBinaryOverwriteError{
 				Binary: tt.fields.Binary,
 			}
 			if got := e.Error(); got != tt.want {
@@ -342,7 +284,7 @@ func TestBinaryNotInstalledError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := BinaryNotInstalledError{
+			e := stew.BinaryNotInstalledError{
 				Binary: tt.fields.Binary,
 			}
 			if got := e.Error(); got != tt.want {
@@ -364,7 +306,7 @@ func TestNoBinariesInstalledError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := NoBinariesInstalledError{}
+			e := stew.NoBinariesInstalledError{}
 			if got := e.Error(); got != tt.want {
 				t.Errorf("NoBinariesInstalledError.Error() = %v, want %v", got, tt.want)
 			}
@@ -379,14 +321,18 @@ func TestUnrecognizedInputError_Error(t *testing.T) {
 	}{
 		{
 			name: "test1",
-			want: fmt.Sprintf("%v Input was not recognized as a URL or GitHub repo", constants.RedColor("Error:")),
+			want: fmt.Sprintf("%v Input was not recognized as a URL or GitHub repo: %v",
+				constants.RedColor("Error:"),
+				constants.RedColor("")),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := UnrecognizedInputError{}
+			e := stew.UnrecognizedInputError{}
 			if got := e.Error(); got != tt.want {
-				t.Errorf("UnrecognizedInputError.Error() = %v, want %v", got, tt.want)
+				t.Errorf("UnrecognizedInputError.Error()\n"+
+					" got = %v\n"+
+					"want = %v", got, tt.want)
 			}
 		})
 	}
@@ -411,7 +357,7 @@ func TestInstalledFromURLError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := InstalledFromURLError{
+			e := stew.InstalledFromURLError{
 				Binary: tt.fields.Binary,
 			}
 			if got := e.Error(); got != tt.want {
@@ -440,7 +386,7 @@ func TestAlreadyInstalledLatestTagError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := AlreadyInstalledLatestTagError{
+			e := stew.AlreadyInstalledLatestTagError{
 				Tag: tt.fields.Tag,
 			}
 			if got := e.Error(); got != tt.want {
@@ -469,7 +415,7 @@ func TestNoGithubSearchResultsError_Error(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := NoGithubSearchResultsError{
+			e := stew.NoGithubSearchResultsError{
 				SearchQuery: tt.fields.SearchQuery,
 			}
 			if got := e.Error(); got != tt.want {
@@ -493,16 +439,19 @@ func TestInvalidGithubSearchQueryError_Error(t *testing.T) {
 			fields: fields{
 				SearchQuery: "testQuery",
 			},
-			want: fmt.Sprintf("%v The search query %v contains invalid characters", constants.RedColor("Error:"), constants.RedColor("testQuery")),
+			want: fmt.Sprintf(`%v The search query "%v" contains invalid characters`,
+				constants.RedColor("Error:"), constants.RedColor("testQuery")),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := InvalidGithubSearchQueryError{
-				SearchQuery: tt.fields.SearchQuery,
+			e := stew.InvalidGithubSearchQueryError{
+				Query: tt.fields.SearchQuery,
 			}
 			if got := e.Error(); got != tt.want {
-				t.Errorf("InvalidGithubSearchQueryError.Error() = %v, want %v", got, tt.want)
+				t.Errorf("InvalidGithubSearchQueryError.Error()\n"+
+					" got = %v\n"+
+					"want = %v", got, tt.want)
 			}
 		})
 	}

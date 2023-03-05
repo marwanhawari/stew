@@ -1,4 +1,4 @@
-cli/cli@v2.4.0
+cli/cli@v2.4.0!!gh
 junegunn/fzf@0.29.0
 https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz
 marwanhawari/ppath@v0.0.3

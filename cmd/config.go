@@ -1,42 +1,44 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"runtime"
 
 	"github.com/marwanhawari/stew/constants"
-	stew "github.com/marwanhawari/stew/lib"
+	"github.com/marwanhawari/stew/lib/config"
+	"github.com/marwanhawari/stew/lib/errs"
+	"github.com/marwanhawari/stew/lib/pathutil"
+	"github.com/marwanhawari/stew/lib/ui/terminal"
 )
 
+// Config is executed when you run `stew config`.
 func Config() {
-
 	userOS := runtime.GOOS
-	stewConfigFilePath, err := stew.GetStewConfigFilePath(userOS)
-	stew.CatchAndExit(err)
-	configExists, err := stew.PathExists(stewConfigFilePath)
-	stew.CatchAndExit(err)
+	prt := terminal.Standard()
+	configPath, err := config.FilePath(userOS)
+	errs.MaybeExit(err)
+	configExists := errs.Strip(pathutil.Exists(configPath))
 
 	if !configExists {
-		_, err := stew.NewStewConfig(userOS)
-		stew.CatchAndExit(err)
+		_, err = config.NewConfig(prt, userOS)
+		errs.MaybeExit(err)
 		return
 	}
 
-	defaultStewPath, err := stew.GetDefaultStewPath(userOS)
-	stew.CatchAndExit(err)
-	defaultStewBinPath, err := stew.GetDefaultStewBinPath(userOS)
-	stew.CatchAndExit(err)
+	defaultStewPath, err := config.DefaultStewPath(userOS)
+	errs.MaybeExit(err)
+	defaultBinPath, err := config.DefaultBinPath(userOS)
+	errs.MaybeExit(err)
 
-	newStewPath, newStewBinPath, err := stew.PromptConfig(defaultStewPath, defaultStewBinPath)
-	stew.CatchAndExit(err)
+	newStewPath, newStewBinPath, err := config.PromptConfig(prt, defaultStewPath, defaultBinPath)
+	errs.MaybeExit(err)
 
-	newStewConfig := stew.StewConfig{StewPath: newStewPath, StewBinPath: newStewBinPath}
-	err = stew.WriteStewConfigJSON(newStewConfig, stewConfigFilePath)
-	stew.CatchAndExit(err)
+	cfg := config.Config{StewPath: newStewPath, StewBinPath: newStewBinPath}
+	err = cfg.WriteStewConfigJSON(configPath)
+	errs.MaybeExit(err)
 
-	fmt.Printf("📄 Updated %v\n", constants.GreenColor(stewConfigFilePath))
+	prt.Printf("📄 Updated %v\n", constants.GreenColor(configPath))
 
 	pathVariable := os.Getenv("PATH")
-	stew.ValidateStewBinPath(newStewBinPath, pathVariable)
+	config.ValidateBinPath(prt, newStewBinPath, pathVariable)
 }

@@ -14,16 +14,56 @@ jobs:
 
     strategy:
       matrix:
-        go-version: [1.17]
+        go-version:
+        - 1.20.x
+        - 1.19.x
+        - 1.18.x
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
         go-version: ${{ matrix.go-version }}
 
+    - name: Install junit2md
+      run: cargo install junit2md --root build
+
     - name: Test and calculate coverage
-      run: go test -v ./... --coverprofile coverage.out
-    - name: Read the coverage
-      run: go tool cover --func coverage.out
+      run:
+        go run gotest.tools/gotestsum@latest
+          --junitfile build/junit-results.xml
+          --jsonfile build/test-report.jsonl
+          --format testname
+          --
+          --coverprofile build/coverage.out
+          -timeout 5m
+          -count=1 ./...
+
+    - name: Publish Test Report
+      if: success() || failure()
+      run:
+        build/bin/junit2md build/junit-results.xml
+          >> $GITHUB_STEP_SUMMARY
+
+    - name: Create Test Report
+      if: success() || failure()
+      run:
+        npx xunit-viewer 
+          -r build/junit-results.xml 
+          -o build/junit-results.html
+
+    - name: Coverage
+      if: success() || failure()
+      run: go tool cover --func build/coverage.out
+
+    - name: Archive Reports
+      if: success() || failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-report
+        path: |
+          build/*.xml
+          build/*.jsonl
+          build/*.html
+          build/*.out

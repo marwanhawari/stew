@@ -1,14 +1,18 @@
 package stew
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/marwanhawari/stew/lib/config"
+	"github.com/marwanhawari/stew/lib/pathutil"
+	"github.com/marwanhawari/stew/lib/ui/terminal"
+	"github.com/stretchr/testify/require"
 )
 
-var testLockfile LockFile = LockFile{
+var testLockfile = LockFile{
 	Os:   "darwin",
 	Arch: "arm64",
 	Packages: []PackageData{
@@ -42,18 +46,18 @@ var testLockfile LockFile = LockFile{
 	},
 }
 
-var testStewfileContents string = `junegunn/fzf@0.29.0
+var testStewfileContents = `junegunn/fzf@0.29.0
 https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz
 marwanhawari/ppath@v0.0.3
 `
 
-var testStewfileSlice []string = []string{
+var testStewfileSlice = []string{
 	"junegunn/fzf@0.29.0",
 	"https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz",
 	"marwanhawari/ppath@v0.0.3",
 }
 
-var testStewLockFileContents string = `{
+var testStewLockFileContents = `{
 	"os": "darwin",
 	"arch": "arm64",
 	"packages": [
@@ -88,9 +92,9 @@ var testStewLockFileContents string = `{
 }
 `
 
-var testStewLockFileSlice []string = []string{
-	"cli/cli@v2.4.0::gh_2.4.0_macOS_amd64.tar.gz",
-	"junegunn/fzf@0.29.0::fzf-0.29.0-darwin_arm64.zip",
+var testStewLockFileSlice = []string{
+	"cli/cli@v2.4.0::gh_2.4.0_macOS_amd64.tar.gz!!gh",
+	"junegunn/fzf@0.29.0::fzf-0.29.0-darwin_arm64.zip!!fzf",
 	"https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz",
 }
 
@@ -99,18 +103,17 @@ func Test_readLockFileJSON(t *testing.T) {
 		name    string
 		want    LockFile
 		wantErr bool
-	}{
-		{
-			name:    "test1",
-			want:    testLockfile,
-			wantErr: false,
-		},
-	}
+	}{{
+		name:    "test1",
+		want:    testLockfile,
+		wantErr: false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
+			ptr := terminal.TestTerminal{TestingT: t}
 			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
-			WriteLockFileJSON(testLockfile, lockFilePath)
+			require.NoError(t, WriteLockFileJSON(ptr, testLockfile, lockFilePath))
 
 			got, err := readLockFileJSON(lockFilePath)
 			if (err != nil) != tt.wantErr {
@@ -128,18 +131,17 @@ func TestWriteLockFileJSON(t *testing.T) {
 	tests := []struct {
 		name    string
 		wantErr bool
-	}{
-		{
-			name:    "test1",
-			wantErr: false,
-		},
-	}
+	}{{
+		name:    "test1",
+		wantErr: false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
+			ptr := terminal.TestTerminal{TestingT: t}
 			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
 
-			if err := WriteLockFileJSON(testLockfile, lockFilePath); (err != nil) != tt.wantErr {
+			if err := WriteLockFileJSON(ptr, testLockfile, lockFilePath); (err != nil) != tt.wantErr {
 				t.Errorf("WriteLockFileJSON() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
@@ -154,56 +156,37 @@ func TestWriteLockFileJSON(t *testing.T) {
 }
 
 func TestRemovePackage(t *testing.T) {
-	type args struct {
-		index int
-	}
 	tests := []struct {
 		name    string
-		args    args
+		index   int
 		want    []PackageData
 		wantErr bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				index: 0,
-			},
-			want:    testLockfile.Packages[1:],
-			wantErr: false,
-		},
-		{
-			name: "test2",
-			args: args{
-				index: 1,
-			},
-			want:    []PackageData{testLockfile.Packages[0], testLockfile.Packages[2]},
-			wantErr: false,
-		},
-		{
-			name: "test3",
-			args: args{
-				index: 2,
-			},
-			want:    testLockfile.Packages[:2],
-			wantErr: false,
-		},
-		{
-			name: "test4",
-			args: args{
-				index: -1,
-			},
-			want:    []PackageData{},
-			wantErr: true,
-		},
-		{
-			name: "test5",
-			args: args{
-				index: 0,
-			},
-			want:    []PackageData{},
-			wantErr: true,
-		},
-	}
+	}{{
+		name:    "test1",
+		index:   0,
+		want:    testLockfile.Packages[1:],
+		wantErr: false,
+	}, {
+		name:    "test2",
+		index:   1,
+		want:    []PackageData{testLockfile.Packages[0], testLockfile.Packages[2]},
+		wantErr: false,
+	}, {
+		name:    "test3",
+		index:   2,
+		want:    testLockfile.Packages[:2],
+		wantErr: false,
+	}, {
+		name:    "test4",
+		index:   -1,
+		want:    []PackageData{},
+		wantErr: true,
+	}, {
+		name:    "test5",
+		index:   0,
+		want:    []PackageData{},
+		wantErr: true,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var testLockfilePackages []PackageData
@@ -213,7 +196,7 @@ func TestRemovePackage(t *testing.T) {
 				copy(testLockfilePackages, testLockfile.Packages)
 			}
 
-			got, err := RemovePackage(testLockfilePackages, tt.args.index)
+			got, err := RemovePackage(testLockfilePackages, tt.index)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("RemovePackage() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -230,19 +213,17 @@ func TestReadStewfileContents(t *testing.T) {
 		name    string
 		want    []string
 		wantErr bool
-	}{
-		{
-			name:    "test1",
-			want:    testStewfileSlice,
-			wantErr: false,
-		},
-	}
+	}{{
+		name:    "test1",
+		want:    testStewfileSlice,
+		wantErr: false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
 			tempDir := t.TempDir()
 			testStewfilePath := filepath.Join(tempDir, "Stewfile")
-			ioutil.WriteFile(testStewfilePath, []byte(testStewfileContents), 0644)
+			require.NoError(t, os.WriteFile(testStewfilePath, []byte(testStewfileContents), 0o644))
 
 			got, err := ReadStewfileContents(testStewfilePath)
 			if (err != nil) != tt.wantErr {
@@ -258,30 +239,30 @@ func TestReadStewfileContents(t *testing.T) {
 
 func TestReadStewLockFileContents(t *testing.T) {
 	tests := []struct {
-		name    string
-		want    []string
-		wantErr bool
-	}{
-		{
-			name:    "test1",
-			want:    testStewLockFileSlice,
-			wantErr: false,
-		},
-	}
+		name string
+		want []string
+	}{{
+		name: "test1",
+		want: testStewLockFileSlice,
+	}}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			testStewLockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
-			ioutil.WriteFile(testStewLockFilePath, []byte(testStewLockFileContents), 0644)
+			if err := os.WriteFile(testStewLockFilePath, []byte(testStewLockFileContents), 0o644); err != nil {
+				t.Fatalf("unexpected error: %+v", err)
+			}
 
 			got, err := ReadStewLockFileContents(testStewLockFilePath)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ReadStewLockFileContents() error = %v, wantErr %v", err, tt.wantErr)
+			if err != nil {
+				t.Fatalf("unexpected error = %+v", err)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ReadStewLockFileContents() = %v, want %v", got, tt.want)
+				t.Errorf("result\n"+
+					" got = %+v\n"+
+					"want = %+v", got, tt.want)
 			}
 		})
 	}
@@ -297,25 +278,32 @@ func TestNewLockFile(t *testing.T) {
 		args    args
 		want    LockFile
 		wantErr bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				userOS:   testLockfile.Os,
-				userArch: testLockfile.Arch,
-			},
-			want:    testLockfile,
-			wantErr: false,
+	}{{
+		name: "test1",
+		args: args{
+			userOS:   testLockfile.Os,
+			userArch: testLockfile.Arch,
 		},
-	}
+		want:    testLockfile,
+		wantErr: false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			tempDir := t.TempDir()
+			ptr := terminal.TestTerminal{TestingT: t}
 			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
-			WriteLockFileJSON(testLockfile, lockFilePath)
+			if err := WriteLockFileJSON(ptr, testLockfile, lockFilePath); err != nil {
+				t.Fatalf("unexpected error: %+v", err)
+			}
 
-			got, err := NewLockFile(lockFilePath, tt.args.userOS, tt.args.userArch)
+			run := config.Runtime{
+				OS:   tt.args.userOS,
+				Arch: tt.args.userArch,
+				SystemInfo: config.SystemInfo{
+					LockPath: lockFilePath,
+				},
+			}
+			got, err := NewLockFile(run)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewLockFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -336,23 +324,28 @@ func TestNewLockFileDoesntExist(t *testing.T) {
 		name    string
 		args    args
 		wantErr bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				userOS:   testLockfile.Os,
-				userArch: testLockfile.Arch,
-			},
-			wantErr: false,
+	}{{
+		name: "test1",
+		args: args{
+			userOS:   testLockfile.Os,
+			userArch: testLockfile.Arch,
 		},
-	}
+		wantErr: false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
 			tempDir := t.TempDir()
 			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
 
-			got, err := NewLockFile(lockFilePath, tt.args.userOS, tt.args.userArch)
+			run := config.Runtime{
+				OS:   tt.args.userOS,
+				Arch: tt.args.userArch,
+				SystemInfo: config.SystemInfo{
+					LockPath: lockFilePath,
+				},
+			}
+			got, err := NewLockFile(run)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewLockFile() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -368,29 +361,25 @@ func TestNewLockFileDoesntExist(t *testing.T) {
 func TestNewSystemInfo(t *testing.T) {
 	tests := []struct {
 		name string
-	}{
-		{
-			name: "test1",
-		},
-	}
+	}{{
+		name: "test1",
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 
-			testStewConfig := StewConfig{
+			testStewConfig := config.Config{
 				StewPath:    tempDir,
 				StewBinPath: filepath.Join(tempDir, "bin"),
 			}
 
-			testSystemInfo := SystemInfo{
-				StewPath:         tempDir,
-				StewBinPath:      filepath.Join(tempDir, "bin"),
-				StewPkgPath:      filepath.Join(tempDir, "pkg"),
-				StewLockFilePath: filepath.Join(tempDir, "Stewfile.lock.json"),
-				StewTmpPath:      filepath.Join(tempDir, "tmp"),
+			testSystemInfo := config.SystemInfo{
+				PkgPath:  filepath.Join(tempDir, "pkg"),
+				LockPath: filepath.Join(tempDir, "Stewfile.lock.json"),
+				TmpPath:  filepath.Join(tempDir, "tmp"),
 			}
 
-			got := NewSystemInfo(testStewConfig)
+			got := config.NewSystemInfo(testStewConfig)
 			if !reflect.DeepEqual(got, testSystemInfo) {
 				t.Errorf("NewSystemInfo() = %v, want %v", got, testSystemInfo)
 			}
@@ -402,25 +391,23 @@ func TestDeleteAssetAndBinary(t *testing.T) {
 	tests := []struct {
 		name    string
 		wantErr bool
-	}{
-		{
-			name:    "test1",
-			wantErr: false,
-		},
-	}
+	}{{
+		name:    "test1",
+		wantErr: false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			os.MkdirAll(filepath.Join(tempDir, "pkg"), 0755)
+			require.NoError(t, os.MkdirAll(filepath.Join(tempDir, "pkg"), 0o755))
 			testStewAssetPath := filepath.Join(tempDir, "pkg", "testAsset.tar.gz")
-			os.MkdirAll(filepath.Join(tempDir, "bin"), 0755)
+			require.NoError(t, os.MkdirAll(filepath.Join(tempDir, "bin"), 0o755))
 			testStewBinaryPath := filepath.Join(tempDir, "bin", "testBinary")
 
-			ioutil.WriteFile(testStewAssetPath, []byte("This is a test asset"), 0644)
-			ioutil.WriteFile(testStewBinaryPath, []byte("This is a test binary"), 0644)
+			require.NoError(t, os.WriteFile(testStewAssetPath, []byte("This is a test asset"), 0o644))
+			require.NoError(t, os.WriteFile(testStewBinaryPath, []byte("This is a test binary"), 0o644))
 
-			assetExists, _ := PathExists(testStewAssetPath)
-			binaryExists, _ := PathExists(testStewBinaryPath)
+			assetExists, _ := pathutil.Exists(testStewAssetPath)
+			binaryExists, _ := pathutil.Exists(testStewBinaryPath)
 
 			if !assetExists || !binaryExists {
 				t.Errorf("Either the asset or the binary does not exist yet")
@@ -430,8 +417,8 @@ func TestDeleteAssetAndBinary(t *testing.T) {
 				t.Errorf("DeleteAssetAndBinary() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			assetExists, _ = PathExists(testStewAssetPath)
-			binaryExists, _ = PathExists(testStewBinaryPath)
+			assetExists, _ = pathutil.Exists(testStewAssetPath)
+			binaryExists, _ = pathutil.Exists(testStewBinaryPath)
 
 			if assetExists || binaryExists {
 				t.Errorf("Either the binary or the asset still exists")
