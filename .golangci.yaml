@@ -1,0 +1,30 @@
+run:
+  timeout: 5m
+  tests: false
+
+linters:
+  disable-all: false
+  presets:
+    - bugs
+    - unused
+    - complexity
+    - format
+    - performance
+    - style
+  enable:
+    - wrapcheck
+  disable:
+    - exhaustivestruct
+    - tagliatelle
+    - varnamelen
+    - nlreturn
+    - exhaustruct
+    - wsl
+    - gomnd
+
+linters-settings:
+  wrapcheck:
+    ignorePackageGlobs:
+      - encoding/*
+      - github.com/pkg/*
+      - github.com/marwanhawari/stew/*

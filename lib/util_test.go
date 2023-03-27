@@ -1,40 +1,43 @@
 package stew
 
 import (
-	"io/ioutil"
+	"errors"
+	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/marwanhawari/stew/lib/pathutil"
+	"github.com/marwanhawari/stew/lib/testsupport"
+	"github.com/marwanhawari/stew/lib/ui/prompt"
+	"github.com/marwanhawari/stew/lib/ui/terminal"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+const (
+	RegularFilePerm    = 0o644
+	ExecutableFilePerm = 0o755
 )
 
 func Test_isArchiveFile(t *testing.T) {
-	type args struct {
+	type TestCase struct {
+		name     string
 		filePath string
+		want     bool
 	}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				filePath: "notArchive",
-			},
-			want: false,
-		},
-		{
-			name: "test1",
-			args: args{
-				filePath: "Archive.tar.gz",
-			},
-			want: true,
-		},
-	}
-	for _, tt := range tests {
+	cases := []TestCase{{
+		name:     "test1",
+		filePath: "notArchive",
+	}, {
+		name:     "test1",
+		filePath: "Archive.tar.gz",
+		want:     true,
+	}}
+	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isArchiveFile(tt.args.filePath); got != tt.want {
+			if got := isArchiveFile(tt.filePath); got != tt.want {
 				t.Errorf("isArchiveFile() = %v, want %v", got, tt.want)
 			}
 		})
@@ -42,40 +45,28 @@ func Test_isArchiveFile(t *testing.T) {
 }
 
 func Test_isExecutableFile(t *testing.T) {
-	type args struct {
+	type TestCase struct {
+		name     string
 		filePath string
+		want     bool
+		wantErr  bool
 	}
-	tests := []struct {
-		name    string
-		args    args
-		want    bool
-		wantErr bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				filePath: "testExecutableFile",
-			},
-			want:    true,
-			wantErr: false,
-		},
-		{
-			name: "test1",
-			args: args{
-				filePath: "notExecutableFile",
-			},
-			want:    false,
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
+	cases := []TestCase{{
+		name:     "test1",
+		filePath: "testExecutableFile",
+		want:     true,
+	}, {
+		name:     "test1",
+		filePath: "notExecutableFile",
+	}}
+	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			testExecutableFilePath := filepath.Join(tempDir, tt.args.filePath)
+			testExecutableFilePath := filepath.Join(tempDir, tt.filePath)
 			if tt.want {
-				ioutil.WriteFile(testExecutableFilePath, []byte("An executable file"), 0755)
+				require.NoError(t, os.WriteFile(testExecutableFilePath, []byte("An executable file"), ExecutableFilePerm))
 			} else {
-				ioutil.WriteFile(testExecutableFilePath, []byte("Not an executable file"), 0644)
+				require.NoError(t, os.WriteFile(testExecutableFilePath, []byte("Not an executable file"), RegularFilePerm))
 			}
 
 			got, err := isExecutableFile(testExecutableFilePath)
@@ -90,86 +81,35 @@ func Test_isExecutableFile(t *testing.T) {
 	}
 }
 
-func TestPathExists(t *testing.T) {
-	type args struct {
-		path string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    bool
-		wantErr bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				path: "testFile",
-			},
-			want:    true,
-			wantErr: false,
-		},
-		{
-			name: "test2",
-			args: args{
-				path: "noFile",
-			},
-			want:    false,
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tempDir := t.TempDir()
-			testFilePath := filepath.Join(tempDir, tt.args.path)
-			if tt.want {
-				ioutil.WriteFile(testFilePath, []byte("A test file"), 0644)
-			}
-
-			got, err := PathExists(testFilePath)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("PathExists() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("PathExists() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestDownloadFile(t *testing.T) {
-	type args struct {
-		url string
-	}
-	tests := []struct {
+	type TestCase struct {
 		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				url: "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
-			},
-			wantErr: false,
-		},
-		{
-			name: "test1",
-			args: args{
-				url: "",
-			},
-			wantErr: true,
-		},
+		url     string
+		wantErr error
 	}
-	for _, tt := range tests {
+	cases := []TestCase{{
+		name: "test1",
+		url:  "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
+	}, {
+		name: "test2",
+		url:  "",
+		wantErr: &url.Error{
+			Op:  "Get",
+			URL: "",
+			Err: errors.New(`unsupported protocol scheme ""`),
+		},
+	}}
+	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			testDownloadPath := filepath.Join(tempDir, filepath.Base(tt.args.url))
-			if err := DownloadFile(testDownloadPath, tt.args.url); (err != nil) != tt.wantErr {
-				t.Errorf("DownloadFile() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			rt := testsupport.NewDefaultRuntime(t)
+			testDownloadPath := filepath.Join(tempDir, filepath.Base(tt.url))
+			if err := DownloadFile(rt, testDownloadPath, tt.url); tt.wantErr != nil && err.Error() != tt.wantErr.Error() {
+				t.Fatalf("DownloadFile() error\n"+
+					" got = %+v\n"+
+					"want = %+v", err, tt.wantErr)
 			}
-			if fileExists, _ := PathExists(testDownloadPath); !fileExists {
+			if fileExists, _ := pathutil.Exists(testDownloadPath); !fileExists {
 				t.Errorf("The file %v was not found", testDownloadPath)
 			}
 
@@ -186,26 +126,24 @@ func Test_copyFile(t *testing.T) {
 		name    string
 		args    args
 		wantErr bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				srcFile:  "sourceFile.txt",
-				destFile: "destFile.txt",
-			},
-			wantErr: false,
+	}{{
+		name: "test1",
+		args: args{
+			srcFile:  "sourceFile.txt",
+			destFile: "destFile.txt",
 		},
-	}
+		wantErr: false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			srcFilePath := filepath.Join(tempDir, tt.args.srcFile)
 			destFilePath := filepath.Join(tempDir, tt.args.destFile)
 
-			ioutil.WriteFile(srcFilePath, []byte("A test file"), 0644)
+			require.NoError(t, os.WriteFile(srcFilePath, []byte("A test file"), RegularFilePerm))
 
-			srcExists, _ := PathExists(srcFilePath)
-			destExists, _ := PathExists(destFilePath)
+			srcExists, _ := pathutil.Exists(srcFilePath)
+			destExists, _ := pathutil.Exists(destFilePath)
 
 			if !srcExists {
 				t.Errorf("Source file %v not found", srcFilePath)
@@ -219,8 +157,8 @@ func Test_copyFile(t *testing.T) {
 				t.Errorf("copyFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			srcExists, _ = PathExists(srcFilePath)
-			destExists, _ = PathExists(destFilePath)
+			srcExists, _ = pathutil.Exists(srcFilePath)
+			destExists, _ = pathutil.Exists(destFilePath)
 
 			if !srcExists || !destExists {
 				t.Errorf("Copy failed - src or dest file does not exist")
@@ -234,19 +172,19 @@ func Test_walkDir(t *testing.T) {
 	tests := []struct {
 		name    string
 		wantErr bool
-	}{
-		{
-			name:    "test1",
-			wantErr: false,
-		},
-	}
+	}{{
+		name:    "test1",
+		wantErr: false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 
-			ioutil.WriteFile(filepath.Join(tempDir, "testFile.txt"), []byte("A test file"), 0644)
-			os.MkdirAll(filepath.Join(tempDir, "bin"), 0755)
-			ioutil.WriteFile(filepath.Join(tempDir, "bin", "binDirTestFile.txt"), []byte("Another test file"), 0644)
+			require.NoError(t, os.WriteFile(filepath.Join(tempDir, "testFile.txt"),
+				[]byte("A test file"), RegularFilePerm))
+			require.NoError(t, os.MkdirAll(filepath.Join(tempDir, "bin"), ExecutableFilePerm))
+			require.NoError(t, os.WriteFile(filepath.Join(tempDir, "bin",
+				"binDirTestFile.txt"), []byte("Another test file"), RegularFilePerm))
 
 			want := []string{filepath.Join(tempDir, "bin", "binDirTestFile.txt"), filepath.Join(tempDir, "testFile.txt")}
 
@@ -263,55 +201,46 @@ func Test_walkDir(t *testing.T) {
 }
 
 func Test_getBinary(t *testing.T) {
-	type args struct {
-		repo string
-	}
 	tests := []struct {
 		name       string
-		args       args
+		repo       string
 		binaryName string
 		wantErr    bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				repo: "testBinary",
-			},
-			binaryName: "testBinary",
-			wantErr:    false,
-		},
-		{
-			name: "test2",
-			args: args{
-				repo: "someRepo",
-			},
-			binaryName: "testBinary",
-			wantErr:    false,
-		},
-		{
-			name: "test3",
-			args: args{
-				repo: "someRepo",
-			},
-			binaryName: "testBinary.exe",
-			wantErr:    false,
-		},
-	}
+	}{{
+		name:       "test1",
+		repo:       "testBinary",
+		binaryName: "testBinary",
+		wantErr:    false,
+	}, {
+		name:       "test2",
+		repo:       "someRepo",
+		binaryName: "testBinary",
+		wantErr:    false,
+	}, {
+		name:       "test3",
+		repo:       "someRepo",
+		binaryName: "testBinary.exe",
+		wantErr:    false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
+			prt := terminal.TestTerminal{TestingT: t}
 
 			testBinaryFilePath := filepath.Join(tempDir, tt.binaryName)
-			ioutil.WriteFile(testBinaryFilePath, []byte("An executable file"), 0755)
+			require.NoError(t, os.WriteFile(testBinaryFilePath, []byte("An executable file"), ExecutableFilePerm))
 			testNonBinaryFilePath := filepath.Join(tempDir, "testNonBinary")
-			ioutil.WriteFile(testNonBinaryFilePath, []byte("Not an executable file"), 0644)
+			require.NoError(t, os.WriteFile(testNonBinaryFilePath, []byte("Not an executable file"), RegularFilePerm))
 
 			testFilePaths := []string{testBinaryFilePath, testNonBinaryFilePath}
 
 			wantBinaryFile := filepath.Join(tempDir, tt.binaryName)
 			wantBinaryName := filepath.Base(wantBinaryFile)
 
-			got, got1, err := getBinary(testFilePaths, tt.args.repo)
+			install := Installation{
+				Repo: tt.repo,
+			}
+			got, got1, err := getBinary(prt, testFilePaths, install)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -327,37 +256,37 @@ func Test_getBinary(t *testing.T) {
 }
 
 func Test_getBinaryError(t *testing.T) {
-	type args struct {
-		repo string
-	}
 	tests := []struct {
 		name       string
-		args       args
+		repo       string
 		binaryName string
 		wantErr    bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				repo: "testBinary",
-			},
-			binaryName: "testBinary",
-			wantErr:    true,
-		},
-	}
+	}{{
+		name:       "test1",
+		repo:       "testBinary",
+		binaryName: "testBinary",
+		wantErr:    true,
+	}}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
+			io := terminal.TestTerminal{TestingT: t}
 
 			testNonBinaryFilePath := filepath.Join(tempDir, "testNonBinary")
-			ioutil.WriteFile(testNonBinaryFilePath, []byte("Not an executable file"), 0644)
+			require.NoError(t, os.WriteFile(testNonBinaryFilePath,
+				[]byte("Not an executable file"), RegularFilePerm))
 
 			testFilePaths := []string{testNonBinaryFilePath}
 
 			wantBinaryFile := ""
 			wantBinaryName := ""
 
-			got, got1, err := getBinary(testFilePaths, tt.args.repo)
+			install := Installation{
+				Repo:      tt.repo,
+				BatchMode: true,
+			}
+			got, got1, err := getBinary(io, testFilePaths, install)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -470,65 +399,82 @@ func TestParseCLIInput(t *testing.T) {
 	}
 }
 
-func Test_parseGithubInput(t *testing.T) {
-	type args struct {
-		cliInput string
-	}
+func TestParseGithubInput(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
-		name    string
-		args    args
+		args    string
 		want    CLIInput
-		wantErr bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				cliInput: "marwanhawari/ppath",
-			},
-			want: CLIInput{
-				IsGithubInput: true,
-				Owner:         "marwanhawari",
-				Repo:          "ppath",
-			},
-			wantErr: false,
+		wantErr error
+	}{{
+		args: "marwanhawari/ppath",
+		want: CLIInput{
+			IsGithubInput: true,
+			Owner:         "marwanhawari",
+			Repo:          "ppath",
 		},
-		{
-			name: "test2",
-			args: args{
-				cliInput: "marwanhawari/ppath@v0.0.3",
-			},
-			want: CLIInput{
-				IsGithubInput: true,
-				Owner:         "marwanhawari",
-				Repo:          "ppath",
-				Tag:           "v0.0.3",
-			},
-			wantErr: false,
+	}, {
+		args: "marwanhawari/ppath@v0.0.3",
+		want: CLIInput{
+			IsGithubInput: true,
+			Owner:         "marwanhawari",
+			Repo:          "ppath",
+			Tag:           "v0.0.3",
 		},
-		{
-			name: "test3",
-			args: args{
-				cliInput: "marwanhawari/ppath@v0.0.3::ppath-v0.0.3-linux-amd64.tar.gz",
-			},
-			want: CLIInput{
-				IsGithubInput: true,
-				Owner:         "marwanhawari",
-				Repo:          "ppath",
-				Tag:           "v0.0.3",
-				Asset:         "ppath-v0.0.3-linux-amd64.tar.gz",
-			},
-			wantErr: false,
+	}, {
+		args: "marwanhawari/ppath@v0.0.3::ppath-v0.0.3-linux-amd64.tar.gz",
+		want: CLIInput{
+			IsGithubInput: true,
+			Owner:         "marwanhawari",
+			Repo:          "ppath",
+			Tag:           "v0.0.3",
+			Asset:         "ppath-v0.0.3-linux-amd64.tar.gz",
 		},
-	}
+	}, {
+		args: "knative-sandbox/kn-plugin-event!!kn-event",
+		want: CLIInput{
+			IsGithubInput: true,
+			Owner:         "knative-sandbox",
+			Repo:          "kn-plugin-event",
+			BinaryName:    "kn-event",
+		},
+	}, {
+		args: "knative-sandbox/kn-plugin-event@v1.9.1!!kn-event",
+		want: CLIInput{
+			IsGithubInput: true,
+			Owner:         "knative-sandbox",
+			Repo:          "kn-plugin-event",
+			Tag:           "v1.9.1",
+			BinaryName:    "kn-event",
+		},
+	}, {
+		args: "knative-sandbox/kn-plugin-event@v1.9.1::kn-event-linux-amd64!!kn-event",
+		want: CLIInput{
+			IsGithubInput: true,
+			Owner:         "knative-sandbox",
+			Repo:          "kn-plugin-event",
+			Tag:           "v1.9.1",
+			Asset:         "kn-event-linux-amd64",
+			BinaryName:    "kn-event",
+		},
+	}, {
+		args:    "foo/bar!!foobar@1.2",
+		wantErr: UnrecognizedInputError{"foo/bar!!foobar@1.2"},
+	}}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseGithubInput(tt.args.cliInput)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseGithubInput() error = %v, wantErr %v", err, tt.wantErr)
+		tt := tt
+		t.Run(tt.args, func(t *testing.T) {
+			t.Parallel()
+			got, err := ParseCLIInput(tt.args)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("error mismatch\n"+
+					" got = %+v,\n"+
+					"want = %+v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("parseGithubInput() = %v, want %v", got, tt.want)
+				t.Errorf("results are not equal\n"+
+					" got = %+v,\n"+
+					"want = %+v", got, tt.want)
 			}
 		})
 	}
@@ -624,22 +570,24 @@ func Test_extractBinary(t *testing.T) {
 		args    args
 		url     string
 		wantErr bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				downloadedFilePath: filepath.Join(t.TempDir(), "ppath-v0.0.3-darwin-arm64.tar.gz"),
-				tmpExtractionPath:  filepath.Join(t.TempDir(), "tmp"),
-			},
-			url:     "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
-			wantErr: false,
+	}{{
+		name: "test1",
+		args: args{
+			downloadedFilePath: filepath.Join(t.TempDir(), "ppath-v0.0.3-darwin-arm64.tar.gz"),
+			tmpExtractionPath:  filepath.Join(t.TempDir(), "tmp"),
 		},
-	}
+		url:     "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
+		wantErr: false,
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			DownloadFile(tt.args.downloadedFilePath, tt.url)
+			rt := testsupport.NewDefaultRuntime(t)
+			require.NoError(t, DownloadFile(rt, tt.args.downloadedFilePath, tt.url))
 
-			if err := extractBinary(tt.args.downloadedFilePath, tt.args.tmpExtractionPath); (err != nil) != tt.wantErr {
+			install := Installation{
+				DownloadedFilePath: tt.args.downloadedFilePath,
+			}
+			if err := extractBinary(rt, install, tt.args.tmpExtractionPath); (err != nil) != tt.wantErr {
 				t.Errorf("extractBinary() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -650,126 +598,64 @@ func TestInstallBinary(t *testing.T) {
 	tests := []struct {
 		name    string
 		want    string
-		wantErr bool
-	}{
-		{
-			name:    "test1",
-			want:    "ppath",
-			wantErr: false,
+		pd      PackageData
+		batch   bool
+		wantErr error
+	}{{
+		name:  "test1",
+		want:  "hello",
+		batch: true,
+		pd: PackageData{
+			Source: "github",
+			Owner:  "wavesoftware",
+			Repo:   "asm-sandbox",
+			Tag:    "v0.1.0",
+			Asset:  "hello-0.1.0-linux-amd64.tar.xz",
+			Binary: "hello",
+			URL:    "https://github.com/wavesoftware/asm-sandbox/releases/download/v0.1.0/hello-0.1.0-linux-amd64.tar.xz",
 		},
-	}
+	}, {
+		name: "test2",
+		pd: PackageData{
+			Source: "github",
+			Owner:  "wavesoftware",
+			Repo:   "asm-sandbox",
+			Tag:    "v0.1.0",
+			Asset:  "not-exists.txt",
+			URL:    "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/checksums.txt",
+		},
+		wantErr: prompt.ExitUserSelectionError{},
+	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tempDir := t.TempDir()
-
-			repo := "ppath"
-
-			testStewConfig := StewConfig{
-				StewPath:    tempDir,
-				StewBinPath: filepath.Join(tempDir, "bin"),
-			}
-
-			systemInfo := NewSystemInfo(testStewConfig)
-			os.MkdirAll(systemInfo.StewBinPath, 0755)
-			os.MkdirAll(systemInfo.StewPkgPath, 0755)
-			os.MkdirAll(systemInfo.StewTmpPath, 0755)
-
 			lockFile := LockFile{
-				Os:   "darwin",
-				Arch: "arm64",
-				Packages: []PackageData{
-					{
-						Source: "github",
-						Owner:  "marwanhawari",
-						Repo:   "ppath",
-						Tag:    "v0.0.3",
-						Asset:  "ppath-v0.0.3-darwin-arm64.tar.gz",
-						Binary: "ppath",
-						URL:    "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
-					},
-				},
+				Os:       "darwin",
+				Arch:     "arm64",
+				Packages: []PackageData{tt.pd},
 			}
+			rt := testsupport.NewRuntime(t, lockFile.Os, lockFile.Arch)
 
-			downloadedFilePath := filepath.Join(systemInfo.StewPkgPath, "ppath-v0.0.3-darwin-arm64.tar.gz")
-			err := DownloadFile(downloadedFilePath, "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz")
+			downloadedFilePath := filepath.Join(rt.PkgPath, tt.pd.Asset)
+			err := DownloadFile(rt, downloadedFilePath, tt.pd.URL)
 
 			if err != nil {
-				t.Errorf("Could not download file to %v", downloadedFilePath)
+				t.Fatalf("Could not download file to %v", downloadedFilePath)
 			}
 
-			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, true)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
+			install := Installation{
+				DownloadedFilePath: downloadedFilePath,
+				Repo:               tt.pd.Repo,
+				BatchMode:          tt.batch,
+				BinaryName:         tt.pd.Binary,
+			}
+			got, err := InstallBinary(rt, install, &lockFile, false)
+			if tt.wantErr != nil && reflect.TypeOf(tt.wantErr) != reflect.TypeOf(err) {
+				t.Fatalf("error\n"+
+					" got = %+v\n"+
+					"want = %+v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("InstallBinary() = %v, want %v", got, tt.want)
-			}
-
-		})
-	}
-}
-
-func TestInstallBinary_Fail(t *testing.T) {
-	tests := []struct {
-		name    string
-		want    string
-		wantErr bool
-	}{
-		{
-			name:    "test1",
-			want:    "",
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tempDir := t.TempDir()
-
-			repo := "ppath"
-
-			testStewConfig := StewConfig{
-				StewPath:    tempDir,
-				StewBinPath: filepath.Join(tempDir, "bin"),
-			}
-
-			systemInfo := NewSystemInfo(testStewConfig)
-			os.MkdirAll(systemInfo.StewBinPath, 0755)
-			os.MkdirAll(systemInfo.StewPkgPath, 0755)
-			os.MkdirAll(systemInfo.StewTmpPath, 0755)
-
-			lockFile := LockFile{
-				Os:   "darwin",
-				Arch: "arm64",
-				Packages: []PackageData{
-					{
-						Source: "github",
-						Owner:  "marwanhawari",
-						Repo:   "ppath",
-						Tag:    "v0.0.3",
-						Asset:  "ppath-v0.0.3-darwin-arm64.tar.gz",
-						Binary: "ppath",
-						URL:    "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
-					},
-				},
-			}
-
-			downloadedFilePath := filepath.Join(systemInfo.StewPkgPath, "ppath-v0.0.3-darwin-arm64.tar.gz")
-			err := DownloadFile(downloadedFilePath, "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz")
-
-			if err != nil {
-				t.Errorf("Could not download file to %v", downloadedFilePath)
-			}
-
-			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, false)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("InstallBinary() = %v, want %v", got, tt.want)
-			}
-
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

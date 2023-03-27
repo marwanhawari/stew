@@ -9,17 +9,34 @@ import (
 )
 
 func main() {
+	// yesFlag is a flag that can be used to skip the confirmation prompts.
+	var yesFlag cli.Flag = cli.BoolFlag{
+		Name:  "yes, y",
+		Usage: "answer all prompts with yes, or default value",
+	}
 
 	app := &cli.App{
 		Name:    "stew",
 		Version: "v0.3.0",
 		Commands: []cli.Command{
 			{
-				Name:    "install",
-				Usage:   "Install a binary. The input can be a GitHub repo or a URL. [Ex: stew install marwanhawari/ppath]",
+				Name:  "install",
+				Usage: "Install a binary.",
+				ArgsUsage: `<owner>/<repo>(@tag)(::asset)(!!binary) | <url> | <Stewfile> | <Stewfile.lock.json> ...
+
+The input can be a GitHub repo or a URL. You can pass multiple inputs.
+You can also use a Stewfile or Stewfile.lock.json files.
+
+EXAMPLES:
+    stew install marwanhawari/ppath
+    stew install marwanhawari/ppath@v0.0.3::ppath-v0.0.3-linux-amd64.tar.gz!!ppath
+    stew install marwanhawari/ppath knative/client!!kn
+    stew install Stewfile
+`,
 				Aliases: []string{"i"},
+				Flags:   []cli.Flag{yesFlag},
 				Action: func(c *cli.Context) error {
-					cmd.Install(c.Args())
+					cmd.Install(c.Args(), c.Bool("yes"))
 					return nil
 				},
 			},

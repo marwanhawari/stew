@@ -1,21 +1,16 @@
 package cmd
 
 import (
-	"fmt"
-
 	stew "github.com/marwanhawari/stew/lib"
+	"github.com/marwanhawari/stew/lib/config"
+	"github.com/marwanhawari/stew/lib/errs"
 )
 
-// List is executed when you run `stew list`
+// List is executed when you run `stew list`.
 func List(cliTagsFlag bool, cliAssetsFlag bool) {
+	rt := errs.Strip(config.Initialize())
 
-	userOS, userArch, _, systemInfo, err := stew.Initialize()
-	stew.CatchAndExit(err)
-
-	stewLockFilePath := systemInfo.StewLockFilePath
-
-	lockFile, err := stew.NewLockFile(stewLockFilePath, userOS, userArch)
-	stew.CatchAndExit(err)
+	lockFile := errs.Strip(stew.NewLockFile(rt))
 
 	if len(lockFile.Packages) == 0 {
 		return
@@ -24,14 +19,14 @@ func List(cliTagsFlag bool, cliAssetsFlag bool) {
 	for _, pkg := range lockFile.Packages {
 		switch pkg.Source {
 		case "other":
-			fmt.Println(pkg.URL)
+			rt.Println(pkg.URL)
 		case "github":
 			if !cliTagsFlag && !cliAssetsFlag {
-				fmt.Println(pkg.Owner + "/" + pkg.Repo)
+				rt.Println(pkg.Owner + "/" + pkg.Repo)
 			} else if cliTagsFlag && !cliAssetsFlag {
-				fmt.Println(pkg.Owner + "/" + pkg.Repo + "@" + pkg.Tag)
+				rt.Println(pkg.Owner + "/" + pkg.Repo + "@" + pkg.Tag)
 			} else {
-				fmt.Println(pkg.Owner + "/" + pkg.Repo + "@" + pkg.Tag + "::" + pkg.Asset)
+				rt.Println(pkg.Owner + "/" + pkg.Repo + "@" + pkg.Tag + "::" + pkg.Asset + "!!" + pkg.Binary)
 			}
 		}
 	}

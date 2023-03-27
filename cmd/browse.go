@@ -1,77 +1,78 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/marwanhawari/stew/constants"
 	stew "github.com/marwanhawari/stew/lib"
+	"github.com/marwanhawari/stew/lib/config"
+	"github.com/marwanhawari/stew/lib/errs"
+	"github.com/marwanhawari/stew/lib/pathutil"
+	"github.com/marwanhawari/stew/lib/ui/progress"
+	"github.com/marwanhawari/stew/lib/ui/prompt"
 )
 
 // Browse is executed when you run `stew browse`
 func Browse(cliInput string) {
+	rt := errs.Strip(config.Initialize())
 
-	userOS, userArch, _, systemInfo, err := stew.Initialize()
-	stew.CatchAndExit(err)
+	sp := progress.Spinner(rt)
 
-	sp := constants.LoadingSpinner
+	stewBinPath := rt.StewBinPath
+	stewPkgPath := rt.PkgPath
+	stewLockFilePath := rt.LockPath
+	stewTmpPath := rt.TmpPath
 
-	stewBinPath := systemInfo.StewBinPath
-	stewPkgPath := systemInfo.StewPkgPath
-	stewLockFilePath := systemInfo.StewLockFilePath
-	stewTmpPath := systemInfo.StewTmpPath
-
-	parsedInput, err := stew.ParseCLIInput(cliInput)
-	stew.CatchAndExit(err)
+	parsedInput := errs.Strip(stew.ParseCLIInput(cliInput))
 
 	owner := parsedInput.Owner
 	repo := parsedInput.Repo
 
-	lockFile, err := stew.NewLockFile(stewLockFilePath, userOS, userArch)
-	stew.CatchAndExit(err)
+	lockFile := errs.Strip(stew.NewLockFile(rt))
 
-	err = os.RemoveAll(stewTmpPath)
-	stew.CatchAndExit(err)
-	err = os.MkdirAll(stewTmpPath, 0755)
-	stew.CatchAndExit(err)
+	errs.MaybeExit(os.RemoveAll(stewTmpPath))
+	errs.MaybeExit(os.MkdirAll(stewTmpPath, 0o755))
 
-	fmt.Println(constants.GreenColor(owner + "/" + repo))
+	rt.Println(constants.GreenColor(owner + "/" + repo))
 	sp.Start()
-	githubProject, err := stew.NewGithubProject(owner, repo)
+	githubProject := errs.Strip(stew.NewGithubProject(rt.Config, owner, repo))
 	sp.Stop()
-	stew.CatchAndExit(err)
 
-	releaseTags, err := stew.GetGithubReleasesTags(githubProject)
-	stew.CatchAndExit(err)
-	tag, err := stew.PromptSelect("Choose a release tag:", releaseTags)
-	stew.CatchAndExit(err)
+	releaseTags := errs.Strip(stew.GetGithubReleasesTags(githubProject))
+	tag := errs.Strip(prompt.Select(rt, "Choose a release tag:", releaseTags))
 	tagIndex, _ := stew.Contains(releaseTags, tag)
 
-	releaseAssets, err := stew.GetGithubReleasesAssets(githubProject, tag)
-	stew.CatchAndExit(err)
-	asset, err := stew.PromptSelect("Download and install an asset", releaseAssets)
-	stew.CatchAndExit(err)
+	releaseAssets := errs.Strip(stew.GetGithubReleasesAssets(githubProject, tag))
+	asset := errs.Strip(prompt.Select(rt, "Download and install an asset", releaseAssets))
 	assetIndex, _ := stew.Contains(releaseAssets, asset)
 
 	downloadURL := githubProject.Releases[tagIndex].Assets[assetIndex].DownloadURL
 	downloadPath := filepath.Join(stewPkgPath, asset)
-	downloadPathExists, err := stew.PathExists(downloadPath)
-	stew.CatchAndExit(err)
+	downloadPathExists := errs.Strip(pathutil.Exists(downloadPath))
 
 	if downloadPathExists {
-		stew.CatchAndExit(stew.AssetAlreadyDownloadedError{Asset: asset})
+		errs.MaybeExit(stew.AssetAlreadyDownloadedError{Asset: asset})
 	} else {
-		err = stew.DownloadFile(downloadPath, downloadURL)
-		stew.CatchAndExit(err)
-		fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
+		errs.MaybeExit(stew.DownloadFile(rt, downloadPath, downloadURL))
+		rt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
 	}
 
-	binaryName, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, false)
-	if err != nil {
-		os.RemoveAll(downloadPath)
-		stew.CatchAndExit(err)
-	}
+	binaryName := func() string {
+		var (
+			binaryName string
+			err        error
+		)
+		if binaryName, err = stew.InstallBinary(rt, stew.Installation{
+			DownloadedFilePath: downloadPath,
+			Repo:               repo,
+			BinaryName:         parsedInput.BinaryName,
+		}, &lockFile, false); err != nil {
+			errs.MaybeExit(os.RemoveAll(downloadPath))
+			errs.MaybeExit(err)
+		}
+		return binaryName
+	}()
 
 	packageData := stew.PackageData{
 		Source: "github",
@@ -85,9 +86,9 @@ func Browse(cliInput string) {
 
 	lockFile.Packages = append(lockFile.Packages, packageData)
 
-	err = stew.WriteLockFileJSON(lockFile, stewLockFilePath)
-	stew.CatchAndExit(err)
+	errs.MaybeExit(stew.WriteLockFileJSON(rt, lockFile, stewLockFilePath))
 
-	fmt.Printf("✨ Successfully installed the %v binary in %v\n", constants.GreenColor(binaryName), constants.GreenColor(stewBinPath))
+	rt.Printf("✨ Successfully installed the %v binary in %v\n",
+		constants.GreenColor(binaryName), constants.GreenColor(stewBinPath))
 
 }
