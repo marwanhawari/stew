@@ -10,31 +10,31 @@ var testGithubRelease0 GithubRelease = GithubRelease{
 	Assets: []GithubAsset{
 		{
 			Name:        "checksums.txt",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/checksums.txt",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/52676090",
 			Size:        394,
 			ContentType: "text/plain; charset=utf-8",
 		},
 		{
 			Name:        "ppath-v0.0.3-darwin-amd64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-amd64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/52676089",
 			Size:        626448,
 			ContentType: "application/gzip",
 		},
 		{
 			Name:        "ppath-v0.0.3-darwin-arm64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/52676091",
 			Size:        625832,
 			ContentType: "application/gzip",
 		},
 		{
 			Name:        "ppath-v0.0.3-linux-amd64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-linux-amd64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/52676093",
 			Size:        567449,
 			ContentType: "application/gzip",
 		},
 		{
 			Name:        "ppath-v0.0.3-linux-arm64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-linux-arm64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/52676092",
 			Size:        529321,
 			ContentType: "application/gzip",
 		},
@@ -45,25 +45,25 @@ var testGithubRelease1 GithubRelease = GithubRelease{
 	Assets: []GithubAsset{
 		{
 			Name:        "ppath-v0.0.2-darwin-amd64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.2/ppath-v0.0.2-darwin-amd64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/52647309",
 			Size:        1139147,
 			ContentType: "application/x-gtar",
 		},
 		{
 			Name:        "ppath-v0.0.2-darwin-arm64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.2/ppath-v0.0.2-darwin-arm64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/52647324",
 			Size:        1100483,
 			ContentType: "application/x-gtar",
 		},
 		{
 			Name:        "ppath-v0.0.2-linux-amd64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.2/ppath-v0.0.2-linux-amd64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/52647307",
 			Size:        1092421,
 			ContentType: "application/x-gtar",
 		},
 		{
 			Name:        "ppath-v0.0.2-linux-arm64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.2/ppath-v0.0.2-linux-arm64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/52647308",
 			Size:        1012554,
 			ContentType: "application/x-gtar",
 		},
@@ -74,25 +74,25 @@ var testGithubRelease2 GithubRelease = GithubRelease{
 	Assets: []GithubAsset{
 		{
 			Name:        "ppath-v0.0.1-darwin-amd64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.1/ppath-v0.0.1-darwin-amd64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/51111591",
 			Size:        1139366,
 			ContentType: "application/x-gtar",
 		},
 		{
 			Name:        "ppath-v0.0.1-darwin-arm64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.1/ppath-v0.0.1-darwin-arm64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/51111587",
 			Size:        1101013,
 			ContentType: "application/x-gtar",
 		},
 		{
 			Name:        "ppath-v0.0.1-linux-amd64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.1/ppath-v0.0.1-linux-amd64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/51111593",
 			Size:        1093728,
 			ContentType: "application/x-gtar",
 		},
 		{
 			Name:        "ppath-v0.0.1-linux-arm64.tar.gz",
-			DownloadURL: "https://github.com/marwanhawari/ppath/releases/download/v0.0.1/ppath-v0.0.1-linux-arm64.tar.gz",
+			DownloadURL: "https://api.github.com/repos/marwanhawari/ppath/releases/assets/51111599",
 			Size:        1014337,
 			ContentType: "application/x-gtar",
 		},

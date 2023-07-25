@@ -60,7 +60,21 @@ func PathExists(path string) (bool, error) {
 func DownloadFile(downloadPath string, url string) error {
 	sp := constants.LoadingSpinner
 	sp.Start()
-	resp, err := http.Get(url)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+
+	if strings.Contains(url, "api.github.com") {
+		req.Header.Add("Accept", "application/octet-stream")
+		githubToken := os.Getenv("GITHUB_TOKEN")
+		if githubToken != "" {
+			req.Header.Add("Authorization", fmt.Sprintf("token %v", githubToken))
+		}
+	}
+
+	resp, err := client.Do(req)
 	sp.Stop()
 
 	if err != nil {
