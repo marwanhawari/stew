@@ -176,7 +176,7 @@ func DetectAsset(userOS string, userArch string, releaseAssets []string) (string
 			}
 		}
 		if finalAsset == "" {
-			finalAsset, err = WarningPromptSelect("Could not automatically detect the release asset matching your OS/Arch. Please select it manually:", releaseAssets)
+			finalAsset, err = PromptSelect("Could not automatically detect the release asset matching your OS/Arch. Please select it manually:", releaseAssets)
 			if err != nil {
 				return "", err
 			}

@@ -177,7 +177,7 @@ func getBinary(filePaths []string, repo string) (string, string, error) {
 			binaryFile = executableFiles[0]
 			binaryName = filepath.Base(binaryFile)
 		} else if len(executableFiles) != 1 {
-			binaryFile, err = WarningPromptSelect("Could not automatically detect the binary. Please select it manually:", filePaths)
+			binaryFile, err = PromptSelect("Could not automatically detect the binary. Please select it manually:", filePaths)
 			if err != nil {
 				return "", "", err
 			}
@@ -332,7 +332,7 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 		var overwrite bool
 		if pkg.Binary == binaryName {
 			if !overwriteFromUpgrade {
-				overwrite, err = WarningPromptConfirm(fmt.Sprintf("The binary %v version: %v is already installed, would you like to overwrite it?", constants.YellowColor(binaryName), constants.YellowColor(pkg.Tag)))
+				overwrite, err = PromptConfirm(fmt.Sprintf("The binary %v version: %v is already installed, would you like to overwrite it?", constants.YellowColor(binaryName), constants.YellowColor(pkg.Tag)))
 				if err != nil {
 					os.RemoveAll(newAssetPath)
 					return "", err
@@ -385,7 +385,7 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 
 // PromptRenameBinary takes in the original name of the binary and will return the new name of the binary.
 func PromptRenameBinary(originalBinaryName string) (string, error) {
-	renamedBinaryName, err := warningPromptInput("Rename the binary?", originalBinaryName)
+	renamedBinaryName, err := PromptInput("Rename the binary?", originalBinaryName)
 	if err != nil {
 		return "", err
 	}

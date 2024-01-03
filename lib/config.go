@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/charmbracelet/huh"
 	"github.com/marwanhawari/stew/constants"
 )
 
@@ -237,14 +238,23 @@ func Initialize() (string, string, StewConfig, SystemInfo, error) {
 }
 
 // PromptConfig launches an interactive UI for setting the stew config values. It returns the resolved stewPath and stewBinPath.
-func PromptConfig(suggestedStewPath, suggestedStewBinPath string) (string, string, error) {
-	inputStewPath, err := PromptInput("Set the stewPath. This will contain all stew data other than the binaries.", suggestedStewPath)
+func PromptConfig(inputStewPath, inputStewBinPath string) (string, string, error) {
+	stewPathPrompt := "Set the stewPath. This will contain all stew data other than the binaries."
+	stewBinPathPrompt := "Set the stewBinPath. This is where the binaries will be installed by stew."
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewInput().
+				Title(stewPathPrompt).
+				Value(&inputStewPath),
+			huh.NewInput().
+				Title(stewBinPathPrompt).
+				Value(&inputStewBinPath),
+		),
+	)
+	err := form.Run()
 	if err != nil {
-		return "", "", err
-	}
-	inputStewBinPath, err := PromptInput("Set the stewBinPath. This is where the binaries will be installed by stew.", suggestedStewBinPath)
-	if err != nil {
-		return "", "", err
+		return "", "", ExitUserSelectionError{Err: err}
 	}
 
 	fullStewPath, err := ResolvePath(inputStewPath)
