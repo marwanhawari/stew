@@ -3,12 +3,14 @@ module github.com/marwanhawari/stew
 go 1.21
 
 require (
+	github.com/agiledragon/gomonkey/v2 v2.11.0
 	github.com/briandowns/spinner v1.18.0
 	github.com/charmbracelet/bubbles v0.17.1
 	github.com/charmbracelet/huh v0.2.4-0.20231222231237-4bd4657a36ac
 	github.com/gookit/color v1.5.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/schollz/progressbar/v3 v3.8.5
+	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli v1.22.5
 )
 
@@ -23,6 +25,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.9.1 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/fatih/color v1.7.0 // indirect
@@ -43,6 +46,7 @@ require (
 	github.com/nwaples/rardecode v1.1.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
@@ -57,4 +61,6 @@ require (
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
