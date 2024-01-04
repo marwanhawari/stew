@@ -2,7 +2,7 @@ package stew
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -34,7 +34,7 @@ func getHTTPResponseBody(url string) (string, error) {
 		return "", NonZeroStatusCodeError{res.StatusCode}
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", err
 	}

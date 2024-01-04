@@ -4,9 +4,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetHTTPResponseBody(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
 	type Test struct {
 		name    string
 		server  *httptest.Server
@@ -42,12 +47,12 @@ func TestGetHTTPResponseBody(t *testing.T) {
 			defer test.server.Close()
 
 			got, err := getHTTPResponseBody(test.server.URL)
-			if (err != nil) != test.wantErr {
-				t.Errorf("getHTTPResponseBody() error = %v, wantErr %v", err, test.wantErr)
-				return
-			}
-			if got != test.want {
-				t.Errorf("getHTTPResponseBody() = %v, want %v", got, test.want)
+			if test.wantErr {
+				require.Error(err, "Expected an error but got none")
+				assert.IsType(test.err, err, "Error type mismatch")
+			} else {
+				require.NoError(err, "Unexpected error")
+				assert.Equal(test.want, got, "Response body mismatch")
 			}
 		})
 	}
