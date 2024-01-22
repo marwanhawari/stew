@@ -1,11 +1,11 @@
 package stew
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var testLockfile LockFile = LockFile{
@@ -106,6 +106,7 @@ func Test_readLockFileJSON(t *testing.T) {
 			wantErr: false,
 		},
 	}
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
@@ -113,12 +114,11 @@ func Test_readLockFileJSON(t *testing.T) {
 			WriteLockFileJSON(testLockfile, lockFilePath)
 
 			got, err := readLockFileJSON(lockFilePath)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("readLockFileJSON() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("readLockFileJSON() = %v, want %v", got, tt.want)
+			if tt.wantErr {
+				assert.Error(err, "Expected an error")
+			} else {
+				assert.NoError(err, "Did not expect an error")
+				assert.Equal(tt.want, got, "Mismatch in lock file content")
 			}
 		})
 	}
@@ -134,21 +134,21 @@ func TestWriteLockFileJSON(t *testing.T) {
 			wantErr: false,
 		},
 	}
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
 
-			if err := WriteLockFileJSON(testLockfile, lockFilePath); (err != nil) != tt.wantErr {
-				t.Errorf("WriteLockFileJSON() error = %v, wantErr %v", err, tt.wantErr)
+			err := WriteLockFileJSON(testLockfile, lockFilePath)
+			if tt.wantErr {
+				assert.Error(err, "Expected an error")
+			} else {
+				assert.NoError(err, "Did not expect an error")
+
+				got, _ := readLockFileJSON(lockFilePath)
+				assert.Equal(testLockfile, got, "Mismatch in written and read lock file")
 			}
-
-			got, _ := readLockFileJSON(lockFilePath)
-
-			if !reflect.DeepEqual(got, testLockfile) {
-				t.Errorf("WriteLockFileJSON() = %v, want %v", got, testLockfile)
-			}
-
 		})
 	}
 }
@@ -204,6 +204,7 @@ func TestRemovePackage(t *testing.T) {
 			wantErr: true,
 		},
 	}
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var testLockfilePackages []PackageData
@@ -214,12 +215,11 @@ func TestRemovePackage(t *testing.T) {
 			}
 
 			got, err := RemovePackage(testLockfilePackages, tt.args.index)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("RemovePackage() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("RemovePackage() = %v, want %v", got, tt.want)
+			if tt.wantErr {
+				assert.Error(err, "Expected an error")
+			} else {
+				assert.NoError(err, "Did not expect an error")
+				assert.Equal(tt.want, got, "Mismatch in package data")
 			}
 		})
 	}
@@ -237,20 +237,19 @@ func TestReadStewfileContents(t *testing.T) {
 			wantErr: false,
 		},
 	}
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			tempDir := t.TempDir()
 			testStewfilePath := filepath.Join(tempDir, "Stewfile")
-			ioutil.WriteFile(testStewfilePath, []byte(testStewfileContents), 0644)
+			os.WriteFile(testStewfilePath, []byte(testStewfileContents), 0644)
 
 			got, err := ReadStewfileContents(testStewfilePath)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ReadStewfileContents() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ReadStewfileContents() = %v, want %v", got, tt.want)
+			if tt.wantErr {
+				assert.Error(err, "Expected an error")
+			} else {
+				assert.NoError(err, "Did not expect an error")
+				assert.Equal(tt.want, got, "Mismatch in stewfile contents")
 			}
 		})
 	}
@@ -268,20 +267,19 @@ func TestReadStewLockFileContents(t *testing.T) {
 			wantErr: false,
 		},
 	}
-
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			testStewLockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
-			ioutil.WriteFile(testStewLockFilePath, []byte(testStewLockFileContents), 0644)
+			os.WriteFile(testStewLockFilePath, []byte(testStewLockFileContents), 0644)
 
 			got, err := ReadStewLockFileContents(testStewLockFilePath)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ReadStewLockFileContents() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ReadStewLockFileContents() = %v, want %v", got, tt.want)
+			if tt.wantErr {
+				assert.Error(err, "Expected an error")
+			} else {
+				assert.NoError(err, "Did not expect an error")
+				assert.Equal(tt.want, got, "Mismatch in stewlock file contents")
 			}
 		})
 	}
@@ -308,20 +306,19 @@ func TestNewLockFile(t *testing.T) {
 			wantErr: false,
 		},
 	}
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			tempDir := t.TempDir()
 			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
 			WriteLockFileJSON(testLockfile, lockFilePath)
 
 			got, err := NewLockFile(lockFilePath, tt.args.userOS, tt.args.userArch)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewLockFile() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewLockFile() = %v, want %v", got, tt.want)
+			if tt.wantErr {
+				assert.Error(err, "Expected an error")
+			} else {
+				assert.NoError(err, "Did not expect an error")
+				assert.Equal(tt.want, got, "Mismatch in lock file creation")
 			}
 		})
 	}
@@ -346,20 +343,19 @@ func TestNewLockFileDoesntExist(t *testing.T) {
 			wantErr: false,
 		},
 	}
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			tempDir := t.TempDir()
 			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
 
 			got, err := NewLockFile(lockFilePath, tt.args.userOS, tt.args.userArch)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewLockFile() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			want := LockFile{Os: tt.args.userOS, Arch: tt.args.userArch, Packages: []PackageData{}}
-			if !reflect.DeepEqual(got, want) {
-				t.Errorf("NewLockFile() = %v, want %v", got, want)
+			if tt.wantErr {
+				assert.Error(err, "Expected an error")
+			} else {
+				assert.NoError(err, "Did not expect an error")
+				want := LockFile{Os: tt.args.userOS, Arch: tt.args.userArch, Packages: []PackageData{}}
+				assert.Equal(want, got, "Mismatch in new lock file creation")
 			}
 		})
 	}
@@ -373,6 +369,7 @@ func TestNewSystemInfo(t *testing.T) {
 			name: "test1",
 		},
 	}
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
@@ -391,9 +388,7 @@ func TestNewSystemInfo(t *testing.T) {
 			}
 
 			got := NewSystemInfo(testStewConfig)
-			if !reflect.DeepEqual(got, testSystemInfo) {
-				t.Errorf("NewSystemInfo() = %v, want %v", got, testSystemInfo)
-			}
+			assert.Equal(testSystemInfo, got, "Mismatch in system info creation")
 		})
 	}
 }
@@ -408,6 +403,7 @@ func TestDeleteAssetAndBinary(t *testing.T) {
 			wantErr: false,
 		},
 	}
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
@@ -416,27 +412,23 @@ func TestDeleteAssetAndBinary(t *testing.T) {
 			os.MkdirAll(filepath.Join(tempDir, "bin"), 0755)
 			testStewBinaryPath := filepath.Join(tempDir, "bin", "testBinary")
 
-			ioutil.WriteFile(testStewAssetPath, []byte("This is a test asset"), 0644)
-			ioutil.WriteFile(testStewBinaryPath, []byte("This is a test binary"), 0644)
+			os.WriteFile(testStewAssetPath, []byte("This is a test asset"), 0644)
+			os.WriteFile(testStewBinaryPath, []byte("This is a test binary"), 0644)
 
 			assetExists, _ := PathExists(testStewAssetPath)
 			binaryExists, _ := PathExists(testStewBinaryPath)
+			assert.True(assetExists && binaryExists, "Either the asset or the binary does not exist yet")
 
-			if !assetExists || !binaryExists {
-				t.Errorf("Either the asset or the binary does not exist yet")
+			err := DeleteAssetAndBinary(filepath.Dir(testStewAssetPath), filepath.Dir(testStewBinaryPath), filepath.Base(testStewAssetPath), filepath.Base(testStewBinaryPath))
+			if tt.wantErr {
+				assert.Error(err, "Expected an error")
+			} else {
+				assert.NoError(err, "Did not expect an error")
+
+				assetExists, _ = PathExists(testStewAssetPath)
+				binaryExists, _ = PathExists(testStewBinaryPath)
+				assert.False(assetExists || binaryExists, "Either the binary or the asset still exists")
 			}
-
-			if err := DeleteAssetAndBinary(filepath.Dir(testStewAssetPath), filepath.Dir(testStewBinaryPath), filepath.Base(testStewAssetPath), filepath.Base(testStewBinaryPath)); (err != nil) != tt.wantErr {
-				t.Errorf("DeleteAssetAndBinary() error = %v, wantErr %v", err, tt.wantErr)
-			}
-
-			assetExists, _ = PathExists(testStewAssetPath)
-			binaryExists, _ = PathExists(testStewBinaryPath)
-
-			if assetExists || binaryExists {
-				t.Errorf("Either the binary or the asset still exists")
-			}
-
 		})
 	}
 }

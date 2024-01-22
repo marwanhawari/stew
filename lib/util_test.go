@@ -1,11 +1,12 @@
 package stew
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_isArchiveFile(t *testing.T) {
@@ -32,11 +33,11 @@ func Test_isArchiveFile(t *testing.T) {
 			want: true,
 		},
 	}
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isArchiveFile(tt.args.filePath); got != tt.want {
-				t.Errorf("isArchiveFile() = %v, want %v", got, tt.want)
-			}
+			got := isArchiveFile(tt.args.filePath)
+			assert.Equal(tt.want, got, "isArchiveFile() mismatch")
 		})
 	}
 }
@@ -68,23 +69,23 @@ func Test_isExecutableFile(t *testing.T) {
 			wantErr: false,
 		},
 	}
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			testExecutableFilePath := filepath.Join(tempDir, tt.args.filePath)
 			if tt.want {
-				ioutil.WriteFile(testExecutableFilePath, []byte("An executable file"), 0755)
+				os.WriteFile(testExecutableFilePath, []byte("An executable file"), 0755)
 			} else {
-				ioutil.WriteFile(testExecutableFilePath, []byte("Not an executable file"), 0644)
+				os.WriteFile(testExecutableFilePath, []byte("Not an executable file"), 0644)
 			}
 
 			got, err := isExecutableFile(testExecutableFilePath)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("isExecutableFile() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("isExecutableFile() = %v, want %v", got, tt.want)
+			if tt.wantErr {
+				assert.Error(err, "Expected an error")
+			} else {
+				assert.NoError(err, "Did not expect an error")
+				assert.Equal(tt.want, got, "isExecutableFile() mismatch")
 			}
 		})
 	}
@@ -117,21 +118,21 @@ func TestPathExists(t *testing.T) {
 			wantErr: false,
 		},
 	}
+	assert := assert.New(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			testFilePath := filepath.Join(tempDir, tt.args.path)
 			if tt.want {
-				ioutil.WriteFile(testFilePath, []byte("A test file"), 0644)
+				os.WriteFile(testFilePath, []byte("A test file"), 0644)
 			}
 
 			got, err := PathExists(testFilePath)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("PathExists() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("PathExists() = %v, want %v", got, tt.want)
+			if tt.wantErr {
+				assert.Error(err, "Expected an error")
+			} else {
+				assert.NoError(err, "Did not expect an error")
+				assert.Equal(tt.want, got, "PathExists() mismatch")
 			}
 		})
 	}
@@ -202,7 +203,7 @@ func Test_copyFile(t *testing.T) {
 			srcFilePath := filepath.Join(tempDir, tt.args.srcFile)
 			destFilePath := filepath.Join(tempDir, tt.args.destFile)
 
-			ioutil.WriteFile(srcFilePath, []byte("A test file"), 0644)
+			os.WriteFile(srcFilePath, []byte("A test file"), 0644)
 
 			srcExists, _ := PathExists(srcFilePath)
 			destExists, _ := PathExists(destFilePath)
@@ -244,9 +245,9 @@ func Test_walkDir(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 
-			ioutil.WriteFile(filepath.Join(tempDir, "testFile.txt"), []byte("A test file"), 0644)
+			os.WriteFile(filepath.Join(tempDir, "testFile.txt"), []byte("A test file"), 0644)
 			os.MkdirAll(filepath.Join(tempDir, "bin"), 0755)
-			ioutil.WriteFile(filepath.Join(tempDir, "bin", "binDirTestFile.txt"), []byte("Another test file"), 0644)
+			os.WriteFile(filepath.Join(tempDir, "bin", "binDirTestFile.txt"), []byte("Another test file"), 0644)
 
 			want := []string{filepath.Join(tempDir, "bin", "binDirTestFile.txt"), filepath.Join(tempDir, "testFile.txt")}
 
@@ -302,9 +303,9 @@ func Test_getBinary(t *testing.T) {
 			tempDir := t.TempDir()
 
 			testBinaryFilePath := filepath.Join(tempDir, tt.binaryName)
-			ioutil.WriteFile(testBinaryFilePath, []byte("An executable file"), 0755)
+			os.WriteFile(testBinaryFilePath, []byte("An executable file"), 0755)
 			testNonBinaryFilePath := filepath.Join(tempDir, "testNonBinary")
-			ioutil.WriteFile(testNonBinaryFilePath, []byte("Not an executable file"), 0644)
+			os.WriteFile(testNonBinaryFilePath, []byte("Not an executable file"), 0644)
 
 			testFilePaths := []string{testBinaryFilePath, testNonBinaryFilePath}
 
@@ -350,7 +351,7 @@ func Test_getBinaryError(t *testing.T) {
 			tempDir := t.TempDir()
 
 			testNonBinaryFilePath := filepath.Join(tempDir, "testNonBinary")
-			ioutil.WriteFile(testNonBinaryFilePath, []byte("Not an executable file"), 0644)
+			os.WriteFile(testNonBinaryFilePath, []byte("Not an executable file"), 0644)
 
 			testFilePaths := []string{testNonBinaryFilePath}
 

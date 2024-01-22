@@ -79,7 +79,7 @@ func Install(cliInputs []string) {
 			// Need to make sure user input tag is in the tags
 			tagIndex, tagFound := stew.Contains(releaseTags, tag)
 			if !tagFound {
-				tag, err = stew.WarningPromptSelect(fmt.Sprintf("Could not find a release with the tag %v - please select a release:", constants.YellowColor(tag)), releaseTags)
+				tag, err = stew.PromptSelect(fmt.Sprintf("Could not find a release with the tag %v - please select a release:", constants.YellowColor(tag)), releaseTags)
 				stew.CatchAndExit(err)
 				tagIndex, _ = stew.Contains(releaseTags, tag)
 			}
@@ -95,7 +95,7 @@ func Install(cliInputs []string) {
 
 			assetIndex, assetFound := stew.Contains(releaseAssets, asset)
 			if !assetFound {
-				asset, err = stew.WarningPromptSelect(fmt.Sprintf("Could not find the asset %v - please select an asset:", constants.YellowColor(asset)), releaseAssets)
+				asset, err = stew.PromptSelect(fmt.Sprintf("Could not find the asset %v - please select an asset:", constants.YellowColor(asset)), releaseAssets)
 				stew.CatchAndExit(err)
 				assetIndex, _ = stew.Contains(releaseAssets, asset)
 			}

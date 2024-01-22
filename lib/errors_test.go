@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"github.com/marwanhawari/stew/constants"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNonZeroStatusCodeError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		StatusCode int
 	}
@@ -30,14 +32,13 @@ func TestNonZeroStatusCodeError_Error(t *testing.T) {
 			e := NonZeroStatusCodeError{
 				StatusCode: tt.fields.StatusCode,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("NonZeroStatusCodeError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestReleasesNotFoundError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		Owner string
 		Repo  string
@@ -62,14 +63,13 @@ func TestReleasesNotFoundError_Error(t *testing.T) {
 				Owner: tt.fields.Owner,
 				Repo:  tt.fields.Repo,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("ReleasesNotFoundError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestAssetsNotFoundError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		Tag string
 	}
@@ -91,14 +91,13 @@ func TestAssetsNotFoundError_Error(t *testing.T) {
 			e := AssetsNotFoundError{
 				Tag: tt.fields.Tag,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("AssetsNotFoundError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestNoPackagesInLockfileError_Error(t *testing.T) {
+	assert := assert.New(t)
 	tests := []struct {
 		name string
 		want string
@@ -111,14 +110,13 @@ func TestNoPackagesInLockfileError_Error(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := NoPackagesInLockfileError{}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("NoPackagesInLockfileError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestIndexOutOfBoundsInLockfileError_Error(t *testing.T) {
+	assert := assert.New(t)
 	tests := []struct {
 		name string
 		want string
@@ -131,14 +129,13 @@ func TestIndexOutOfBoundsInLockfileError_Error(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := IndexOutOfBoundsInLockfileError{}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("IndexOutOfBoundsInLockfileError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestExitUserSelectionError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		Err error
 	}
@@ -160,14 +157,13 @@ func TestExitUserSelectionError_Error(t *testing.T) {
 			e := ExitUserSelectionError{
 				Err: tt.fields.Err,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("ExitUserSelectionError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestStewpathNotFoundError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		StewPath string
 	}
@@ -189,14 +185,13 @@ func TestStewpathNotFoundError_Error(t *testing.T) {
 			e := StewpathNotFoundError{
 				StewPath: tt.fields.StewPath,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("StewpathNotFoundError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestNonZeroStatusCodeDownloadError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		StatusCode int
 	}
@@ -218,14 +213,13 @@ func TestNonZeroStatusCodeDownloadError_Error(t *testing.T) {
 			e := NonZeroStatusCodeDownloadError{
 				StatusCode: tt.fields.StatusCode,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("NonZeroStatusCodeDownloadError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestEmptyCLIInputError_Error(t *testing.T) {
+	assert := assert.New(t)
 	tests := []struct {
 		name string
 		want string
@@ -238,14 +232,13 @@ func TestEmptyCLIInputError_Error(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := EmptyCLIInputError{}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("EmptyCLIInputError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestCLIFlagAndInputError_Error(t *testing.T) {
+	assert := assert.New(t)
 	tests := []struct {
 		name string
 		want string
@@ -258,14 +251,13 @@ func TestCLIFlagAndInputError_Error(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := CLIFlagAndInputError{}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("CLIFlagAndInputError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestAssetAlreadyDownloadedError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		Asset string
 	}
@@ -287,14 +279,13 @@ func TestAssetAlreadyDownloadedError_Error(t *testing.T) {
 			e := AssetAlreadyDownloadedError{
 				Asset: tt.fields.Asset,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("AssetAlreadyDownloadedError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestAbortBinaryOverwriteError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		Binary string
 	}
@@ -316,14 +307,13 @@ func TestAbortBinaryOverwriteError_Error(t *testing.T) {
 			e := AbortBinaryOverwriteError{
 				Binary: tt.fields.Binary,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("AbortBinaryOverwriteError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestBinaryNotInstalledError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		Binary string
 	}
@@ -345,14 +335,13 @@ func TestBinaryNotInstalledError_Error(t *testing.T) {
 			e := BinaryNotInstalledError{
 				Binary: tt.fields.Binary,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("BinaryNotInstalledError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestNoBinariesInstalledError_Error(t *testing.T) {
+	assert := assert.New(t)
 	tests := []struct {
 		name string
 		want string
@@ -365,14 +354,13 @@ func TestNoBinariesInstalledError_Error(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := NoBinariesInstalledError{}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("NoBinariesInstalledError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestUnrecognizedInputError_Error(t *testing.T) {
+	assert := assert.New(t)
 	tests := []struct {
 		name string
 		want string
@@ -385,14 +373,13 @@ func TestUnrecognizedInputError_Error(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := UnrecognizedInputError{}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("UnrecognizedInputError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestInstalledFromURLError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		Binary string
 	}
@@ -414,14 +401,13 @@ func TestInstalledFromURLError_Error(t *testing.T) {
 			e := InstalledFromURLError{
 				Binary: tt.fields.Binary,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("InstalledFromURLError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestAlreadyInstalledLatestTagError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		Tag string
 	}
@@ -443,14 +429,13 @@ func TestAlreadyInstalledLatestTagError_Error(t *testing.T) {
 			e := AlreadyInstalledLatestTagError{
 				Tag: tt.fields.Tag,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("AlreadyInstalledLatestTagError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestNoGithubSearchResultsError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		SearchQuery string
 	}
@@ -472,14 +457,13 @@ func TestNoGithubSearchResultsError_Error(t *testing.T) {
 			e := NoGithubSearchResultsError{
 				SearchQuery: tt.fields.SearchQuery,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("NoGithubSearchResultsError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
 
 func TestInvalidGithubSearchQueryError_Error(t *testing.T) {
+	assert := assert.New(t)
 	type fields struct {
 		SearchQuery string
 	}
@@ -501,9 +485,7 @@ func TestInvalidGithubSearchQueryError_Error(t *testing.T) {
 			e := InvalidGithubSearchQueryError{
 				SearchQuery: tt.fields.SearchQuery,
 			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("InvalidGithubSearchQueryError.Error() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(tt.want, e.Error())
 		})
 	}
 }
