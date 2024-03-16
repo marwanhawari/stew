@@ -25,9 +25,16 @@ func Test_isArchiveFile(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "test1",
+			name: "test2",
 			args: args{
 				filePath: "Archive.tar.gz",
+			},
+			want: true,
+		},
+		{
+			name: "test3",
+			args: args{
+				filePath: "Archive.tgz",
 			},
 			want: true,
 		},

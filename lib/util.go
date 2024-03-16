@@ -16,7 +16,7 @@ import (
 
 func isArchiveFile(filePath string) bool {
 	fileExtension := filepath.Ext(filePath)
-	if fileExtension == ".br" || fileExtension == ".bz2" || fileExtension == ".zip" || fileExtension == ".gz" || fileExtension == ".lz4" || fileExtension == ".sz" || fileExtension == ".xz" || fileExtension == ".zst" || fileExtension == ".tar" || fileExtension == ".rar" {
+	if fileExtension == ".br" || fileExtension == ".bz2" || fileExtension == ".zip" || fileExtension == ".gz" || fileExtension == ".lz4" || fileExtension == ".sz" || fileExtension == ".xz" || fileExtension == ".zst" || fileExtension == ".tar" || fileExtension == ".rar" || fileExtension == ".tgz" {
 		return true
 	}
 	return false
