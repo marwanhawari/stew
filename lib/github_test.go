@@ -582,7 +582,7 @@ var testGithubSearch GithubSearch = GithubSearch{
 	},
 }
 
-var testFormattedSearchResults = []string{"marwanhawari/ppath [⭐️7]  🌈 A command-line tool to pretty print your system's PATH environment variable."}
+var testFormattedSearchResults = []string{"marwanhawari/ppath [⭐️7] 🌈 A command-line tool to pretty print your system's PATH environment variable."}
 
 func Test_getGithubSearchJSON(t *testing.T) {
 	type args struct {
