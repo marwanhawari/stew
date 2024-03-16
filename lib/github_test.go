@@ -576,7 +576,7 @@ var testGithubSearch GithubSearch = GithubSearch{
 		{
 			FullName:    "marwanhawari/ppath",
 			Stars:       7,
-			Language:    "JavaScript",
+			Language:    "Go",
 			Description: "🌈 A command-line tool to pretty print your system's PATH environment variable.",
 		},
 	},
