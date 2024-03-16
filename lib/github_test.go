@@ -555,34 +555,34 @@ func Test_darwinARMFallback(t *testing.T) {
 	}
 }
 
-var testGithubSearchJSON, _ = getGithubSearchJSON("marwanhawari/pacing.app")
+var testGithubSearchJSON, _ = getGithubSearchJSON("marwanhawari/ppath")
 
 var testGithubSearchReadJSON GithubSearch = GithubSearch{
 	Count: 1,
 	Items: []GithubSearchResult{
 		{
-			FullName:    "marwanhawari/pacing.app",
-			Stars:       0,
-			Language:    "JavaScript",
-			Description: "⏱ A simple and intuitive website for calculating your running pace.",
+			FullName:    "marwanhawari/ppath",
+			Stars:       7,
+			Language:    "Go",
+			Description: "🌈 A command-line tool to pretty print your system's PATH environment variable.",
 		},
 	},
 }
 
 var testGithubSearch GithubSearch = GithubSearch{
-	SearchQuery: "marwanhawari/pacing.app",
+	SearchQuery: "marwanhawari/ppath",
 	Count:       1,
 	Items: []GithubSearchResult{
 		{
-			FullName:    "marwanhawari/pacing.app",
-			Stars:       0,
+			FullName:    "marwanhawari/ppath",
+			Stars:       7,
 			Language:    "JavaScript",
-			Description: "⏱ A simple and intuitive website for calculating your running pace.",
+			Description: "🌈 A command-line tool to pretty print your system's PATH environment variable.",
 		},
 	},
 }
 
-var testFormattedSearchResults = []string{"marwanhawari/pacing.app [⭐️0] ⏱ A simple and intuitive website for calculating your running pace."}
+var testFormattedSearchResults = []string{"marwanhawari/ppath [⭐️7]  🌈 A command-line tool to pretty print your system's PATH environment variable."}
 
 func Test_getGithubSearchJSON(t *testing.T) {
 	type args struct {
@@ -597,7 +597,7 @@ func Test_getGithubSearchJSON(t *testing.T) {
 		{
 			name: "test1",
 			args: args{
-				searchQuery: "marwanhawari/pacing.app",
+				searchQuery: "marwanhawari/ppath",
 			},
 			want:    testGithubSearchJSON,
 			wantErr: false,
@@ -671,7 +671,7 @@ func TestNewGithubSearch(t *testing.T) {
 		{
 			name: "test1",
 			args: args{
-				searchQuery: "marwanhawari/pacing.app",
+				searchQuery: "marwanhawari/ppath",
 			},
 			want:    testGithubSearch,
 			wantErr: false,
