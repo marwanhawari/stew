@@ -10,14 +10,14 @@ import (
 )
 
 // Upgrade is executed when you run `stew upgrade`
-func Upgrade(cliFlag bool, binaryName string) {
+func Upgrade(upgradeAllCliFlag bool, binaryName string) {
 
 	userOS, userArch, _, systemInfo, err := stew.Initialize()
 	stew.CatchAndExit(err)
 
-	if cliFlag && binaryName != "" {
+	if upgradeAllCliFlag && binaryName != "" {
 		stew.CatchAndExit(stew.CLIFlagAndInputError{})
-	} else if !cliFlag {
+	} else if !upgradeAllCliFlag {
 		err := stew.ValidateCLIInput(binaryName)
 		stew.CatchAndExit(err)
 	}
@@ -42,7 +42,7 @@ func Upgrade(cliFlag bool, binaryName string) {
 
 	var binaryFound bool
 	for index, pkg := range lockFile.Packages {
-		shouldUpgradePackage := (cliFlag || pkg.Binary == binaryName)
+		shouldUpgradePackage := (upgradeAllCliFlag || pkg.Binary == binaryName)
 		if !shouldUpgradePackage {
 			continue
 		}
@@ -110,7 +110,7 @@ func Upgrade(cliFlag bool, binaryName string) {
 
 		fmt.Printf("✨ Successfully upgraded the %v binary from %v to %v\n", constants.GreenColor(pkg.Binary), constants.GreenColor(pkg.Tag), constants.GreenColor(tag))
 	}
-	if !cliFlag && !binaryFound {
+	if !upgradeAllCliFlag && !binaryFound {
 		stew.CatchAndExit(stew.BinaryNotInstalledError{Binary: binaryName})
 	}
 }
