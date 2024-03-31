@@ -42,78 +42,73 @@ func Upgrade(cliFlag bool, binaryName string) {
 
 	var binaryFound bool
 	for index, pkg := range lockFile.Packages {
+		shouldUpgradePackage := (cliFlag || pkg.Binary == binaryName)
+		if !shouldUpgradePackage {
+			continue
+		}
+		fmt.Println(constants.GreenColor(pkg.Binary))
+		binaryFound = true
 
-		var upgradeCondition bool
-		if cliFlag || pkg.Binary == binaryName {
-			upgradeCondition = true
+		if pkg.Source == "other" {
+			fmt.Println(stew.InstalledFromURLError{Binary: pkg.Binary})
+			continue
+		}
+		owner := pkg.Owner
+		repo := pkg.Repo
+
+		sp.Start()
+		githubProject, err := stew.NewGithubProject(owner, repo)
+		sp.Stop()
+		stew.CatchAndExit(err)
+
+		// This will make sure that there are any tags at all
+		_, err = stew.GetGithubReleasesTags(githubProject)
+		stew.CatchAndExit(err)
+
+		// Get the latest tag
+		tagIndex := 0
+		tag := githubProject.Releases[tagIndex].TagName
+
+		if pkg.Tag == tag {
+			fmt.Println(stew.AlreadyInstalledLatestTagError{Tag: tag})
+			continue
 		}
 
-		if upgradeCondition {
-			fmt.Println(constants.GreenColor(pkg.Binary))
-			binaryFound = true
+		// Make sure there are any assets at all
+		releaseAssets, err := stew.GetGithubReleasesAssets(githubProject, tag)
+		stew.CatchAndExit(err)
 
-			if pkg.Source == "other" {
-				fmt.Println(stew.InstalledFromURLError{Binary: pkg.Binary})
-				continue
-			}
-			owner := pkg.Owner
-			repo := pkg.Repo
+		asset, err := stew.DetectAsset(userOS, userArch, releaseAssets)
+		stew.CatchAndExit(err)
+		assetIndex, _ := stew.Contains(releaseAssets, asset)
 
-			sp.Start()
-			githubProject, err := stew.NewGithubProject(owner, repo)
-			sp.Stop()
+		downloadURL := githubProject.Releases[tagIndex].Assets[assetIndex].DownloadURL
+
+		downloadPath := filepath.Join(stewPkgPath, asset)
+		downloadPathExists, err := stew.PathExists(downloadPath)
+		stew.CatchAndExit(err)
+		if downloadPathExists {
+			stew.CatchAndExit(stew.AssetAlreadyDownloadedError{Asset: asset})
+		} else {
+			err = stew.DownloadFile(downloadPath, downloadURL)
 			stew.CatchAndExit(err)
-
-			// This will make sure that there are any tags at all
-			_, err = stew.GetGithubReleasesTags(githubProject)
-			stew.CatchAndExit(err)
-
-			// Get the latest tag
-			tagIndex := 0
-			tag := githubProject.Releases[tagIndex].TagName
-
-			if pkg.Tag == tag {
-				fmt.Println(stew.AlreadyInstalledLatestTagError{Tag: tag})
-				continue
-			}
-
-			// Make sure there are any assets at all
-			releaseAssets, err := stew.GetGithubReleasesAssets(githubProject, tag)
-			stew.CatchAndExit(err)
-
-			asset, err := stew.DetectAsset(userOS, userArch, releaseAssets)
-			stew.CatchAndExit(err)
-			assetIndex, _ := stew.Contains(releaseAssets, asset)
-
-			downloadURL := githubProject.Releases[tagIndex].Assets[assetIndex].DownloadURL
-
-			downloadPath := filepath.Join(stewPkgPath, asset)
-			downloadPathExists, err := stew.PathExists(downloadPath)
-			stew.CatchAndExit(err)
-			if downloadPathExists {
-				stew.CatchAndExit(stew.AssetAlreadyDownloadedError{Asset: asset})
-			} else {
-				err = stew.DownloadFile(downloadPath, downloadURL)
-				stew.CatchAndExit(err)
-				fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
-			}
-
-			_, err = stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, true)
-			if err != nil {
-				os.RemoveAll(downloadPath)
-				stew.CatchAndExit(err)
-			}
-
-			lockFile.Packages[index].Tag = tag
-			lockFile.Packages[index].Asset = asset
-			lockFile.Packages[index].URL = downloadURL
-
-			err = stew.WriteLockFileJSON(lockFile, stewLockFilePath)
-			stew.CatchAndExit(err)
-
-			fmt.Printf("✨ Successfully upgraded the %v binary from %v to %v\n", constants.GreenColor(pkg.Binary), constants.GreenColor(pkg.Tag), constants.GreenColor(tag))
-
+			fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
 		}
+
+		_, err = stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, true)
+		if err != nil {
+			os.RemoveAll(downloadPath)
+			stew.CatchAndExit(err)
+		}
+
+		lockFile.Packages[index].Tag = tag
+		lockFile.Packages[index].Asset = asset
+		lockFile.Packages[index].URL = downloadURL
+
+		err = stew.WriteLockFileJSON(lockFile, stewLockFilePath)
+		stew.CatchAndExit(err)
+
+		fmt.Printf("✨ Successfully upgraded the %v binary from %v to %v\n", constants.GreenColor(pkg.Binary), constants.GreenColor(pkg.Tag), constants.GreenColor(tag))
 	}
 	if !cliFlag && !binaryFound {
 		stew.CatchAndExit(stew.BinaryNotInstalledError{Binary: binaryName})
