@@ -197,7 +197,6 @@ func ValidateCLIInput(cliInput string) error {
 	if cliInput == "" {
 		return EmptyCLIInputError{}
 	}
-
 	return nil
 }
 
@@ -271,7 +270,7 @@ func parseURLInput(cliInput string) (CLIInput, error) {
 }
 
 // Contains checks if a string slice contains a given target
-func Contains(slice []string, target string) (int, bool) {
+func Contains[T comparable](slice []T, target T) (int, bool) {
 	for index, element := range slice {
 		if target == element {
 			return index, true
