@@ -110,7 +110,7 @@ func Install(cliInputs []string) {
 		downloadPathExists, err := stew.PathExists(downloadPath)
 		stew.CatchAndExit(err)
 		if downloadPathExists {
-			fmt.Println(stew.AssetAlreadyDownloadedError{Asset: asset})
+			fmt.Fprintln(os.Stderr, stew.AssetAlreadyDownloadedError{Asset: asset})
 			continue
 		} else {
 			err = stew.DownloadFile(downloadPath, downloadURL)

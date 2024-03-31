@@ -50,7 +50,7 @@ func Upgrade(cliFlag bool, binaryName string) {
 		binaryFound = true
 
 		if pkg.Source == "other" {
-			fmt.Println(stew.InstalledFromURLError{Binary: pkg.Binary})
+			fmt.Fprintln(os.Stderr, stew.InstalledFromURLError{Binary: pkg.Binary})
 			continue
 		}
 		owner := pkg.Owner
@@ -70,7 +70,7 @@ func Upgrade(cliFlag bool, binaryName string) {
 		tag := githubProject.Releases[tagIndex].TagName
 
 		if pkg.Tag == tag {
-			fmt.Println(stew.AlreadyInstalledLatestTagError{Tag: tag})
+			fmt.Fprintln(os.Stderr, stew.AlreadyInstalledLatestTagError{Tag: tag})
 			continue
 		}
 

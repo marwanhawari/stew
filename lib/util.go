@@ -37,7 +37,7 @@ func isExecutableFile(filePath string) (bool, error) {
 // CatchAndExit will catch errors and immediately exit
 func CatchAndExit(err error) {
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
