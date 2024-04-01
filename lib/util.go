@@ -351,14 +351,16 @@ func handleExistingBinary(lockFile *LockFile, binaryName, newlyDownloadedAssetPa
 			return AbortBinaryOverwriteError{Binary: binaryName}
 		}
 	}
-	return overwriteBinary(lockFile, indexInLockFile, stewPkgPath, overwriteFromUpgrade)
+	return overwriteBinary(lockFile, indexInLockFile, newlyDownloadedAssetPath, stewPkgPath, overwriteFromUpgrade)
 }
 
-func overwriteBinary(lockFile *LockFile, indexInLockFile int, stewPkgPath string, overwriteFromUpgrade bool) error {
+func overwriteBinary(lockFile *LockFile, indexInLockFile int, newlyDownloadedAssetPath, stewPkgPath string, overwriteFromUpgrade bool) error {
 	pkg := lockFile.Packages[indexInLockFile]
 	previousAssetPath := filepath.Join(stewPkgPath, pkg.Asset)
-	if err := os.RemoveAll(previousAssetPath); err != nil {
-		return err
+	if previousAssetPath != newlyDownloadedAssetPath {
+		if err := os.RemoveAll(previousAssetPath); err != nil {
+			return err
+		}
 	}
 	// If not overwriting as part of an upgrade, remove the package entry from the lock file
 	// This is because the upgrade command will update the package entry in place
