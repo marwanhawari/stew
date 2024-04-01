@@ -27,10 +27,8 @@ func isExecutableFile(filePath string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
 	filePerm := fileInfo.Mode()
 	isExecutable := filePerm&0111 != 0
-
 	return isExecutable, nil
 }
 
@@ -45,14 +43,12 @@ func CatchAndExit(err error) {
 // PathExists checks if a given path exists
 func PathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
-
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
 		return false, err
 	}
-
 	return true, nil
 }
 
@@ -129,12 +125,7 @@ func copyFile(srcFile, destFile string) error {
 		return err
 	}
 
-	err = os.Chmod(destFile, 0755)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return os.Chmod(destFile, 0755)
 }
 
 func walkDir(rootDir string) ([]string, error) {
@@ -279,6 +270,15 @@ func Contains[T comparable](slice []T, target T) (int, bool) {
 	return -1, false
 }
 
+func FindBinaryInLockFile(lockFile LockFile, binaryName string) (int, bool) {
+	for index, pkg := range lockFile.Packages {
+		if pkg.Binary == binaryName {
+			return index, true
+		}
+	}
+	return -1, false
+}
+
 func extractBinary(downloadedFilePath, tmpExtractionPath string) error {
 	isArchive := isArchiveFile(downloadedFilePath)
 	if isArchive {
@@ -286,31 +286,20 @@ func extractBinary(downloadedFilePath, tmpExtractionPath string) error {
 		if err != nil {
 			return err
 		}
-
-	} else {
-		originalBinaryName := filepath.Base(downloadedFilePath)
-
-		renamedBinaryName, err := PromptRenameBinary(originalBinaryName)
-		if err != nil {
-			return err
-		}
-		err = copyFile(downloadedFilePath, filepath.Join(tmpExtractionPath, renamedBinaryName))
-		if err != nil {
-			return err
-		}
+		return nil
 	}
-	return nil
+	originalBinaryName := filepath.Base(downloadedFilePath)
+	renamedBinaryName, err := PromptRenameBinary(originalBinaryName)
+	if err != nil {
+		return err
+	}
+	return copyFile(downloadedFilePath, filepath.Join(tmpExtractionPath, renamedBinaryName))
 }
 
 // InstallBinary will extract the binary and copy it to the ~/.stew/bin path
 func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo, lockFile *LockFile, overwriteFromUpgrade bool) (string, error) {
-
-	tmpExtractionPath := systemInfo.StewTmpPath
-	assetDownloadPath := systemInfo.StewPkgPath
-	binaryInstallPath := systemInfo.StewBinPath
-
-	err := extractBinary(downloadedFilePath, tmpExtractionPath)
-	if err != nil {
+	tmpExtractionPath, stewPkgPath, binaryInstallPath := systemInfo.StewTmpPath, systemInfo.StewPkgPath, systemInfo.StewBinPath
+	if err := extractBinary(downloadedFilePath, tmpExtractionPath); err != nil {
 		return "", err
 	}
 
@@ -319,57 +308,16 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 		return "", err
 	}
 
-	binaryFile, binaryName, err := getBinary(allFilePaths, repo)
+	binaryFileInTmpExtractionPath, binaryName, err := getBinary(allFilePaths, repo)
 	if err != nil {
 		return "", err
 	}
 
-	// Check if the binary already exists
-	for index, pkg := range lockFile.Packages {
-		previousAssetPath := filepath.Join(assetDownloadPath, pkg.Asset)
-		newAssetPath := downloadedFilePath
-		var overwrite bool
-		if pkg.Binary == binaryName {
-			if !overwriteFromUpgrade {
-				overwrite, err = WarningPromptConfirm(fmt.Sprintf("The binary %v version: %v is already installed, would you like to overwrite it?", constants.YellowColor(binaryName), constants.YellowColor(pkg.Tag)))
-				if err != nil {
-					os.RemoveAll(newAssetPath)
-					return "", err
-				}
-			} else {
-				overwrite = true
-			}
-
-			if overwrite {
-				err := os.RemoveAll(previousAssetPath)
-				if err != nil {
-					return "", err
-				}
-
-				if !overwriteFromUpgrade {
-					lockFile.Packages, err = RemovePackage(lockFile.Packages, index)
-					if err != nil {
-						return "", err
-					}
-				}
-
-			} else {
-				err = os.RemoveAll(newAssetPath)
-				if err != nil {
-					return "", err
-				}
-
-				err = os.RemoveAll(tmpExtractionPath)
-				if err != nil {
-					return "", err
-				}
-
-				return "", AbortBinaryOverwriteError{Binary: pkg.Binary}
-			}
-		}
+	if err = handleExistingBinary(lockFile, binaryName, downloadedFilePath, stewPkgPath, overwriteFromUpgrade); err != nil {
+		return "", err
 	}
 
-	err = copyFile(binaryFile, filepath.Join(binaryInstallPath, binaryName))
+	err = copyFile(binaryFileInTmpExtractionPath, filepath.Join(binaryInstallPath, binaryName))
 	if err != nil {
 		return "", err
 	}
@@ -380,6 +328,49 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 	}
 
 	return binaryName, nil
+}
+
+func handleExistingBinary(lockFile *LockFile, binaryName, newlyDownloadedAssetPath, stewPkgPath string, overwriteFromUpgrade bool) error {
+	indexInLockFile, binaryFoundInLockFile := FindBinaryInLockFile(*lockFile, binaryName)
+	if !binaryFoundInLockFile {
+		return nil
+	}
+	pkg := lockFile.Packages[indexInLockFile]
+	if !overwriteFromUpgrade {
+		userChoosingToOverwrite, err := WarningPromptConfirm(fmt.Sprintf("The binary %v version: %v is already installed, would you like to overwrite it?", constants.YellowColor(binaryName), constants.YellowColor(pkg.Tag)))
+		if err != nil {
+			if err := os.RemoveAll(newlyDownloadedAssetPath); err != nil {
+				return err
+			}
+			return err
+		}
+		if !userChoosingToOverwrite {
+			if err := os.RemoveAll(newlyDownloadedAssetPath); err != nil {
+				return err
+			}
+			return AbortBinaryOverwriteError{Binary: binaryName}
+		}
+	}
+	return overwriteBinary(lockFile, indexInLockFile, stewPkgPath, overwriteFromUpgrade)
+}
+
+func overwriteBinary(lockFile *LockFile, indexInLockFile int, stewPkgPath string, overwriteFromUpgrade bool) error {
+	pkg := lockFile.Packages[indexInLockFile]
+	previousAssetPath := filepath.Join(stewPkgPath, pkg.Asset)
+	if err := os.RemoveAll(previousAssetPath); err != nil {
+		return err
+	}
+	// If not overwriting as part of an upgrade, remove the package entry from the lock file
+	// This is because the upgrade command will update the package entry in place
+	// but the install command will add a new package entry
+	if !overwriteFromUpgrade {
+		var err error
+		lockFile.Packages, err = RemovePackage(lockFile.Packages, indexInLockFile)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // PromptRenameBinary takes in the original name of the binary and will return the new name of the binary.
