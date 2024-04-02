@@ -1,25 +1,29 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"os"
 
+	"github.com/urfave/cli/v3"
+
 	"github.com/marwanhawari/stew/cmd"
-	"github.com/urfave/cli"
+	stew "github.com/marwanhawari/stew/lib"
 )
 
 func main() {
-
-	app := &cli.App{
-		Name:    "stew",
-		Version: "v0.3.0",
-		Commands: []cli.Command{
+	app := &cli.Command{
+		Name:                  "stew",
+		EnableShellCompletion: true,
+		Version:               "v0.3.0",
+		Commands: []*cli.Command{
 			{
 				Name:    "install",
 				Usage:   "Install a binary. The input can be a GitHub repo or a URL. [Ex: stew install marwanhawari/ppath]",
 				Aliases: []string{"i"},
-				Action: func(c *cli.Context) error {
-					cmd.Install(c.Args())
+				Action: func(ctx context.Context, c *cli.Command) error {
+					cmd.Install(c.Args().Slice())
 					return nil
 				},
 			},
@@ -27,7 +31,7 @@ func main() {
 				Name:    "search",
 				Usage:   "Search for a GitHub repo then browse the selected repo's releases and assets. [Ex: stew search ripgrep]",
 				Aliases: []string{"s"},
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					cmd.Search(c.Args().First())
 					return nil
 				},
@@ -36,7 +40,7 @@ func main() {
 				Name:    "browse",
 				Usage:   "Browse the releases and assets from a GitHub repo. [Ex: stew browse marwanhawari/ppath]",
 				Aliases: []string{"b"},
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					cmd.Browse(c.Args().First())
 					return nil
 				},
@@ -51,7 +55,8 @@ func main() {
 						Usage: "Upgrade all binaries",
 					},
 				},
-				Action: func(c *cli.Context) error {
+				ShellComplete: listInstalledBinaries,
+				Action: func(ctx context.Context, c *cli.Command) error {
 					cmd.Upgrade(c.Bool("all"), c.Args().First())
 					return nil
 				},
@@ -66,16 +71,18 @@ func main() {
 						Usage: "Uninstall all binaries",
 					},
 				},
-				Action: func(c *cli.Context) error {
+				ShellComplete: listInstalledBinaries,
+				Action: func(ctx context.Context, c *cli.Command) error {
 					cmd.Uninstall(c.Bool("all"), c.Args().First())
 					return nil
 				},
 			},
 			{
-				Name:    "rename",
-				Usage:   "Rename an installed binary using an interactive UI. [Ex: stew rename fzf]",
-				Aliases: []string{"re"},
-				Action: func(c *cli.Context) error {
+				Name:          "rename",
+				Usage:         "Rename an installed binary using an interactive UI. [Ex: stew rename fzf]",
+				Aliases:       []string{"re"},
+				ShellComplete: listInstalledBinaries,
+				Action: func(ctx context.Context, c *cli.Command) error {
 					cmd.Rename(c.Args().First())
 					return nil
 				},
@@ -90,7 +97,7 @@ func main() {
 						Usage: "include the version tags",
 					},
 				},
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					cmd.List(c.Bool("tags"))
 					return nil
 				},
@@ -98,7 +105,7 @@ func main() {
 			{
 				Name:  "config",
 				Usage: "Configure the stew file paths using an interactive UI. [Ex: stew config]",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					cmd.Config()
 					return nil
 				},
@@ -106,9 +113,22 @@ func main() {
 		},
 	}
 
-	err := app.Run(os.Args)
-	if err != nil {
+	if err := app.Run(context.Background(), os.Args); err != nil {
 		log.Fatal(err)
 	}
+}
 
+func listInstalledBinaries(ctx context.Context, cmd *cli.Command) {
+	userOS, userArch, _, systemInfo, err := stew.Initialize()
+	stew.CatchAndExit(err)
+
+	stewLockFilePath := systemInfo.StewLockFilePath
+
+	lockFile, err := stew.NewLockFile(stewLockFilePath, userOS, userArch)
+	if err != nil {
+		return // no lockfile
+	}
+	for _, pkg := range lockFile.Packages {
+		fmt.Println(pkg.Binary)
+	}
 }
