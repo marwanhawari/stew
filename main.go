@@ -89,13 +89,9 @@ func main() {
 						Name:  "tags",
 						Usage: "include the version tags",
 					},
-					&cli.BoolFlag{
-						Name:  "assets",
-						Usage: "include the assets and version tags",
-					},
 				},
 				Action: func(c *cli.Context) error {
-					cmd.List(c.Bool("tags"), c.Bool("assets"))
+					cmd.List(c.Bool("tags"))
 					return nil
 				},
 			},

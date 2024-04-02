@@ -505,20 +505,6 @@ func Test_parseGithubInput(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		{
-			name: "test3",
-			args: args{
-				cliInput: "marwanhawari/ppath@v0.0.3::ppath-v0.0.3-linux-amd64.tar.gz",
-			},
-			want: CLIInput{
-				IsGithubInput: true,
-				Owner:         "marwanhawari",
-				Repo:          "ppath",
-				Tag:           "v0.0.3",
-				Asset:         "ppath-v0.0.3-linux-amd64.tar.gz",
-			},
-			wantErr: false,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

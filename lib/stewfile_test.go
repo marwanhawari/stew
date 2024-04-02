@@ -89,8 +89,8 @@ var testStewLockFileContents string = `{
 `
 
 var testStewLockFileSlice []string = []string{
-	"cli/cli@v2.4.0::gh_2.4.0_macOS_amd64.tar.gz",
-	"junegunn/fzf@0.29.0::fzf-0.29.0-darwin_arm64.zip",
+	"cli/cli@v2.4.0",
+	"junegunn/fzf@0.29.0",
 	"https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz",
 }
 
