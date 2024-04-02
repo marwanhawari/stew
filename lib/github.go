@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/marwanhawari/stew/constants"
 )
@@ -122,6 +123,17 @@ func assetsFound(releaseAssets []string, releaseTag string) error {
 	return nil
 }
 
+func filterReleaseAssets(assets []string) []string {
+	var filteredAssets []string
+	for _, asset := range assets {
+		if strings.HasSuffix(asset, ".sha256") {
+			continue
+		}
+		filteredAssets = append(filteredAssets, asset)
+	}
+	return filteredAssets
+}
+
 // DetectAsset will automatically detect a release asset matching your systems OS/arch or prompt you to manually select an asset
 func DetectAsset(userOS string, userArch string, releaseAssets []string) (string, error) {
 	var detectedOSAssets []string
@@ -139,7 +151,8 @@ func DetectAsset(userOS string, userArch string, releaseAssets []string) (string
 		return "", err
 	}
 
-	for _, asset := range releaseAssets {
+	filteredReleaseAssets := filterReleaseAssets(releaseAssets)
+	for _, asset := range filteredReleaseAssets {
 		if reOS.MatchString(asset) {
 			detectedOSAssets = append(detectedOSAssets, asset)
 		}
@@ -176,7 +189,7 @@ func DetectAsset(userOS string, userArch string, releaseAssets []string) (string
 			}
 		}
 		if finalAsset == "" {
-			finalAsset, err = WarningPromptSelect("Could not automatically detect the release asset matching your OS/Arch. Please select it manually:", releaseAssets)
+			finalAsset, err = WarningPromptSelect("Could not automatically detect the release asset matching your OS/Arch. Please select it manually:", filteredReleaseAssets)
 			if err != nil {
 				return "", err
 			}
