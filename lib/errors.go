@@ -93,15 +93,6 @@ func (e CLIFlagAndInputError) Error() string {
 	return fmt.Sprintf("%v Cannot use the --all flag with a positional argument", constants.RedColor("Error:"))
 }
 
-// AssetAlreadyDownloadedError occurs if the requested asset has already been downloaded
-type AssetAlreadyDownloadedError struct {
-	Asset string
-}
-
-func (e AssetAlreadyDownloadedError) Error() string {
-	return fmt.Sprintf("%v The %v asset has already been downloaded and installed", constants.RedColor("Error:"), constants.RedColor(e.Asset))
-}
-
 // AbortBinaryOverwriteError occurs if the overwrite of a binary is aborted
 type AbortBinaryOverwriteError struct {
 	Binary string

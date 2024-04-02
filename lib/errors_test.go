@@ -265,35 +265,6 @@ func TestCLIFlagAndInputError_Error(t *testing.T) {
 	}
 }
 
-func TestAssetAlreadyDownloadedError_Error(t *testing.T) {
-	type fields struct {
-		Asset string
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   string
-	}{
-		{
-			name: "test1",
-			fields: fields{
-				Asset: "testAsset",
-			},
-			want: fmt.Sprintf("%v The %v asset has already been downloaded and installed", constants.RedColor("Error:"), constants.RedColor("testAsset")),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			e := AssetAlreadyDownloadedError{
-				Asset: tt.fields.Asset,
-			}
-			if got := e.Error(); got != tt.want {
-				t.Errorf("AssetAlreadyDownloadedError.Error() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestAbortBinaryOverwriteError_Error(t *testing.T) {
 	type fields struct {
 		Binary string
