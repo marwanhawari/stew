@@ -19,7 +19,7 @@ func main() {
 				Usage:   "Install a binary. The input can be a GitHub repo or a URL. [Ex: stew install marwanhawari/ppath]",
 				Aliases: []string{"i"},
 				Action: func(c *cli.Context) error {
-					cmd.Install(c.Args())
+					cmd.Install(c.Args().First())
 					return nil
 				},
 			},

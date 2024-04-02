@@ -11,24 +11,21 @@ import (
 )
 
 // Install is executed when you run `stew install`
-func Install(cliInputs []string) {
+func Install(cliInput string) {
 	var err error
 
 	userOS, userArch, _, systemInfo, err := stew.Initialize()
 	stew.CatchAndExit(err)
 
-	for _, cliInput := range cliInputs {
-		if strings.Contains(cliInput, "Stewfile.lock.json") {
-			cliInputs, err = stew.ReadStewLockFileContents(cliInput)
-			stew.CatchAndExit(err)
-			break
-		}
-
-		if strings.Contains(cliInput, "Stewfile") {
-			cliInputs, err = stew.ReadStewfileContents(cliInput)
-			stew.CatchAndExit(err)
-			break
-		}
+	var cliInputs []string
+	if strings.Contains(cliInput, "Stewfile.lock.json") {
+		cliInputs, err = stew.ReadStewLockFileContents(cliInput)
+		stew.CatchAndExit(err)
+	} else if strings.Contains(cliInput, "Stewfile") {
+		cliInputs, err = stew.ReadStewfileContents(cliInput)
+		stew.CatchAndExit(err)
+	} else {
+		cliInputs = append(cliInputs, cliInput)
 	}
 
 	if len(cliInputs) == 0 {
