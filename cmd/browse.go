@@ -56,16 +56,9 @@ func Browse(cliInput string) {
 
 	downloadURL := githubProject.Releases[tagIndex].Assets[assetIndex].DownloadURL
 	downloadPath := filepath.Join(stewPkgPath, asset)
-	downloadPathExists, err := stew.PathExists(downloadPath)
+	err = stew.DownloadFile(downloadPath, downloadURL)
 	stew.CatchAndExit(err)
-
-	if downloadPathExists {
-		stew.CatchAndExit(stew.AssetAlreadyDownloadedError{Asset: asset})
-	} else {
-		err = stew.DownloadFile(downloadPath, downloadURL)
-		stew.CatchAndExit(err)
-		fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
-	}
+	fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
 
 	binaryName, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, false)
 	if err != nil {
