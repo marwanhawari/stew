@@ -111,7 +111,7 @@ func ReadStewLockFileContents(lockFilePath string) ([]string, error) {
 		case "other":
 			packages = append(packages, pkg.URL)
 		case "github":
-			path := fmt.Sprintf("%s/%s@%s::%s", pkg.Owner, pkg.Repo, pkg.Tag, pkg.Asset)
+			path := fmt.Sprintf("%s/%s@%s", pkg.Owner, pkg.Repo, pkg.Tag)
 			packages = append(packages, path)
 		}
 	}

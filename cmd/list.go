@@ -7,7 +7,7 @@ import (
 )
 
 // List is executed when you run `stew list`
-func List(cliTagsFlag bool, cliAssetsFlag bool) {
+func List(cliTagsFlag bool) {
 
 	userOS, userArch, _, systemInfo, err := stew.Initialize()
 	stew.CatchAndExit(err)
@@ -26,12 +26,10 @@ func List(cliTagsFlag bool, cliAssetsFlag bool) {
 		case "other":
 			fmt.Println(pkg.URL)
 		case "github":
-			if !cliTagsFlag && !cliAssetsFlag {
-				fmt.Println(pkg.Owner + "/" + pkg.Repo)
-			} else if cliTagsFlag && !cliAssetsFlag {
+			if cliTagsFlag {
 				fmt.Println(pkg.Owner + "/" + pkg.Repo + "@" + pkg.Tag)
 			} else {
-				fmt.Println(pkg.Owner + "/" + pkg.Repo + "@" + pkg.Tag + "::" + pkg.Asset)
+				fmt.Println(pkg.Owner + "/" + pkg.Repo)
 			}
 		}
 	}

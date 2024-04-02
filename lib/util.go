@@ -235,7 +235,7 @@ func ParseCLIInput(cliInput string) (CLIInput, error) {
 func parseGithubInput(cliInput string) (CLIInput, error) {
 	parsedInput := CLIInput{}
 	parsedInput.IsGithubInput = true
-	trimmedString := strings.Trim(strings.Trim(strings.Trim(strings.TrimSpace(cliInput), "/"), "@"), "::")
+	trimmedString := strings.Trim(strings.Trim(strings.TrimSpace(cliInput), "/"), "@")
 	splitInput := strings.SplitN(trimmedString, "@", 2)
 
 	ownerAndRepo := splitInput[0]
@@ -244,12 +244,7 @@ func parseGithubInput(cliInput string) (CLIInput, error) {
 	parsedInput.Repo = splitOwnerAndRepo[1]
 
 	if len(splitInput) == 2 {
-		tagAndAsset := splitInput[1]
-		splitTagAndAsset := strings.SplitN(tagAndAsset, "::", 2)
-		parsedInput.Tag = splitTagAndAsset[0]
-		if len(splitTagAndAsset) == 2 {
-			parsedInput.Asset = splitTagAndAsset[1]
-		}
+		parsedInput.Tag = splitInput[1]
 	}
 
 	return parsedInput, nil
