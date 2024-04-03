@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"slices"
 	"strings"
 
 	"github.com/mholt/archiver"
@@ -16,23 +15,9 @@ import (
 	"github.com/marwanhawari/stew/constants"
 )
 
-var archiveFileExtensions = []string{
-	".br",
-	".bz2",
-	".zip",
-	".gz",
-	".lz4",
-	".sz",
-	".xz",
-	".zst",
-	".tar",
-	".tgz",
-	".rar",
-}
-
 func isArchiveFile(filePath string) bool {
-	fileExtension := filepath.Ext(filePath)
-	return slices.Contains(archiveFileExtensions, fileExtension)
+	_, err := archiver.ByExtension(filePath)
+	return err == nil
 }
 
 func isExecutableFile(filePath string) (bool, error) {
