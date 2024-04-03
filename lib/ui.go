@@ -6,12 +6,18 @@ import (
 
 // PromptSelect launches the selection UI
 func PromptSelect(message string, options []string) (string, error) {
+	for i, option := range options {
+		max := 128
+		if len(option) > max {
+			options[i] = option[:max] + "..."
+		}
+	}
 	result := ""
 	err := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().Title(message).Options(
 				huh.NewOptions(options...)...,
-			).Value(&result),
+			).Height(10).Value(&result),
 		),
 	).Run()
 	if err != nil {
@@ -41,12 +47,18 @@ func PromptInput(message string, defaultInput string) (string, error) {
 
 // WarningPromptSelect launches the selection UI with a warning styling
 func WarningPromptSelect(message string, options []string) (string, error) {
+	for i, option := range options {
+		max := 128
+		if len(option) > max {
+			options[i] = option[:max] + "..."
+		}
+	}
 	result := ""
 	err := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().Title("! " + message).Options(
 				huh.NewOptions(options...)...,
-			).Value(&result),
+			).Height(10).Value(&result),
 		),
 	).Run()
 	if err != nil {
