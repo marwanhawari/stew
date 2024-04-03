@@ -1,5 +1,4 @@
-# Stew binary
-stew
+dist
 
 # Binaries for programs and plugins
 *.exe
