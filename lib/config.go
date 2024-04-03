@@ -3,7 +3,6 @@ package stew
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -14,7 +13,6 @@ import (
 
 // GetDefaultStewPath will return the default path to the top-level stew directory
 func GetDefaultStewPath(userOS string) (string, error) {
-
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
@@ -30,7 +28,6 @@ func GetDefaultStewPath(userOS string) (string, error) {
 			stewPath = filepath.Join(homeDir, ".local", "share", "stew")
 		} else {
 			stewPath = filepath.Join(xdgDataHomePath, "stew")
-
 		}
 	}
 
@@ -39,7 +36,6 @@ func GetDefaultStewPath(userOS string) (string, error) {
 
 // GetDefaultStewBinPath will return the default path where binaries are installed by stew
 func GetDefaultStewBinPath(userOS string) (string, error) {
-
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
@@ -59,7 +55,6 @@ func GetDefaultStewBinPath(userOS string) (string, error) {
 
 // GetStewConfigFilePath will return the stew config file path
 func GetStewConfigFilePath(userOS string) (string, error) {
-
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
@@ -88,8 +83,7 @@ type StewConfig struct {
 }
 
 func readStewConfigJSON(stewConfigFilePath string) (StewConfig, error) {
-
-	stewConfigFileBytes, err := ioutil.ReadFile(stewConfigFilePath)
+	stewConfigFileBytes, err := os.ReadFile(stewConfigFilePath)
 	if err != nil {
 		return StewConfig{}, err
 	}
@@ -105,13 +99,12 @@ func readStewConfigJSON(stewConfigFilePath string) (StewConfig, error) {
 
 // WriteStewConfigJSON will write the config JSON file
 func WriteStewConfigJSON(stewConfigFileJSON StewConfig, outputPath string) error {
-
 	stewConfigFileBytes, err := json.MarshalIndent(stewConfigFileJSON, "", "\t")
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(outputPath, stewConfigFileBytes, 0644)
+	err = os.WriteFile(outputPath, stewConfigFileBytes, 0644)
 	if err != nil {
 		return err
 	}
@@ -238,11 +231,17 @@ func Initialize() (string, string, StewConfig, SystemInfo, error) {
 
 // PromptConfig launches an interactive UI for setting the stew config values. It returns the resolved stewPath and stewBinPath.
 func PromptConfig(suggestedStewPath, suggestedStewBinPath string) (string, string, error) {
-	inputStewPath, err := PromptInput("Set the stewPath. This will contain all stew data other than the binaries.", suggestedStewPath)
+	inputStewPath, err := PromptInput(
+		"Set the stewPath. This will contain all stew data other than the binaries.",
+		suggestedStewPath,
+	)
 	if err != nil {
 		return "", "", err
 	}
-	inputStewBinPath, err := PromptInput("Set the stewBinPath. This is where the binaries will be installed by stew.", suggestedStewBinPath)
+	inputStewBinPath, err := PromptInput(
+		"Set the stewBinPath. This is where the binaries will be installed by stew.",
+		suggestedStewBinPath,
+	)
 	if err != nil {
 		return "", "", err
 	}
@@ -261,8 +260,16 @@ func PromptConfig(suggestedStewPath, suggestedStewBinPath string) (string, strin
 
 func ValidateStewBinPath(stewBinPath, pathVariable string) bool {
 	if !strings.Contains(pathVariable, stewBinPath) {
-		fmt.Printf("%v The stewBinPath %v is not in your PATH variable.\nYou need to add %v to PATH.\n", constants.YellowColor("WARNING:"), constants.YellowColor(stewBinPath), constants.YellowColor(stewBinPath))
-		fmt.Printf("Add the following line to your ~/.zshrc or ~/.bashrc file then start a new terminal session:\n\nexport PATH=\"%v:$PATH\"\n\n", stewBinPath)
+		fmt.Printf(
+			"%v The stewBinPath %v is not in your PATH variable.\nYou need to add %v to PATH.\n",
+			constants.YellowColor("WARNING:"),
+			constants.YellowColor(stewBinPath),
+			constants.YellowColor(stewBinPath),
+		)
+		fmt.Printf(
+			"Add the following line to your ~/.zshrc or ~/.bashrc file then start a new terminal session:\n\nexport PATH=\"%v:$PATH\"\n\n",
+			stewBinPath,
+		)
 		return false
 	}
 

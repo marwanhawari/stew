@@ -20,7 +20,7 @@ func TestGetHTTPResponseBody(t *testing.T) {
 			name: "test1",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"test":"ok"}`))
+				_, _ = w.Write([]byte(`{"test":"ok"}`))
 			})),
 			want:    `{"test":"ok"}`,
 			wantErr: false,
@@ -30,7 +30,7 @@ func TestGetHTTPResponseBody(t *testing.T) {
 			name: "test2",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusForbidden)
-				w.Write([]byte(``))
+				_, _ = w.Write([]byte(``))
 			})),
 			want:    "",
 			wantErr: true,

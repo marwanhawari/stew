@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -30,8 +29,7 @@ type PackageData struct {
 }
 
 func readLockFileJSON(lockFilePath string) (LockFile, error) {
-
-	lockFileBytes, err := ioutil.ReadFile(lockFilePath)
+	lockFileBytes, err := os.ReadFile(lockFilePath)
 	if err != nil {
 		return LockFile{}, err
 	}
@@ -47,13 +45,12 @@ func readLockFileJSON(lockFilePath string) (LockFile, error) {
 
 // WriteLockFileJSON will write the lockfile JSON file
 func WriteLockFileJSON(lockFileJSON LockFile, outputPath string) error {
-
 	lockFileBytes, err := json.MarshalIndent(lockFileJSON, "", "\t")
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(outputPath, lockFileBytes, 0644)
+	err = os.WriteFile(outputPath, lockFileBytes, 0644)
 	if err != nil {
 		return err
 	}
@@ -99,7 +96,6 @@ func ReadStewfileContents(stewfilePath string) ([]string, error) {
 }
 
 func ReadStewLockFileContents(lockFilePath string) ([]string, error) {
-
 	lockFile, err := readLockFileJSON(lockFilePath)
 	if err != nil {
 		return []string{}, err

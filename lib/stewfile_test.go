@@ -1,7 +1,6 @@
 package stew
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -110,8 +109,11 @@ func Test_readLockFileJSON(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
-			WriteLockFileJSON(testLockfile, lockFilePath)
-
+			err := WriteLockFileJSON(testLockfile, lockFilePath)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("readLockFileJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
 			got, err := readLockFileJSON(lockFilePath)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("readLockFileJSON() error = %v, wantErr %v", err, tt.wantErr)
@@ -148,7 +150,6 @@ func TestWriteLockFileJSON(t *testing.T) {
 			if !reflect.DeepEqual(got, testLockfile) {
 				t.Errorf("WriteLockFileJSON() = %v, want %v", got, testLockfile)
 			}
-
 		})
 	}
 }
@@ -239,10 +240,13 @@ func TestReadStewfileContents(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			tempDir := t.TempDir()
 			testStewfilePath := filepath.Join(tempDir, "Stewfile")
-			ioutil.WriteFile(testStewfilePath, []byte(testStewfileContents), 0644)
+			err := os.WriteFile(testStewfilePath, []byte(testStewfileContents), 0644)
+			if err != nil {
+				t.Errorf("WriteFile() error = %v", err)
+				return
+			}
 
 			got, err := ReadStewfileContents(testStewfilePath)
 			if (err != nil) != tt.wantErr {
@@ -273,8 +277,11 @@ func TestReadStewLockFileContents(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			testStewLockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
-			ioutil.WriteFile(testStewLockFilePath, []byte(testStewLockFileContents), 0644)
-
+			err := os.WriteFile(testStewLockFilePath, []byte(testStewLockFileContents), 0644)
+			if err != nil {
+				t.Errorf("WriteFile() error = %v", err)
+				return
+			}
 			got, err := ReadStewLockFileContents(testStewLockFilePath)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadStewLockFileContents() error = %v, wantErr %v", err, tt.wantErr)
@@ -310,11 +317,13 @@ func TestNewLockFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			tempDir := t.TempDir()
 			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
-			WriteLockFileJSON(testLockfile, lockFilePath)
-
+			err := WriteLockFileJSON(testLockfile, lockFilePath)
+			if err != nil {
+				t.Errorf("readLockFileJSON() error = %v", err)
+				return
+			}
 			got, err := NewLockFile(lockFilePath, tt.args.userOS, tt.args.userArch)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewLockFile() error = %v, wantErr %v", err, tt.wantErr)
@@ -348,7 +357,6 @@ func TestNewLockFileDoesntExist(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			tempDir := t.TempDir()
 			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
 
@@ -411,13 +419,29 @@ func TestDeleteAssetAndBinary(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			os.MkdirAll(filepath.Join(tempDir, "pkg"), 0755)
+			err := os.MkdirAll(filepath.Join(tempDir, "pkg"), 0755)
+			if err != nil {
+				t.Errorf("MkdirAll() error = %v", err)
+				return
+			}
 			testStewAssetPath := filepath.Join(tempDir, "pkg", "testAsset.tar.gz")
-			os.MkdirAll(filepath.Join(tempDir, "bin"), 0755)
+			err = os.MkdirAll(filepath.Join(tempDir, "bin"), 0755)
+			if err != nil {
+				t.Errorf("MkdirAll() error = %v", err)
+				return
+			}
 			testStewBinaryPath := filepath.Join(tempDir, "bin", "testBinary")
 
-			ioutil.WriteFile(testStewAssetPath, []byte("This is a test asset"), 0644)
-			ioutil.WriteFile(testStewBinaryPath, []byte("This is a test binary"), 0644)
+			err = os.WriteFile(testStewAssetPath, []byte("This is a test asset"), 0644)
+			if err != nil {
+				t.Errorf("WriteFile() error = %v", err)
+				return
+			}
+			err = os.WriteFile(testStewBinaryPath, []byte("This is a test binary"), 0644)
+			if err != nil {
+				t.Errorf("WriteFile() error = %v", err)
+				return
+			}
 
 			assetExists, _ := PathExists(testStewAssetPath)
 			binaryExists, _ := PathExists(testStewBinaryPath)
@@ -436,7 +460,6 @@ func TestDeleteAssetAndBinary(t *testing.T) {
 			if assetExists || binaryExists {
 				t.Errorf("Either the binary or the asset still exists")
 			}
-
 		})
 	}
 }
