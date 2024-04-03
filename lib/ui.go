@@ -12,12 +12,17 @@ func PromptSelect(message string, options []string) (string, error) {
 			options[i] = option[:max] + "..."
 		}
 	}
+	padding := 2
+	height := 10
+	if len(options) < height {
+		height = len(options)
+	}
 	result := ""
 	err := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().Title(message).Options(
 				huh.NewOptions(options...)...,
-			).Height(10).Value(&result),
+			).Height(height + padding).Value(&result),
 		),
 	).WithTheme(huh.ThemeCatppuccin()).Run()
 	if err != nil {
@@ -56,12 +61,17 @@ func WarningPromptSelect(message string, options []string) (string, error) {
 			options[i] = option[:max] + "..."
 		}
 	}
+	padding := 2
+	height := 10
+	if len(options) < height {
+		height = len(options)
+	}
 	result := ""
 	err := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().Title("! " + message).Options(
 				huh.NewOptions(options...)...,
-			).Height(10).Value(&result),
+			).Height(height + padding).Value(&result),
 		),
 	).WithTheme(huh.ThemeCatppuccin()).Run()
 	if err != nil {
