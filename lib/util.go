@@ -7,19 +7,32 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
-	"github.com/marwanhawari/stew/constants"
 	"github.com/mholt/archiver"
 	progressbar "github.com/schollz/progressbar/v3"
+
+	"github.com/marwanhawari/stew/constants"
 )
+
+var archiveFileExtensions = []string{
+	".br",
+	".bz2",
+	".zip",
+	".gz",
+	".lz4",
+	".sz",
+	".xz",
+	".zst",
+	".tar",
+	".tgz",
+	".rar",
+}
 
 func isArchiveFile(filePath string) bool {
 	fileExtension := filepath.Ext(filePath)
-	if fileExtension == ".br" || fileExtension == ".bz2" || fileExtension == ".zip" || fileExtension == ".gz" || fileExtension == ".lz4" || fileExtension == ".sz" || fileExtension == ".xz" || fileExtension == ".zst" || fileExtension == ".tar" || fileExtension == ".rar" {
-		return true
-	}
-	return false
+	return slices.Contains(archiveFileExtensions, fileExtension)
 }
 
 func isExecutableFile(filePath string) (bool, error) {
@@ -104,7 +117,6 @@ func DownloadFile(downloadPath string, url string) error {
 	}
 
 	return nil
-
 }
 
 func copyFile(srcFile, destFile string) error {
@@ -229,7 +241,6 @@ func ParseCLIInput(cliInput string) (CLIInput, error) {
 	}
 
 	return parsedInput, nil
-
 }
 
 func parseGithubInput(cliInput string) (CLIInput, error) {
@@ -248,7 +259,6 @@ func parseGithubInput(cliInput string) (CLIInput, error) {
 	}
 
 	return parsedInput, nil
-
 }
 
 func parseURLInput(cliInput string) (CLIInput, error) {
@@ -292,7 +302,13 @@ func extractBinary(downloadedFilePath, tmpExtractionPath string) error {
 }
 
 // InstallBinary will extract the binary and copy it to the ~/.stew/bin path
-func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo, lockFile *LockFile, overwriteFromUpgrade bool) (string, error) {
+func InstallBinary(
+	downloadedFilePath string,
+	repo string,
+	systemInfo SystemInfo,
+	lockFile *LockFile,
+	overwriteFromUpgrade bool,
+) (string, error) {
 	tmpExtractionPath, stewPkgPath, binaryInstallPath := systemInfo.StewTmpPath, systemInfo.StewPkgPath, systemInfo.StewBinPath
 	if err := extractBinary(downloadedFilePath, tmpExtractionPath); err != nil {
 		return "", err
@@ -325,14 +341,24 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 	return binaryName, nil
 }
 
-func handleExistingBinary(lockFile *LockFile, binaryName, newlyDownloadedAssetPath, stewPkgPath string, overwriteFromUpgrade bool) error {
+func handleExistingBinary(
+	lockFile *LockFile,
+	binaryName, newlyDownloadedAssetPath, stewPkgPath string,
+	overwriteFromUpgrade bool,
+) error {
 	indexInLockFile, binaryFoundInLockFile := FindBinaryInLockFile(*lockFile, binaryName)
 	if !binaryFoundInLockFile {
 		return nil
 	}
 	pkg := lockFile.Packages[indexInLockFile]
 	if !overwriteFromUpgrade {
-		userChoosingToOverwrite, err := WarningPromptConfirm(fmt.Sprintf("The binary %v version: %v is already installed, would you like to overwrite it?", constants.YellowColor(binaryName), constants.YellowColor(pkg.Tag)))
+		userChoosingToOverwrite, err := WarningPromptConfirm(
+			fmt.Sprintf(
+				"The binary %v version: %v is already installed, would you like to overwrite it?",
+				constants.YellowColor(binaryName),
+				constants.YellowColor(pkg.Tag),
+			),
+		)
 		if err != nil {
 			if err := os.RemoveAll(newlyDownloadedAssetPath); err != nil {
 				return err
@@ -349,7 +375,12 @@ func handleExistingBinary(lockFile *LockFile, binaryName, newlyDownloadedAssetPa
 	return overwriteBinary(lockFile, indexInLockFile, newlyDownloadedAssetPath, stewPkgPath, overwriteFromUpgrade)
 }
 
-func overwriteBinary(lockFile *LockFile, indexInLockFile int, newlyDownloadedAssetPath, stewPkgPath string, overwriteFromUpgrade bool) error {
+func overwriteBinary(
+	lockFile *LockFile,
+	indexInLockFile int,
+	newlyDownloadedAssetPath, stewPkgPath string,
+	overwriteFromUpgrade bool,
+) error {
 	pkg := lockFile.Packages[indexInLockFile]
 	previousAssetPath := filepath.Join(stewPkgPath, pkg.Asset)
 	if previousAssetPath != newlyDownloadedAssetPath {
