@@ -1,38 +1,39 @@
 package stew
 
 import (
-	"github.com/AlecAivazis/survey/v2"
+	"github.com/charmbracelet/huh"
 )
 
 // PromptSelect launches the selection UI
 func PromptSelect(message string, options []string) (string, error) {
 	result := ""
-	prompt := &survey.Select{
-		Message: message,
-		Options: options,
-	}
-	err := survey.AskOne(prompt, &result, survey.WithIcons(func(icons *survey.IconSet) {
-		icons.Question.Text = "*"
-	}))
+	err := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().Title(message).Options(
+				huh.NewOptions(options...)...,
+			).Value(&result),
+		),
+	).Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
 	}
-
 	return result, nil
 }
 
 // PromptInput launches the input UI
 func PromptInput(message string, defaultInput string) (string, error) {
 	result := ""
-	prompt := &survey.Input{
-		Message: message,
-		Default: defaultInput,
-	}
-	err := survey.AskOne(prompt, &result, survey.WithIcons(func(icons *survey.IconSet) {
-		icons.Question.Text = "*"
-	}))
+	err := huh.NewInput().
+		Title(message).
+		Prompt("> ").
+		Value(&result).
+		Placeholder(defaultInput).
+		Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
+	}
+	if result == "" {
+		result = defaultInput
 	}
 
 	return result, nil
@@ -41,31 +42,28 @@ func PromptInput(message string, defaultInput string) (string, error) {
 // WarningPromptSelect launches the selection UI with a warning styling
 func WarningPromptSelect(message string, options []string) (string, error) {
 	result := ""
-	prompt := &survey.Select{
-		Message: message,
-		Options: options,
-	}
-	err := survey.AskOne(prompt, &result, survey.WithIcons(func(icons *survey.IconSet) {
-		icons.Question.Text = "!"
-		icons.Question.Format = "yellow+hb"
-	}))
+	err := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().Title("! " + message).Options(
+				huh.NewOptions(options...)...,
+			).Value(&result),
+		),
+	).Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
 	}
-
 	return result, nil
 }
 
 // WarningPromptConfirm launches the confirm UI with a warning styling
 func WarningPromptConfirm(message string) (bool, error) {
-	result := false
-	prompt := &survey.Confirm{
-		Message: message,
-	}
-	err := survey.AskOne(prompt, &result, survey.WithIcons(func(icons *survey.IconSet) {
-		icons.Question.Text = "!"
-		icons.Question.Format = "yellow+hb"
-	}))
+	var result bool
+	err := huh.NewConfirm().
+		Title("! " + message).
+		Affirmative("Yes").
+		Value(&result).
+		Negative("No").
+		Run()
 	if err != nil {
 		return false, ExitUserSelectionError{Err: err}
 	}
@@ -73,19 +71,20 @@ func WarningPromptConfirm(message string) (bool, error) {
 	return result, nil
 }
 
-// warningPromptInput launches the input UI with a warning styling
+// PromptInput launches the input UI with a warning styling
 func warningPromptInput(message string, defaultInput string) (string, error) {
 	result := ""
-	prompt := &survey.Input{
-		Message: message,
-		Default: defaultInput,
-	}
-	err := survey.AskOne(prompt, &result, survey.WithIcons(func(icons *survey.IconSet) {
-		icons.Question.Text = "!"
-		icons.Question.Format = "yellow+hb"
-	}))
+	err := huh.NewInput().
+		Title("! " + message).
+		Prompt("> ").
+		Value(&result).
+		Placeholder(defaultInput).
+		Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
+	}
+	if result == "" {
+		result = defaultInput
 	}
 
 	return result, nil
