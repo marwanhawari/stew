@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -123,10 +122,11 @@ func main() {
 func listInstalledBinaries(ctx context.Context, cmd *cli.Command) {
 	configPath, err := stew.GetStewConfigFilePath(runtime.GOOS)
 	if err != nil {
-		return // error getting config file path
+		return
 	}
-	if _, err := os.Stat(configPath); errors.Is(err, os.ErrNotExist) {
-		return // no config file
+	configExists, err := stew.PathExists(configPath)
+	if err != nil || !configExists {
+		return
 	}
 	userOS, userArch, _, systemInfo, err := stew.Initialize()
 	stew.CatchAndExit(err)
