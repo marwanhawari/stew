@@ -24,7 +24,7 @@ func PromptSelect(message string, options []string) (string, error) {
 				huh.NewOptions(options...)...,
 			).Height(height + padding).Value(&result),
 		),
-	).WithTheme(huh.ThemeCatppuccin()).Run()
+	).Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
 	}
@@ -42,7 +42,7 @@ func PromptInput(message string, defaultInput string) (string, error) {
 				Value(&result).
 				Placeholder(defaultInput),
 		),
-	).WithTheme(huh.ThemeCatppuccin()).Run()
+	).Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
 	}
@@ -73,7 +73,7 @@ func WarningPromptSelect(message string, options []string) (string, error) {
 				huh.NewOptions(options...)...,
 			).Height(height + padding).Value(&result),
 		),
-	).WithTheme(huh.ThemeCatppuccin()).Run()
+	).Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
 	}
@@ -91,7 +91,7 @@ func WarningPromptConfirm(message string) (bool, error) {
 				Value(&result).
 				Negative("No"),
 		),
-	).WithTheme(huh.ThemeCatppuccin()).Run()
+	).Run()
 	if err != nil {
 		return false, ExitUserSelectionError{Err: err}
 	}
@@ -110,7 +110,7 @@ func warningPromptInput(message string, defaultInput string) (string, error) {
 				Value(&result).
 				Placeholder(defaultInput),
 		),
-	).WithTheme(huh.ThemeCatppuccin()).Run()
+	).Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
 	}
