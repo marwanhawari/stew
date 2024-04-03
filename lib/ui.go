@@ -19,7 +19,7 @@ func PromptSelect(message string, options []string) (string, error) {
 				huh.NewOptions(options...)...,
 			).Height(10).Value(&result),
 		),
-	).Run()
+	).WithTheme(huh.ThemeCatppuccin()).Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
 	}
@@ -29,12 +29,15 @@ func PromptSelect(message string, options []string) (string, error) {
 // PromptInput launches the input UI
 func PromptInput(message string, defaultInput string) (string, error) {
 	result := ""
-	err := huh.NewInput().
-		Title(message).
-		Prompt("> ").
-		Value(&result).
-		Placeholder(defaultInput).
-		Run()
+	err := huh.NewForm(
+		huh.NewGroup(
+			huh.NewInput().
+				Title(message).
+				Prompt("> ").
+				Value(&result).
+				Placeholder(defaultInput),
+		),
+	).WithTheme(huh.ThemeCatppuccin()).Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
 	}
@@ -60,7 +63,7 @@ func WarningPromptSelect(message string, options []string) (string, error) {
 				huh.NewOptions(options...)...,
 			).Height(10).Value(&result),
 		),
-	).Run()
+	).WithTheme(huh.ThemeCatppuccin()).Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
 	}
@@ -70,12 +73,15 @@ func WarningPromptSelect(message string, options []string) (string, error) {
 // WarningPromptConfirm launches the confirm UI with a warning styling
 func WarningPromptConfirm(message string) (bool, error) {
 	var result bool
-	err := huh.NewConfirm().
-		Title("! " + message).
-		Affirmative("Yes").
-		Value(&result).
-		Negative("No").
-		Run()
+	err := huh.NewForm(
+		huh.NewGroup(
+			huh.NewConfirm().
+				Title("! " + message).
+				Affirmative("Yes").
+				Value(&result).
+				Negative("No"),
+		),
+	).WithTheme(huh.ThemeCatppuccin()).Run()
 	if err != nil {
 		return false, ExitUserSelectionError{Err: err}
 	}
@@ -86,12 +92,15 @@ func WarningPromptConfirm(message string) (bool, error) {
 // PromptInput launches the input UI with a warning styling
 func warningPromptInput(message string, defaultInput string) (string, error) {
 	result := ""
-	err := huh.NewInput().
-		Title("! " + message).
-		Prompt("> ").
-		Value(&result).
-		Placeholder(defaultInput).
-		Run()
+	err := huh.NewForm(
+		huh.NewGroup(
+			huh.NewInput().
+				Title("! " + message).
+				Prompt("> ").
+				Value(&result).
+				Placeholder(defaultInput),
+		),
+	).WithTheme(huh.ThemeCatppuccin()).Run()
 	if err != nil {
 		return "", ExitUserSelectionError{Err: err}
 	}
