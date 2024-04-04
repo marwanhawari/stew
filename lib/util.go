@@ -242,7 +242,7 @@ func parseGithubInput(cliInput string) (PackageData, error) {
 }
 
 func parseURLInput(cliInput string) (PackageData, error) {
-	return PackageData{Source: "github", Asset: filepath.Base(cliInput), URL: cliInput}, nil
+	return PackageData{Source: "other", Asset: filepath.Base(cliInput), URL: cliInput}, nil
 }
 
 // Contains checks if a string slice contains a given target

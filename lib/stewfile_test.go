@@ -47,12 +47,6 @@ https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0
 marwanhawari/ppath@v0.0.3
 `
 
-var testStewfileSlice []string = []string{
-	"junegunn/fzf@0.29.0",
-	"https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz",
-	"marwanhawari/ppath@v0.0.3",
-}
-
 var testStewLockFileContents string = `{
 	"os": "darwin",
 	"arch": "arm64",
@@ -88,10 +82,34 @@ var testStewLockFileContents string = `{
 }
 `
 
-var testStewLockFileSlice []string = []string{
-	"cli/cli@v2.4.0",
-	"junegunn/fzf@0.29.0",
-	"https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz",
+var testStewLockFileSlice []PackageData = []PackageData{
+	{
+		Source: "github",
+		Owner:  "cli",
+		Repo:   "cli",
+		Tag:    "v2.4.0",
+		Asset:  "gh_2.4.0_macOS_amd64.tar.gz",
+		Binary: "gh",
+		URL:    "https://github.com/cli/cli/releases/download/v2.4.0/gh_2.4.0_macOS_amd64.tar.gz",
+	},
+	{
+		Source: "github",
+		Owner:  "junegunn",
+		Repo:   "fzf",
+		Tag:    "0.29.0",
+		Asset:  "fzf-0.29.0-darwin_arm64.zip",
+		Binary: "fzf",
+		URL:    "https://github.com/junegunn/fzf/releases/download/0.29.0/fzf-0.29.0-darwin_arm64.zip",
+	},
+	{
+		Source: "other",
+		Owner:  "",
+		Repo:   "",
+		Tag:    "",
+		Asset:  "hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz",
+		Binary: "hyperfine",
+		URL:    "https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz",
+	},
 }
 
 func Test_readLockFileJSON(t *testing.T) {
@@ -226,9 +244,28 @@ func TestRemovePackage(t *testing.T) {
 }
 
 func TestReadStewfileContents(t *testing.T) {
+	var testStewfileSlice []PackageData = []PackageData{
+		{
+			Source: "github",
+			Owner:  "junegunn",
+			Repo:   "fzf",
+			Tag:    "0.29.0",
+		},
+		{
+			Source: "other",
+			Asset:  "hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz",
+			URL:    "https://github.com/sharkdp/hyperfine/releases/download/v1.12.0/hyperfine-v1.12.0-x86_64-apple-darwin.tar.gz",
+		},
+		{
+			Source: "github",
+			Owner:  "marwanhawari",
+			Repo:   "ppath",
+			Tag:    "v0.0.3",
+		},
+	}
 	tests := []struct {
 		name    string
-		want    []string
+		want    []PackageData
 		wantErr bool
 	}{
 		{
@@ -259,7 +296,7 @@ func TestReadStewfileContents(t *testing.T) {
 func TestReadStewLockFileContents(t *testing.T) {
 	tests := []struct {
 		name    string
-		want    []string
+		want    []PackageData
 		wantErr bool
 	}{
 		{
