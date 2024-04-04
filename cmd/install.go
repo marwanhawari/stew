@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/marwanhawari/stew/constants"
 	stew "github.com/marwanhawari/stew/lib"
@@ -18,10 +17,10 @@ func Install(cliInput string) {
 	stew.CatchAndExit(err)
 
 	var pkgs []stew.PackageData
-	if strings.HasSuffix(cliInput, "Stewfile.lock.json") {
+	if filepath.Base(cliInput) == "Stewfile.lock.json" {
 		pkgs, err = stew.ReadStewLockFileContents(cliInput)
 		stew.CatchAndExit(err)
-	} else if strings.HasSuffix(cliInput, "Stewfile") {
+	} else if filepath.Base(cliInput) == "Stewfile" {
 		pkgs, err = stew.ReadStewfileContents(cliInput)
 		stew.CatchAndExit(err)
 	} else {
