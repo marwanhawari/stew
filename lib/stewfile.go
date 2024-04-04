@@ -77,46 +77,39 @@ func RemovePackage(pkgs []PackageData, index int) ([]PackageData, error) {
 }
 
 // ReadStewfileContents will read the contents of the Stewfile
-func ReadStewfileContents(stewfilePath string) ([]string, error) {
+func ReadStewfileContents(stewfilePath string) ([]PackageData, error) {
 	file, err := os.Open(stewfilePath)
 	if err != nil {
-		return []string{}, err
+		return []PackageData{}, err
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 
-	var packages []string
+	var packages []PackageData
 	for scanner.Scan() {
-		packages = append(packages, scanner.Text())
+		packageText := scanner.Text()
+		pkg, err := ParseCLIInput(packageText)
+		if err != nil {
+			return []PackageData{}, err
+		}
+		packages = append(packages, pkg)
 	}
 
 	if err := scanner.Err(); err != nil {
-		return []string{}, err
+		return []PackageData{}, err
 	}
 
 	return packages, nil
 }
 
-func ReadStewLockFileContents(lockFilePath string) ([]string, error) {
-
+// ReadStewLockFileContents will read the contents of the Stewfile.lock.json
+func ReadStewLockFileContents(lockFilePath string) ([]PackageData, error) {
 	lockFile, err := readLockFileJSON(lockFilePath)
 	if err != nil {
-		return []string{}, err
+		return []PackageData{}, err
 	}
-
-	var packages []string
-	for _, pkg := range lockFile.Packages {
-		switch pkg.Source {
-		case "other":
-			packages = append(packages, pkg.URL)
-		case "github":
-			path := fmt.Sprintf("%s/%s@%s", pkg.Owner, pkg.Repo, pkg.Tag)
-			packages = append(packages, path)
-		}
-	}
-
-	return packages, nil
+	return lockFile.Packages, nil
 }
 
 // NewLockFile creates a new instance of the LockFile struct

@@ -191,50 +191,40 @@ func ValidateCLIInput(cliInput string) error {
 	return nil
 }
 
-// CLIInput contains information about the parsed CLI input
-type CLIInput struct {
-	IsGithubInput bool
-	Owner         string
-	Repo          string
-	Tag           string
-	Asset         string
-	DownloadURL   string
-}
-
-// ParseCLIInput creates a new instance of the CLIInput struct
-func ParseCLIInput(cliInput string) (CLIInput, error) {
+// ParseCLIInput creates a new instance of the PackageData struct
+func ParseCLIInput(cliInput string) (PackageData, error) {
 	err := ValidateCLIInput(cliInput)
 	if err != nil {
-		return CLIInput{}, err
+		return PackageData{}, err
 	}
 
 	reGithub, err := regexp.Compile(constants.RegexGithub)
 	if err != nil {
-		return CLIInput{}, err
+		return PackageData{}, err
 	}
 	reURL, err := regexp.Compile(constants.RegexURL)
 	if err != nil {
-		return CLIInput{}, err
+		return PackageData{}, err
 	}
-	var parsedInput CLIInput
+	var parsedInput PackageData
 	if reGithub.MatchString(cliInput) {
 		parsedInput, err = parseGithubInput(cliInput)
 	} else if reURL.MatchString(cliInput) {
 		parsedInput, err = parseURLInput(cliInput)
 	} else {
-		return CLIInput{}, UnrecognizedInputError{}
+		return PackageData{}, UnrecognizedInputError{}
 	}
 	if err != nil {
-		return CLIInput{}, err
+		return PackageData{}, err
 	}
 
 	return parsedInput, nil
 
 }
 
-func parseGithubInput(cliInput string) (CLIInput, error) {
-	parsedInput := CLIInput{}
-	parsedInput.IsGithubInput = true
+func parseGithubInput(cliInput string) (PackageData, error) {
+	parsedInput := PackageData{}
+	parsedInput.Source = "github"
 	trimmedString := strings.Trim(strings.Trim(strings.TrimSpace(cliInput), "/"), "@")
 	splitInput := strings.SplitN(trimmedString, "@", 2)
 
@@ -251,8 +241,8 @@ func parseGithubInput(cliInput string) (CLIInput, error) {
 
 }
 
-func parseURLInput(cliInput string) (CLIInput, error) {
-	return CLIInput{IsGithubInput: false, Asset: filepath.Base(cliInput), DownloadURL: cliInput}, nil
+func parseURLInput(cliInput string) (PackageData, error) {
+	return PackageData{Source: "github", Asset: filepath.Base(cliInput), URL: cliInput}, nil
 }
 
 // Contains checks if a string slice contains a given target
