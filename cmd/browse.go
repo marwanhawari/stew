@@ -60,7 +60,7 @@ func Browse(cliInput string) {
 	stew.CatchAndExit(err)
 	fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
 
-	binaryName, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, false)
+	binaryName, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, false, "")
 	if err != nil {
 		os.RemoveAll(downloadPath)
 		stew.CatchAndExit(err)

@@ -311,7 +311,7 @@ func Test_getBinary(t *testing.T) {
 			wantBinaryFile := filepath.Join(tempDir, tt.binaryName)
 			wantBinaryName := filepath.Base(wantBinaryFile)
 
-			got, got1, err := getBinary(testFilePaths, tt.args.repo)
+			got, got1, err := getBinary(testFilePaths, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -357,7 +357,7 @@ func Test_getBinaryError(t *testing.T) {
 			wantBinaryFile := ""
 			wantBinaryName := ""
 
-			got, got1, err := getBinary(testFilePaths, tt.args.repo)
+			got, got1, err := getBinary(testFilePaths, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -412,7 +412,7 @@ func TestParseCLIInput(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    CLIInput
+		want    PackageData
 		wantErr bool
 	}{
 		{
@@ -420,7 +420,7 @@ func TestParseCLIInput(t *testing.T) {
 			args: args{
 				cliInput: "",
 			},
-			want:    CLIInput{},
+			want:    PackageData{},
 			wantErr: true,
 		},
 		{
@@ -428,10 +428,10 @@ func TestParseCLIInput(t *testing.T) {
 			args: args{
 				cliInput: "marwanhawari/ppath",
 			},
-			want: CLIInput{
-				IsGithubInput: true,
-				Owner:         "marwanhawari",
-				Repo:          "ppath",
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
 			},
 			wantErr: false,
 		},
@@ -440,10 +440,10 @@ func TestParseCLIInput(t *testing.T) {
 			args: args{
 				cliInput: "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
 			},
-			want: CLIInput{
-				IsGithubInput: false,
-				Asset:         "ppath-v0.0.3-darwin-arm64.tar.gz",
-				DownloadURL:   "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
+			want: PackageData{
+				Source: "other",
+				Asset:  "ppath-v0.0.3-darwin-arm64.tar.gz",
+				URL:    "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
 			},
 			wantErr: false,
 		},
@@ -452,7 +452,7 @@ func TestParseCLIInput(t *testing.T) {
 			args: args{
 				cliInput: "marwan",
 			},
-			want:    CLIInput{},
+			want:    PackageData{},
 			wantErr: true,
 		},
 	}
@@ -477,7 +477,7 @@ func Test_parseGithubInput(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    CLIInput
+		want    PackageData
 		wantErr bool
 	}{
 		{
@@ -485,10 +485,10 @@ func Test_parseGithubInput(t *testing.T) {
 			args: args{
 				cliInput: "marwanhawari/ppath",
 			},
-			want: CLIInput{
-				IsGithubInput: true,
-				Owner:         "marwanhawari",
-				Repo:          "ppath",
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
 			},
 			wantErr: false,
 		},
@@ -497,11 +497,11 @@ func Test_parseGithubInput(t *testing.T) {
 			args: args{
 				cliInput: "marwanhawari/ppath@v0.0.3",
 			},
-			want: CLIInput{
-				IsGithubInput: true,
-				Owner:         "marwanhawari",
-				Repo:          "ppath",
-				Tag:           "v0.0.3",
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
+				Tag:    "v0.0.3",
 			},
 			wantErr: false,
 		},
@@ -527,7 +527,7 @@ func Test_parseURLInput(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    CLIInput
+		want    PackageData
 		wantErr bool
 	}{
 		{
@@ -535,10 +535,10 @@ func Test_parseURLInput(t *testing.T) {
 			args: args{
 				cliInput: "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
 			},
-			want: CLIInput{
-				IsGithubInput: false,
-				Asset:         "ppath-v0.0.3-darwin-arm64.tar.gz",
-				DownloadURL:   "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
+			want: PackageData{
+				Source: "other",
+				Asset:  "ppath-v0.0.3-darwin-arm64.tar.gz",
+				URL:    "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
 			},
 			wantErr: false,
 		},
@@ -625,7 +625,7 @@ func Test_extractBinary(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			DownloadFile(tt.args.downloadedFilePath, tt.url)
 
-			if err := extractBinary(tt.args.downloadedFilePath, tt.args.tmpExtractionPath); (err != nil) != tt.wantErr {
+			if err := extractBinary(tt.args.downloadedFilePath, tt.args.tmpExtractionPath, ""); (err != nil) != tt.wantErr {
 				t.Errorf("extractBinary() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -683,7 +683,7 @@ func TestInstallBinary(t *testing.T) {
 				t.Errorf("Could not download file to %v", downloadedFilePath)
 			}
 
-			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, true)
+			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, true, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -747,7 +747,7 @@ func TestInstallBinary_Fail(t *testing.T) {
 				t.Errorf("Could not download file to %v", downloadedFilePath)
 			}
 
-			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, false)
+			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, false, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
