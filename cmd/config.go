@@ -23,12 +23,9 @@ func Config() {
 		return
 	}
 
-	defaultStewPath, err := stew.GetDefaultStewPath(userOS)
+	config, err := stew.ReadStewConfigJSON(stewConfigFilePath)
 	stew.CatchAndExit(err)
-	defaultStewBinPath, err := stew.GetDefaultStewBinPath(userOS)
-	stew.CatchAndExit(err)
-
-	newStewPath, newStewBinPath, err := stew.PromptConfig(defaultStewPath, defaultStewBinPath)
+	newStewPath, newStewBinPath, err := stew.PromptConfig(config.StewPath, config.StewBinPath)
 	stew.CatchAndExit(err)
 
 	newStewConfig := stew.StewConfig{StewPath: newStewPath, StewBinPath: newStewBinPath}
