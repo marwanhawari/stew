@@ -87,7 +87,7 @@ type StewConfig struct {
 	StewBinPath string `json:"stewBinPath"`
 }
 
-func readStewConfigJSON(stewConfigFilePath string) (StewConfig, error) {
+func ReadStewConfigJSON(stewConfigFilePath string) (StewConfig, error) {
 
 	stewConfigFileBytes, err := ioutil.ReadFile(stewConfigFilePath)
 	if err != nil {
@@ -141,7 +141,7 @@ func NewStewConfig(userOS string) (StewConfig, error) {
 		return StewConfig{}, err
 	}
 	if configExists {
-		stewConfig, err = readStewConfigJSON(stewConfigFilePath)
+		stewConfig, err = ReadStewConfigJSON(stewConfigFilePath)
 		if err != nil {
 			return StewConfig{}, err
 		}
