@@ -32,7 +32,8 @@ func Install(cliInput string) {
 	} else {
 		pkg, err := stew.ParseCLIInput(cliInput)
 		stew.CatchAndExit(err)
-		installOne(pkg, userOS, userArch, systemInfo, false)
+		err = installOne(pkg, userOS, userArch, systemInfo, false)
+		stew.CatchAndExit(err)
 	}
 }
 
