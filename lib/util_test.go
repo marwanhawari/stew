@@ -311,7 +311,7 @@ func Test_getBinary(t *testing.T) {
 			wantBinaryFile := filepath.Join(tempDir, tt.binaryName)
 			wantBinaryName := filepath.Base(wantBinaryFile)
 
-			got, got1, err := getBinary(testFilePaths, tt.args.repo)
+			got, got1, err := getBinary(testFilePaths, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -357,7 +357,7 @@ func Test_getBinaryError(t *testing.T) {
 			wantBinaryFile := ""
 			wantBinaryName := ""
 
-			got, got1, err := getBinary(testFilePaths, tt.args.repo)
+			got, got1, err := getBinary(testFilePaths, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -625,7 +625,7 @@ func Test_extractBinary(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			DownloadFile(tt.args.downloadedFilePath, tt.url)
 
-			if err := extractBinary(tt.args.downloadedFilePath, tt.args.tmpExtractionPath); (err != nil) != tt.wantErr {
+			if err := extractBinary(tt.args.downloadedFilePath, tt.args.tmpExtractionPath, ""); (err != nil) != tt.wantErr {
 				t.Errorf("extractBinary() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -683,7 +683,7 @@ func TestInstallBinary(t *testing.T) {
 				t.Errorf("Could not download file to %v", downloadedFilePath)
 			}
 
-			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, true)
+			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, true, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -747,7 +747,7 @@ func TestInstallBinary_Fail(t *testing.T) {
 				t.Errorf("Could not download file to %v", downloadedFilePath)
 			}
 
-			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, false)
+			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, false, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return

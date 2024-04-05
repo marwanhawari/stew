@@ -139,48 +139,41 @@ func walkDir(rootDir string) ([]string, error) {
 	return allFilePaths, err
 }
 
-func getBinary(filePaths []string, repo string) (string, string, error) {
-	binaryFile := ""
-	binaryName := ""
-	var err error
-	executableFiles := []string{}
+type ExecutableFileInfo struct {
+	fileName string
+	filePath string
+}
+
+func getBinary(filePaths []string, desiredBinaryRename string) (string, string, error) {
+	executableFiles := []ExecutableFileInfo{}
 	for _, fullPath := range filePaths {
 		fileNameBase := filepath.Base(fullPath)
 		fileIsExecutable, err := isExecutableFile(fullPath)
 		if err != nil {
 			return "", "", err
 		}
-		if fileNameBase == repo && fileIsExecutable {
-			binaryFile = fullPath
-			binaryName = repo
-			executableFiles = append(executableFiles, fullPath)
-		} else if filepath.Ext(fullPath) == ".exe" {
-			binaryFile = fullPath
-			binaryName = filepath.Base(fullPath)
-			executableFiles = append(executableFiles, fullPath)
-		} else if fileIsExecutable {
-			executableFiles = append(executableFiles, fullPath)
+		if !fileIsExecutable {
+			continue
 		}
+		executableFiles = append(executableFiles, ExecutableFileInfo{fileName: fileNameBase, filePath: fullPath})
 	}
 
-	if binaryFile == "" {
-		if len(executableFiles) == 1 {
-			binaryFile = executableFiles[0]
-			binaryName = filepath.Base(binaryFile)
-		} else if len(executableFiles) != 1 {
-			binaryFile, err = WarningPromptSelect("Could not automatically detect the binary. Please select it manually:", filePaths)
-			if err != nil {
-				return "", "", err
-			}
-			binaryName = filepath.Base(binaryFile)
-			binaryName, err = PromptRenameBinary(binaryName)
-			if err != nil {
-				return "", "", nil
-			}
+	if len(executableFiles) != 1 {
+		binaryFilePath, err := WarningPromptSelect("Could not automatically detect the binary. Please select it manually:", filePaths)
+		if err != nil {
+			return "", "", err
 		}
+		binaryName, err := PromptRenameBinary(filepath.Base(binaryFilePath))
+		if err != nil {
+			return "", "", nil
+		}
+		return binaryFilePath, binaryName, nil
 	}
 
-	return binaryFile, binaryName, nil
+	if desiredBinaryRename != "" {
+		return executableFiles[0].filePath, desiredBinaryRename, nil
+	}
+	return executableFiles[0].filePath, executableFiles[0].fileName, nil
 }
 
 // ValidateCLIInput makes sure the CLI input isn't empty
@@ -264,7 +257,7 @@ func FindBinaryInLockFile(lockFile LockFile, binaryName string) (int, bool) {
 	return -1, false
 }
 
-func extractBinary(downloadedFilePath, tmpExtractionPath string) error {
+func extractBinary(downloadedFilePath, tmpExtractionPath, desiredBinaryRename string) error {
 	isArchive := isArchiveFile(downloadedFilePath)
 	if isArchive {
 		err := archiver.Unarchive(downloadedFilePath, tmpExtractionPath)
@@ -274,6 +267,9 @@ func extractBinary(downloadedFilePath, tmpExtractionPath string) error {
 		return nil
 	}
 	originalBinaryName := filepath.Base(downloadedFilePath)
+	if desiredBinaryRename != "" {
+		return copyFile(downloadedFilePath, filepath.Join(tmpExtractionPath, desiredBinaryRename))
+	}
 	renamedBinaryName, err := PromptRenameBinary(originalBinaryName)
 	if err != nil {
 		return err
@@ -282,9 +278,9 @@ func extractBinary(downloadedFilePath, tmpExtractionPath string) error {
 }
 
 // InstallBinary will extract the binary and copy it to the ~/.stew/bin path
-func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo, lockFile *LockFile, overwriteFromUpgrade bool) (string, error) {
+func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo, lockFile *LockFile, overwriteFromUpgrade bool, desiredBinaryRename string) (string, error) {
 	tmpExtractionPath, stewPkgPath, binaryInstallPath := systemInfo.StewTmpPath, systemInfo.StewPkgPath, systemInfo.StewBinPath
-	if err := extractBinary(downloadedFilePath, tmpExtractionPath); err != nil {
+	if err := extractBinary(downloadedFilePath, tmpExtractionPath, desiredBinaryRename); err != nil {
 		return "", err
 	}
 
@@ -293,7 +289,7 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 		return "", err
 	}
 
-	binaryFileInTmpExtractionPath, binaryName, err := getBinary(allFilePaths, repo)
+	binaryFileInTmpExtractionPath, binaryName, err := getBinary(allFilePaths, desiredBinaryRename)
 	if err != nil {
 		return "", err
 	}
