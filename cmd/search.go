@@ -31,6 +31,6 @@ func Search(cliInput string) {
 
 	searchResultIndex, _ := stew.Contains(formattedSearchResults, githubProjectName)
 
-	Browse(githubSearch.Items[searchResultIndex].FullName)
+	Install(githubSearch.Items[searchResultIndex].FullName)
 
 }
