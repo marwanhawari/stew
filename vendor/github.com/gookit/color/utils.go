@@ -32,38 +32,31 @@ func ResetTerminal() error {
  *************************************************************/
 
 // Print render color tag and print messages
-func Print(a ...interface{}) {
+func Print(a ...any) {
 	Fprint(output, a...)
 }
 
 // Printf format and print messages
-func Printf(format string, a ...interface{}) {
+func Printf(format string, a ...any) {
 	Fprintf(output, format, a...)
 }
 
 // Println messages with new line
-func Println(a ...interface{}) {
+func Println(a ...any) {
 	Fprintln(output, a...)
 }
 
 // Fprint print rendered messages to writer
+//
 // Notice: will ignore print error
-func Fprint(w io.Writer, a ...interface{}) {
+func Fprint(w io.Writer, a ...any) {
 	_, err := fmt.Fprint(w, Render(a...))
 	saveInternalError(err)
-
-	// if isLikeInCmd {
-	// 	renderColorCodeOnCmd(func() {
-	// 		_, _ = fmt.Fprint(w, Render(a...))
-	// 	})
-	// } else {
-	// 	_, _ = fmt.Fprint(w, Render(a...))
-	// }
 }
 
 // Fprintf print format and rendered messages to writer.
 // Notice: will ignore print error
-func Fprintf(w io.Writer, format string, a ...interface{}) {
+func Fprintf(w io.Writer, format string, a ...any) {
 	str := fmt.Sprintf(format, a...)
 	_, err := fmt.Fprint(w, ReplaceTag(str))
 	saveInternalError(err)
@@ -71,7 +64,7 @@ func Fprintf(w io.Writer, format string, a ...interface{}) {
 
 // Fprintln print rendered messages line to writer
 // Notice: will ignore print error
-func Fprintln(w io.Writer, a ...interface{}) {
+func Fprintln(w io.Writer, a ...any) {
 	str := formatArgsForPrintln(a)
 	_, err := fmt.Fprintln(w, ReplaceTag(str))
 	saveInternalError(err)
@@ -79,45 +72,41 @@ func Fprintln(w io.Writer, a ...interface{}) {
 
 // Lprint passes colored messages to a log.Logger for printing.
 // Notice: should be goroutine safe
-func Lprint(l *log.Logger, a ...interface{}) {
+func Lprint(l *log.Logger, a ...any) {
 	l.Print(Render(a...))
 }
 
 // Render parse color tags, return rendered string.
+//
 // Usage:
+//
 //	text := Render("<info>hello</> <cyan>world</>!")
 //	fmt.Println(text)
-func Render(a ...interface{}) string {
+func Render(a ...any) string {
 	if len(a) == 0 {
 		return ""
 	}
-
 	return ReplaceTag(fmt.Sprint(a...))
 }
 
 // Sprint parse color tags, return rendered string
-func Sprint(a ...interface{}) string {
+func Sprint(a ...any) string {
 	if len(a) == 0 {
 		return ""
 	}
-
 	return ReplaceTag(fmt.Sprint(a...))
 }
 
 // Sprintf format and return rendered string
-func Sprintf(format string, a ...interface{}) string {
+func Sprintf(format string, a ...any) string {
 	return ReplaceTag(fmt.Sprintf(format, a...))
 }
 
 // String alias of the ReplaceTag
-func String(s string) string {
-	return ReplaceTag(s)
-}
+func String(s string) string { return ReplaceTag(s) }
 
 // Text alias of the ReplaceTag
-func Text(s string) string {
-	return ReplaceTag(s)
-}
+func Text(s string) string { return ReplaceTag(s) }
 
 // Uint8sToInts convert []uint8 to []int
 // func Uint8sToInts(u8s []uint8 ) []int {
@@ -136,25 +125,17 @@ func Text(s string) string {
 func doPrintV2(code, str string) {
 	_, err := fmt.Fprint(output, RenderString(code, str))
 	saveInternalError(err)
-
-	// if isLikeInCmd {
-	// 	renderColorCodeOnCmd(func() {
-	// 		_, _ = fmt.Fprint(output, RenderString(code, str))
-	// 	})
-	// } else {
-	// 	_, _ = fmt.Fprint(output, RenderString(code, str))
-	// }
 }
 
 // new implementation, support render full color code on pwsh.exe, cmd.exe
-func doPrintlnV2(code string, args []interface{}) {
+func doPrintlnV2(code string, args []any) {
 	str := formatArgsForPrintln(args)
 	_, err := fmt.Fprintln(output, RenderString(code, str))
 	saveInternalError(err)
 }
 
 // use Println, will add spaces for each arg
-func formatArgsForPrintln(args []interface{}) (message string) {
+func formatArgsForPrintln(args []any) (message string) {
 	if ln := len(args); ln == 0 {
 		message = ""
 	} else if ln == 1 {
@@ -176,12 +157,17 @@ func formatArgsForPrintln(args []interface{}) (message string) {
 // 	return debugMode == "on"
 // }
 
-func debugf(f string, v ...interface{}) {
+func debugf(f string, v ...any) {
 	if debugMode {
 		fmt.Print("COLOR_DEBUG: ")
 		fmt.Printf(f, v...)
 		fmt.Println()
 	}
+}
+
+// equals: return ok ? val1 : val2
+func isValidUint8(val int) bool {
+	return val >= 0 && val < 256
 }
 
 // equals: return ok ? val1 : val2

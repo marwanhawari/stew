@@ -1,6 +1,5 @@
 # Survey
 
-[![Build Status](https://travis-ci.org/AlecAivazis/survey.svg?branch=feature%2Fpretty)](https://travis-ci.org/AlecAivazis/survey)
 [![GoDoc](http://img.shields.io/badge/godoc-reference-5272B4.svg)](https://pkg.go.dev/github.com/AlecAivazis/survey/v2)
 
 A library for building interactive and accessible prompts on terminals supporting ANSI escape sequences.
@@ -56,39 +55,12 @@ func main() {
 }
 ```
 
-## Table of Contents
-
-1. [Examples](#examples)
-1. [Running the Prompts](#running-the-prompts)
-1. [Prompts](#prompts)
-   1. [Input](#input)
-      1. [Suggestion Options](#suggestion-options)
-   1. [Multiline](#multiline)
-   1. [Password](#password)
-   1. [Confirm](#confirm)
-   1. [Select](#select)
-   1. [MultiSelect](#multiselect)
-   1. [Editor](#editor)
-1. [Filtering Options](#filtering-options)
-1. [Validation](#validation)
-   1. [Built-in Validators](#built-in-validators)
-1. [Help Text](#help-text)
-   1. [Changing the input rune](#changing-the-input-rune)
-1. [Changing the Icons ](#changing-the-icons)
-1. [Custom Types](#custom-types)
-1. [Testing](#testing)
-1. [FAQ](#faq)
-
 ## Examples
 
 Examples can be found in the `examples/` directory. Run them
 to see basic behavior:
 
 ```bash
-go get github.com/AlecAivazis/survey/v2
-
-cd $GOPATH/src/github.com/AlecAivazis/survey
-
 go run examples/simple.go
 go run examples/validation.go
 ```
@@ -219,6 +191,28 @@ prompt := &survey.MultiSelect{..., PageSize: 10}
 
 // or as an option to Ask or AskOne
 survey.AskOne(prompt, &days, survey.WithPageSize(10))
+```
+
+#### Select options description
+
+The optional description text can be used to add extra information to each option listed in the select prompt:
+
+```golang
+color := ""
+prompt := &survey.Select{
+    Message: "Choose a color:",
+    Options: []string{"red", "blue", "green"},
+    Description: func(value string, index int) string {
+        if value == "red" {
+            return "My favorite color"
+        }
+        return ""
+    },
+}
+survey.AskOne(prompt, &color)
+
+// Assuming that the user chose "red - My favorite color":
+fmt.Println(color) //=> "red"
 ```
 
 ### MultiSelect
@@ -362,6 +356,39 @@ All of the prompts have a `Help` field which can be defined to provide more info
     Help:    "Phone number should include the area code",
 }
 ```
+
+## Removing the "Select All" and "Select None" options
+
+By default, users can select all of the multi-select options using the right arrow key. To prevent users from being able to do this (and remove the `<right> to all` message from the prompt), use the option `WithRemoveSelectAll`:
+
+```golang
+import (
+    "github.com/AlecAivazis/survey/v2"
+)
+
+number := ""
+prompt := &survey.Input{
+    Message: "This question has the select all option removed",
+}
+
+survey.AskOne(prompt, &number, survey.WithRemoveSelectAll())
+```
+
+Also by default, users can use the left arrow key to unselect all of the options. To prevent users from being able to do this (and remove the `<left> to none` message from the prompt), use the option `WithRemoveSelectNone`:
+
+```golang
+import (
+    "github.com/AlecAivazis/survey/v2"
+)
+
+number := ""
+prompt := &survey.Input{
+    Message: "This question has the select all option removed",
+}
+
+survey.AskOne(prompt, &number, survey.WithRemoveSelectNone())
+```
+
 
 ### Changing the input rune
 

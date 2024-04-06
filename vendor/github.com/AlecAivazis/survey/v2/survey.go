@@ -56,8 +56,11 @@ func defaultAskOptions() *AskOptions {
 				// include this option if it matches
 				return strings.Contains(strings.ToLower(value), filter)
 			},
-			KeepFilter: false,
-			ShowCursor: false,
+			KeepFilter:       false,
+			ShowCursor:       false,
+			RemoveSelectAll:  false,
+			RemoveSelectNone: false,
+			HideCharacter:    '*',
 		},
 	}
 }
@@ -111,13 +114,16 @@ type Question struct {
 
 // PromptConfig holds the global configuration for a prompt
 type PromptConfig struct {
-	PageSize     int
-	Icons        IconSet
-	HelpInput    string
-	SuggestInput string
-	Filter       func(filter string, option string, index int) bool
-	KeepFilter   bool
-	ShowCursor   bool
+	PageSize         int
+	Icons            IconSet
+	HelpInput        string
+	SuggestInput     string
+	Filter           func(filter string, option string, index int) bool
+	KeepFilter       bool
+	ShowCursor       bool
+	RemoveSelectAll  bool
+	RemoveSelectNone bool
+	HideCharacter    rune
 }
 
 // Prompt is the primary interface for the objects that can take user input
@@ -171,6 +177,22 @@ func WithKeepFilter(KeepFilter bool) AskOpt {
 		options.PromptConfig.KeepFilter = KeepFilter
 
 		// nothing went wrong
+		return nil
+	}
+}
+
+// WithRemoveSelectAll remove the select all option in Multiselect
+func WithRemoveSelectAll() AskOpt {
+	return func(options *AskOptions) error {
+		options.PromptConfig.RemoveSelectAll = true
+		return nil
+	}
+}
+
+// WithRemoveSelectNone remove the select none/unselect all in Multiselect
+func WithRemoveSelectNone() AskOpt {
+	return func(options *AskOptions) error {
+		options.PromptConfig.RemoveSelectNone = true
 		return nil
 	}
 }
@@ -234,6 +256,17 @@ func WithShowCursor(ShowCursor bool) AskOpt {
 	}
 }
 
+// WithHideCharacter sets the default character shown instead of the password for password inputs
+func WithHideCharacter(char rune) AskOpt {
+	return func(options *AskOptions) error {
+		// set the hide character
+		options.PromptConfig.HideCharacter = char
+
+		// nothing went wrong
+		return nil
+	}
+}
+
 /*
 AskOne performs the prompt for a single prompt and asks for validation if required.
 Response types should be something that can be casted from the response type designated
@@ -245,7 +278,6 @@ in the documentation. For example:
 	}
 
 	survey.AskOne(prompt, &name)
-
 */
 func AskOne(p Prompt, response interface{}, opts ...AskOpt) error {
 	err := Ask([]*Question{{Prompt: p}}, response, opts...)
@@ -297,6 +329,20 @@ func Ask(qs []*Question, response interface{}, opts ...AskOpt) error {
 		return errors.New("cannot call Ask() with a nil reference to record the answers")
 	}
 
+	validate := func(q *Question, val interface{}) error {
+		if q.Validate != nil {
+			if err := q.Validate(val); err != nil {
+				return err
+			}
+		}
+		for _, v := range options.Validators {
+			if err := v(val); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
 	// go over every question
 	for _, q := range qs {
 		// If Prompt implements controllable stdio, pass in specified stdio.
@@ -304,45 +350,27 @@ func Ask(qs []*Question, response interface{}, opts ...AskOpt) error {
 			p.WithStdio(options.Stdio)
 		}
 
-		// grab the user input and save it
-		ans, err := q.Prompt.Prompt(&options.PromptConfig)
-		// if there was a problem
-		if err != nil {
-			return err
-		}
-
-		// build up a list of validators that we have to apply to this question
-		validators := []Validator{}
-
-		// make sure to include the question specific one
-		if q.Validate != nil {
-			validators = append(validators, q.Validate)
-		}
-		// add any "global" validators
-		for _, validator := range options.Validators {
-			validators = append(validators, validator)
-		}
-
-		// apply every validator to thte response
-		for _, validator := range validators {
-			// wait for a valid response
-			for invalid := validator(ans); invalid != nil; invalid = validator(ans) {
-				err := q.Prompt.Error(&options.PromptConfig, invalid)
-				// if there was a problem
-				if err != nil {
+		var ans interface{}
+		var validationErr error
+		// prompt and validation loop
+		for {
+			if validationErr != nil {
+				if err := q.Prompt.Error(&options.PromptConfig, validationErr); err != nil {
 					return err
 				}
-
-				// ask for more input
-				if promptAgainer, ok := q.Prompt.(PromptAgainer); ok {
-					ans, err = promptAgainer.PromptAgain(&options.PromptConfig, ans, invalid)
-				} else {
-					ans, err = q.Prompt.Prompt(&options.PromptConfig)
-				}
-				// if there was a problem
-				if err != nil {
-					return err
-				}
+			}
+			var err error
+			if promptAgainer, ok := q.Prompt.(PromptAgainer); ok && validationErr != nil {
+				ans, err = promptAgainer.PromptAgain(&options.PromptConfig, ans, validationErr)
+			} else {
+				ans, err = q.Prompt.Prompt(&options.PromptConfig)
+			}
+			if err != nil {
+				return err
+			}
+			validationErr = validate(q, ans)
+			if validationErr == nil {
+				break
 			}
 		}
 
@@ -356,21 +384,14 @@ func Ask(qs []*Question, response interface{}, opts ...AskOpt) error {
 		}
 
 		// tell the prompt to cleanup with the validated value
-		q.Prompt.Cleanup(&options.PromptConfig, ans)
-
-		// if something went wrong
-		if err != nil {
-			// stop listening
+		if err := q.Prompt.Cleanup(&options.PromptConfig, ans); err != nil {
 			return err
 		}
 
 		// add it to the map
-		err = core.WriteAnswer(response, q.Name, ans)
-		// if something went wrong
-		if err != nil {
+		if err := core.WriteAnswer(response, q.Name, ans); err != nil {
 			return err
 		}
-
 	}
 
 	// return the response
@@ -420,7 +441,6 @@ type IterableOpts interface {
 
 func computeCursorOffset(tmpl string, data IterableOpts, opts []core.OptionAnswer, idx, tWidth int) int {
 	tmpls, err := core.GetTemplatePair(tmpl)
-
 	if err != nil {
 		return 0
 	}
@@ -428,8 +448,8 @@ func computeCursorOffset(tmpl string, data IterableOpts, opts []core.OptionAnswe
 	t := tmpls[0]
 
 	renderOpt := func(ix int, opt core.OptionAnswer) string {
-		buf := bytes.NewBufferString("")
-		t.ExecuteTemplate(buf, "option", data.IterateOption(ix, opt))
+		var buf bytes.Buffer
+		_ = t.ExecuteTemplate(&buf, "option", data.IterateOption(ix, opt))
 		return buf.String()
 	}
 
