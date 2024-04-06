@@ -15,8 +15,8 @@ import (
 )
 
 func isArchiveFile(filePath string) bool {
-+	_, err := archiver.ByExtension(filePath)
-+	return err == nil
+	_, err := archiver.ByExtension(filePath)
+	return err == nil
 }
 
 func isExecutableFile(filePath string) (bool, error) {
