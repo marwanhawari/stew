@@ -142,12 +142,12 @@ func (err errFieldNotMatch) Is(target error) bool { // implements the dynamic er
 // It returns the Question.Name that couldn't be matched with a destination field.
 //
 // Usage:
-// err := survey.Ask(qs, &v);
-// if err != nil {
-// 	if name, ok := core.IsFieldNotMatch(err); ok {
-//		[...name is the not matched question name]
-// 	}
-// }
+//
+//	if err := survey.Ask(qs, &v); err != nil {
+//		if name, ok := core.IsFieldNotMatch(err); ok {
+//			// name is the question name that did not match a field
+//		}
+//	}
 func IsFieldNotMatch(err error) (string, bool) {
 	if err != nil {
 		if v, ok := err.(errFieldNotMatch); ok {
@@ -178,7 +178,7 @@ func findField(s reflect.Value, name string) (reflect.Value, reflect.StructField
 	// then look for matching names
 	for _, f := range fields {
 		// if the name of the field matches what we're looking for
-		if strings.ToLower(f.fieldType.Name) == strings.ToLower(name) {
+		if strings.EqualFold(f.fieldType.Name, name) {
 			return f.value, f.fieldType, nil
 		}
 	}
@@ -197,9 +197,7 @@ func flattenFields(s reflect.Value) []reflectField {
 
 		if field.Kind() == reflect.Struct && fieldType.Anonymous {
 			// field is a promoted structure
-			for _, f := range flattenFields(field) {
-				fields = append(fields, f)
-			}
+			fields = append(fields, flattenFields(field)...)
 			continue
 		}
 		fields = append(fields, reflectField{field, fieldType})
@@ -303,6 +301,7 @@ func copy(t reflect.Value, v reflect.Value) (err error) {
 		case reflect.Float64:
 			castVal, casterr = strconv.ParseFloat(vString, 64)
 		default:
+			//lint:ignore ST1005 allow this error message to be capitalized
 			return fmt.Errorf("Unable to convert from string to type %s", t.Kind())
 		}
 
@@ -337,6 +336,7 @@ func copy(t reflect.Value, v reflect.Value) (err error) {
 		}
 
 		// we're copying an option answer to an incorrect type
+		//lint:ignore ST1005 allow this error message to be capitalized
 		return fmt.Errorf("Unable to convert from OptionAnswer to type %s", t.Kind())
 	}
 
@@ -361,7 +361,9 @@ func copy(t reflect.Value, v reflect.Value) (err error) {
 			// otherwise it could be an array
 			case reflect.Array:
 				// set the index to the appropriate value
-				copy(t.Slice(i, i+1).Index(0), v.Index(i))
+				if err := copy(t.Slice(i, i+1).Index(0), v.Index(i)); err != nil {
+					return err
+				}
 			}
 		}
 	} else {
