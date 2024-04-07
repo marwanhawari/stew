@@ -40,6 +40,7 @@
 * No need for `sudo`.
 * Just a single binary with 0 dependencies.
 * Portable [`Stewfile`](https://github.com/marwanhawari/stew/blob/main/examples/Stewfile) with optional pinned versioning.
+* Headless batch installs from a `Stewfile.lock.json` file.
 
 ![demo](https://github.com/marwanhawari/stew/raw/main/assets/demo.gif)
 
@@ -52,16 +53,6 @@ Stew supports macOS, Linux, and Windows.
 
   ```sh
   brew install marwanhawari/tap/stew
-  ```
-</details>
-
-<details>
-  <summary>Debian/Ubuntu</summary>
-
-  ```sh
-  apt update && apt install -y software-properties-common
-  add-apt-repository ppa:marwanhawari/stew
-  apt update && apt install -y stew
   ```
 </details>
 
@@ -103,13 +94,15 @@ Compiled binaries can be downloaded from the [releases page](https://github.com/
 # Install from GitHub releases
 stew install junegunn/fzf              # Install the latest release
 stew install junegunn/fzf@0.27.1       # Install a specific, tagged version
-stew install junefunn/fzf sharkdp/fd   # Install multiple binaries in a single command
 
 # Install directly from a URL
 stew install https://github.com/cli/cli/releases/download/v2.4.0/gh_2.4.0_macOS_amd64.tar.gz
 
 # Install from an Stewfile
 stew install Stewfile
+
+# Install headlessly from a Stewfile.lock.json
+stew install Stewfile.lock.json
 ```
 
 ### Search
@@ -150,7 +143,6 @@ stew rename rg            # Rename using the name of the binary directly
 stew list                              # Print to console
 stew list > Stewfile                   # Create an Stewfile without pinned tags
 stew list --tags > Stewfile            # Pin tags
-stew list --tags --assets > Stewfile   # Pin tags and assets
 ```
 
 ### Config
