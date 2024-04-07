@@ -2,8 +2,11 @@ package stew
 
 import (
 	"bufio"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -19,13 +22,14 @@ type LockFile struct {
 
 // PackageData contains the information for an installed binary
 type PackageData struct {
-	Source string `json:"source"`
-	Owner  string `json:"owner"`
-	Repo   string `json:"repo"`
-	Tag    string `json:"tag"`
-	Asset  string `json:"asset"`
-	Binary string `json:"binary"`
-	URL    string `json:"url"`
+	Source     string `json:"source"`
+	Owner      string `json:"owner"`
+	Repo       string `json:"repo"`
+	Tag        string `json:"tag"`
+	Asset      string `json:"asset"`
+	Binary     string `json:"binary"`
+	URL        string `json:"url"`
+	BinaryHash string `json:"binaryHash"`
 }
 
 func readLockFileJSON(lockFilePath string) (LockFile, error) {
@@ -142,4 +146,19 @@ func DeleteAssetAndBinary(stewPkgPath, stewBinPath, asset, binary string) error 
 		return err
 	}
 	return nil
+}
+
+func calculateFileHash(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	hasher := sha256.New()
+	if _, err := io.Copy(hasher, file); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(hasher.Sum(nil)), nil
 }
