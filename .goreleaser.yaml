@@ -17,7 +17,7 @@ archives:
 checksum:
   name_template: "checksums.txt"
 changelog:
-  skip: true
+  disable: true
 nfpms:
   - builds:
       - stew
@@ -32,10 +32,10 @@ nfpms:
       - rpm
     bindir: /usr/bin
 brews:
-  - tap:
+  - repository:
       owner: marwanhawari
       name: homebrew-tap
-    folder: Formula
+    directory: Formula
     commit_author:
       name: Marwan Hawari
       email: marwan.hawari@gmail.com
