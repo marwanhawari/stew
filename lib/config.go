@@ -3,7 +3,6 @@ package stew
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -89,7 +88,7 @@ type StewConfig struct {
 
 func ReadStewConfigJSON(stewConfigFilePath string) (StewConfig, error) {
 
-	stewConfigFileBytes, err := ioutil.ReadFile(stewConfigFilePath)
+	stewConfigFileBytes, err := os.ReadFile(stewConfigFilePath)
 	if err != nil {
 		return StewConfig{}, err
 	}
@@ -111,7 +110,7 @@ func WriteStewConfigJSON(stewConfigFileJSON StewConfig, outputPath string) error
 		return err
 	}
 
-	err = ioutil.WriteFile(outputPath, stewConfigFileBytes, 0644)
+	err = os.WriteFile(outputPath, stewConfigFileBytes, 0644)
 	if err != nil {
 		return err
 	}

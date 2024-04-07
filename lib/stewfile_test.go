@@ -1,7 +1,6 @@
 package stew
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -279,7 +278,7 @@ func TestReadStewfileContents(t *testing.T) {
 
 			tempDir := t.TempDir()
 			testStewfilePath := filepath.Join(tempDir, "Stewfile")
-			ioutil.WriteFile(testStewfilePath, []byte(testStewfileContents), 0644)
+			os.WriteFile(testStewfilePath, []byte(testStewfileContents), 0644)
 
 			got, err := ReadStewfileContents(testStewfilePath)
 			if (err != nil) != tt.wantErr {
@@ -310,7 +309,7 @@ func TestReadStewLockFileContents(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			testStewLockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
-			ioutil.WriteFile(testStewLockFilePath, []byte(testStewLockFileContents), 0644)
+			os.WriteFile(testStewLockFilePath, []byte(testStewLockFileContents), 0644)
 
 			got, err := ReadStewLockFileContents(testStewLockFilePath)
 			if (err != nil) != tt.wantErr {
@@ -453,8 +452,8 @@ func TestDeleteAssetAndBinary(t *testing.T) {
 			os.MkdirAll(filepath.Join(tempDir, "bin"), 0755)
 			testStewBinaryPath := filepath.Join(tempDir, "bin", "testBinary")
 
-			ioutil.WriteFile(testStewAssetPath, []byte("This is a test asset"), 0644)
-			ioutil.WriteFile(testStewBinaryPath, []byte("This is a test binary"), 0644)
+			os.WriteFile(testStewAssetPath, []byte("This is a test asset"), 0644)
+			os.WriteFile(testStewBinaryPath, []byte("This is a test binary"), 0644)
 
 			assetExists, _ := PathExists(testStewAssetPath)
 			binaryExists, _ := PathExists(testStewBinaryPath)

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -31,7 +30,7 @@ type PackageData struct {
 
 func readLockFileJSON(lockFilePath string) (LockFile, error) {
 
-	lockFileBytes, err := ioutil.ReadFile(lockFilePath)
+	lockFileBytes, err := os.ReadFile(lockFilePath)
 	if err != nil {
 		return LockFile{}, err
 	}
@@ -53,7 +52,7 @@ func WriteLockFileJSON(lockFileJSON LockFile, outputPath string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(outputPath, lockFileBytes, 0644)
+	err = os.WriteFile(outputPath, lockFileBytes, 0644)
 	if err != nil {
 		return err
 	}
