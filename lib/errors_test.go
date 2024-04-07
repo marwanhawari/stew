@@ -478,3 +478,32 @@ func TestInvalidGithubSearchQueryError_Error(t *testing.T) {
 		})
 	}
 }
+
+func TestBinaryMismatchError_Error(t *testing.T) {
+	type fields struct {
+		BinaryName string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				BinaryName: "testBinaryName",
+			},
+			want: fmt.Sprintf("%v The hash for the downloaded binary %v does not match the hash in the lockfile", constants.RedColor("Error:"), constants.RedColor("testBinaryName")),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := BinaryMismatchError{
+				BinaryName: tt.fields.BinaryName,
+			}
+			if got := e.Error(); got != tt.want {
+				t.Errorf("BinaryMismatchError.Error() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -103,7 +103,7 @@ func upgradeOne(binaryName, userOS, userArch string, lockFile stew.LockFile, sys
 	}
 	fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
 
-	_, binaryHash, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, true, pkg.Binary, pkg.BinaryHash)
+	_, binaryHash, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, true, pkg.Binary, "")
 	if err != nil {
 		if err := os.RemoveAll(downloadPath); err != nil {
 			return err
