@@ -60,20 +60,21 @@ func Browse(cliInput string) {
 	stew.CatchAndExit(err)
 	fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
 
-	binaryName, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, false, "")
+	binaryName, binaryHash, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, false, "", "")
 	if err != nil {
 		os.RemoveAll(downloadPath)
 		stew.CatchAndExit(err)
 	}
 
 	packageData := stew.PackageData{
-		Source: "github",
-		Owner:  githubProject.Owner,
-		Repo:   githubProject.Repo,
-		Tag:    tag,
-		Asset:  asset,
-		Binary: binaryName,
-		URL:    downloadURL,
+		Source:     "github",
+		Owner:      githubProject.Owner,
+		Repo:       githubProject.Repo,
+		Tag:        tag,
+		Asset:      asset,
+		Binary:     binaryName,
+		URL:        downloadURL,
+		BinaryHash: binaryHash,
 	}
 
 	lockFile.Packages = append(lockFile.Packages, packageData)

@@ -51,6 +51,7 @@ func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.S
 	tag := pkg.Tag
 	asset := pkg.Asset
 	desiredBinaryRename := pkg.Binary
+	expectedBinaryHash := pkg.BinaryHash
 	downloadURL := pkg.URL
 
 	lockFile, err := stew.NewLockFile(stewLockFilePath, userOS, userArch)
@@ -126,33 +127,36 @@ func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.S
 	}
 	fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
 
-	binaryName, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, installingFromLockFile, desiredBinaryRename)
+	binaryName, binaryHash, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, installingFromLockFile, desiredBinaryRename, expectedBinaryHash)
 	if err != nil {
 		if err := os.RemoveAll(downloadPath); err != nil {
 			return err
 		}
+		return err
 	}
 
 	var packageData stew.PackageData
 	if source == "github" {
 		packageData = stew.PackageData{
-			Source: "github",
-			Owner:  githubProject.Owner,
-			Repo:   githubProject.Repo,
-			Tag:    tag,
-			Asset:  asset,
-			Binary: binaryName,
-			URL:    downloadURL,
+			Source:     "github",
+			Owner:      githubProject.Owner,
+			Repo:       githubProject.Repo,
+			Tag:        tag,
+			Asset:      asset,
+			Binary:     binaryName,
+			URL:        downloadURL,
+			BinaryHash: binaryHash,
 		}
 	} else {
 		packageData = stew.PackageData{
-			Source: "other",
-			Owner:  "",
-			Repo:   "",
-			Tag:    "",
-			Asset:  asset,
-			Binary: binaryName,
-			URL:    downloadURL,
+			Source:     "other",
+			Owner:      "",
+			Repo:       "",
+			Tag:        "",
+			Asset:      asset,
+			Binary:     binaryName,
+			URL:        downloadURL,
+			BinaryHash: binaryHash,
 		}
 	}
 
