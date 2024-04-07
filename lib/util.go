@@ -128,7 +128,11 @@ func copyFile(srcFile, destFile string) error {
 func walkDir(rootDir string) ([]string, error) {
 	allFilePaths := []string{}
 	err := filepath.Walk(rootDir, func(filePath string, fileInfo os.FileInfo, err error) error {
-		if !fileInfo.IsDir() {
+		if err != nil {
+			return err
+		}
+		fileMode := fileInfo.Mode()
+		if fileMode.IsRegular() {
 			allFilePaths = append(allFilePaths, filePath)
 		}
 		return nil
@@ -180,6 +184,9 @@ func getBinary(filePaths []string, desiredBinaryRename, expectedBinaryHash strin
 	}
 
 	if desiredBinaryRename != "" {
+		if expectedBinaryHash != "" && expectedBinaryHash != executableFiles[0].fileHash {
+			return "", "", "", BinaryMismatchError{BinaryName: desiredBinaryRename}
+		}
 		return executableFiles[0].filePath, desiredBinaryRename, executableFiles[0].fileHash, nil
 	}
 	return executableFiles[0].filePath, executableFiles[0].fileName, executableFiles[0].fileHash, nil

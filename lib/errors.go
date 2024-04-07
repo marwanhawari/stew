@@ -162,3 +162,11 @@ type InvalidGithubSearchQueryError struct {
 func (e InvalidGithubSearchQueryError) Error() string {
 	return fmt.Sprintf("%v The search query %v contains invalid characters", constants.RedColor("Error:"), constants.RedColor(e.SearchQuery))
 }
+
+type BinaryMismatchError struct {
+	BinaryName string
+}
+
+func (e BinaryMismatchError) Error() string {
+	return fmt.Sprintf("%v The hash for the downloaded binary %v does not match the hash in the lockfile", constants.RedColor("Error:"), constants.RedColor(e.BinaryName))
+}
