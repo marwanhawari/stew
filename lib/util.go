@@ -150,7 +150,7 @@ func getBinary(filePaths []string, desiredBinaryRename, expectedBinaryHash strin
 		if err != nil {
 			return "", "", "", err
 		}
-		fileHash, err := calculateFileHash(fullPath)
+		fileHash, err := CalculateFileHash(fullPath)
 		if err != nil {
 			return "", "", "", err
 		}
@@ -172,7 +172,7 @@ func getBinary(filePaths []string, desiredBinaryRename, expectedBinaryHash strin
 		if err != nil {
 			return "", "", "", err
 		}
-		binaryHash, err := calculateFileHash(binaryFilePath)
+		binaryHash, err := CalculateFileHash(binaryFilePath)
 		if err != nil {
 			return "", "", "", err
 		}

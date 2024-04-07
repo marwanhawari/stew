@@ -316,17 +316,21 @@ func Test_getBinary(t *testing.T) {
 
 			wantBinaryFile := filepath.Join(tempDir, tt.binaryName)
 			wantBinaryName := filepath.Base(wantBinaryFile)
+			wantBinaryHash, _ := CalculateFileHash(wantBinaryFile)
 
-			got, got1, err := getBinary(testFilePaths, "")
+			gotBinaryFile, gotBinaryName, gotBinaryHash, err := getBinary(testFilePaths, "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != wantBinaryFile {
-				t.Errorf("getBinary() got = %v, want %v", got, wantBinaryFile)
+			if gotBinaryFile != wantBinaryFile {
+				t.Errorf("getBinary() gotBinaryFile = %v, want %v", gotBinaryFile, wantBinaryFile)
 			}
-			if got1 != wantBinaryName {
-				t.Errorf("getBinary() got1 = %v, want %v", got1, wantBinaryName)
+			if gotBinaryName != wantBinaryName {
+				t.Errorf("getBinary() gotBinaryName = %v, want %v", gotBinaryName, wantBinaryName)
+			}
+			if gotBinaryHash != wantBinaryHash {
+				t.Errorf("getBinary() gotBinaryHash = %v, want %v", gotBinaryHash, wantBinaryHash)
 			}
 		})
 	}
@@ -363,16 +367,16 @@ func Test_getBinaryError(t *testing.T) {
 			wantBinaryFile := ""
 			wantBinaryName := ""
 
-			got, got1, err := getBinary(testFilePaths, "")
+			gotBinaryFile, gotBinaryName, _, err := getBinary(testFilePaths, "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != wantBinaryFile {
-				t.Errorf("getBinary() got = %v, want %v", got, wantBinaryFile)
+			if gotBinaryFile != wantBinaryFile {
+				t.Errorf("getBinary() gotBinaryFile = %v, want %v", gotBinaryFile, wantBinaryFile)
 			}
-			if got1 != wantBinaryName {
-				t.Errorf("getBinary() got1 = %v, want %v", got1, wantBinaryName)
+			if gotBinaryName != wantBinaryName {
+				t.Errorf("getBinary() gotBinaryName = %v, want %v", gotBinaryName, wantBinaryName)
 			}
 		})
 	}
@@ -689,7 +693,7 @@ func TestInstallBinary(t *testing.T) {
 				t.Errorf("Could not download file to %v", downloadedFilePath)
 			}
 
-			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, true, "")
+			got, _, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, true, "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -753,7 +757,7 @@ func TestInstallBinary_Fail(t *testing.T) {
 				t.Errorf("Could not download file to %v", downloadedFilePath)
 			}
 
-			got, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, false, "")
+			got, _, err := InstallBinary(downloadedFilePath, repo, systemInfo, &lockFile, false, "", "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("InstallBinary() error = %v, wantErr %v", err, tt.wantErr)
 				return

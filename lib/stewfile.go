@@ -148,7 +148,7 @@ func DeleteAssetAndBinary(stewPkgPath, stewBinPath, asset, binary string) error 
 	return nil
 }
 
-func calculateFileHash(filePath string) (string, error) {
+func CalculateFileHash(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "", err
