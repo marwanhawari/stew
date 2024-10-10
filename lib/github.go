@@ -21,8 +21,9 @@ type GithubAPIResponse []GithubRelease
 
 // GithubRelease contains information about a GitHub release, including the associated assets
 type GithubRelease struct {
-	TagName string        `json:"tag_name"`
-	Assets  []GithubAsset `json:"assets"`
+	TagName    string        `json:"tag_name"`
+	Assets     []GithubAsset `json:"assets"`
+	Prerelease bool          `json:"prerelease"`
 }
 
 // GithubAsset contains information about a specific GitHub asset
