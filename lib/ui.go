@@ -21,6 +21,24 @@ func PromptSelect(message string, options []string) (string, error) {
 	return result, nil
 }
 
+// PromptMultiSelect launches the multiple selection UI
+func PromptMultiSelect(message string, options []string, defaultSelections []string) ([]string, error) {
+	result := []string{}
+	prompt := &survey.MultiSelect{
+		Message: message,
+		Options: options,
+		Default: defaultSelections,
+	}
+	err := survey.AskOne(prompt, &result, survey.WithIcons(func(icons *survey.IconSet) {
+		icons.Question.Text = "*"
+	}))
+	if err != nil {
+		return []string{}, ExitUserSelectionError{Err: err}
+	}
+
+	return result, nil
+}
+
 // PromptInput launches the input UI
 func PromptInput(message string, defaultInput string) (string, error) {
 	result := ""

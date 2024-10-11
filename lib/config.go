@@ -82,8 +82,9 @@ func GetStewConfigFilePath(userOS string) (string, error) {
 
 // StewConfig contains all the stew configuration data
 type StewConfig struct {
-	StewPath    string `json:"stewPath"`
-	StewBinPath string `json:"stewBinPath"`
+	StewPath               string   `json:"stewPath"`
+	StewBinPath            string   `json:"stewBinPath"`
+	ExcludedFromUpgradeAll []string `json:"excludedFromUpgradeAll"`
 }
 
 func ReadStewConfigJSON(stewConfigFilePath string) (StewConfig, error) {
@@ -153,12 +154,13 @@ func NewStewConfig(userOS string) (StewConfig, error) {
 			stewConfig.StewBinPath = defaultStewBinPath
 		}
 	} else {
-		selectedStewPath, selectedStewBinPath, err := PromptConfig(defaultStewPath, defaultStewBinPath)
+		selectedStewPath, selectedStewBinPath, excludedFromUpgradeAll, err := PromptConfig(defaultStewPath, defaultStewBinPath, []PackageData{}, []string{})
 		if err != nil {
 			return StewConfig{}, err
 		}
 		stewConfig.StewPath = selectedStewPath
 		stewConfig.StewBinPath = selectedStewBinPath
+		stewConfig.ExcludedFromUpgradeAll = excludedFromUpgradeAll
 		fmt.Printf("📄 Updated %v\n", constants.GreenColor(stewConfigFilePath))
 	}
 
@@ -235,27 +237,41 @@ func Initialize() (string, string, StewConfig, SystemInfo, error) {
 	return userOS, userArch, stewConfig, systemInfo, nil
 }
 
-// PromptConfig launches an interactive UI for setting the stew config values. It returns the resolved stewPath and stewBinPath.
-func PromptConfig(suggestedStewPath, suggestedStewBinPath string) (string, string, error) {
+// PromptConfig launches an interactive UI for setting the stew config values. It returns the resolved stewPath, stewBinPath, and excludedFromUpgradeAll values.
+func PromptConfig(suggestedStewPath string, suggestedStewBinPath string, installedPackages []PackageData, excludedPackages []string) (string, string, []string, error) {
 	inputStewPath, err := PromptInput("Set the stewPath. This will contain all stew data other than the binaries.", suggestedStewPath)
 	if err != nil {
-		return "", "", err
+		return "", "", []string{}, err
 	}
 	inputStewBinPath, err := PromptInput("Set the stewBinPath. This is where the binaries will be installed by stew.", suggestedStewBinPath)
 	if err != nil {
-		return "", "", err
+		return "", "", []string{}, err
+	}
+	excludedFromUpgradeAll := []string{}
+	if len(installedPackages) != 0 {
+		packagesNotInstalledFromUrl := []string{}
+		for _, pkg := range installedPackages {
+			if pkg.Source != "other" {
+				packagesNotInstalledFromUrl = append(packagesNotInstalledFromUrl, GetPackageDisplayName(pkg, false))
+			}
+		}
+		packages, err := PromptMultiSelect("Select any packages that you do not wish to be upgraded during stew upgrade --all.", packagesNotInstalledFromUrl, excludedPackages)
+		if err != nil {
+			return "", "", []string{}, err
+		}
+		excludedFromUpgradeAll = append(excludedFromUpgradeAll, packages...)
 	}
 
 	fullStewPath, err := ResolvePath(inputStewPath)
 	if err != nil {
-		return "", "", err
+		return "", "", []string{}, err
 	}
 	fullStewBinPath, err := ResolvePath(inputStewBinPath)
 	if err != nil {
-		return "", "", err
+		return "", "", []string{}, err
 	}
 
-	return fullStewPath, fullStewBinPath, nil
+	return fullStewPath, fullStewBinPath, excludedFromUpgradeAll, nil
 }
 
 func ValidateStewBinPath(stewBinPath, pathVariable string) bool {

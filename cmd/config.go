@@ -22,13 +22,16 @@ func Config() {
 		stew.CatchAndExit(err)
 		return
 	}
+	_, _, _, systemInfo, _ := stew.Initialize()
+	installedPackages, err := stew.ReadStewLockFileContents(systemInfo.StewLockFilePath)
+	stew.CatchAndExit(err)
 
 	config, err := stew.ReadStewConfigJSON(stewConfigFilePath)
 	stew.CatchAndExit(err)
-	newStewPath, newStewBinPath, err := stew.PromptConfig(config.StewPath, config.StewBinPath)
+	newStewPath, newStewBinPath, newExcludedFromUpgradeAll, err := stew.PromptConfig(config.StewPath, config.StewBinPath, installedPackages, config.ExcludedFromUpgradeAll)
 	stew.CatchAndExit(err)
 
-	newStewConfig := stew.StewConfig{StewPath: newStewPath, StewBinPath: newStewBinPath}
+	newStewConfig := stew.StewConfig{StewPath: newStewPath, StewBinPath: newStewBinPath, ExcludedFromUpgradeAll: newExcludedFromUpgradeAll}
 	err = stew.WriteStewConfigJSON(newStewConfig, stewConfigFilePath)
 	stew.CatchAndExit(err)
 

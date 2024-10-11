@@ -32,7 +32,7 @@ type PackageData struct {
 	BinaryHash string `json:"binaryHash"`
 }
 
-func readLockFileJSON(lockFilePath string) (LockFile, error) {
+func ReadLockFileJSON(lockFilePath string) (LockFile, error) {
 
 	lockFileBytes, err := os.ReadFile(lockFilePath)
 	if err != nil {
@@ -108,7 +108,7 @@ func ReadStewfileContents(stewfilePath string) ([]PackageData, error) {
 
 // ReadStewLockFileContents will read the contents of the Stewfile.lock.json
 func ReadStewLockFileContents(lockFilePath string) ([]PackageData, error) {
-	lockFile, err := readLockFileJSON(lockFilePath)
+	lockFile, err := ReadLockFileJSON(lockFilePath)
 	if err != nil {
 		return []PackageData{}, err
 	}
@@ -125,7 +125,7 @@ func NewLockFile(stewLockFilePath, userOS, userArch string) (LockFile, error) {
 	if !lockFileExists {
 		lockFile = LockFile{Os: userOS, Arch: userArch, Packages: []PackageData{}}
 	} else {
-		lockFile, err = readLockFileJSON(stewLockFilePath)
+		lockFile, err = ReadLockFileJSON(stewLockFilePath)
 		if err != nil {
 			return LockFile{}, err
 		}

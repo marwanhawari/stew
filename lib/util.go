@@ -411,3 +411,17 @@ func ResolvePath(filePath string) (string, error) {
 
 	return resolvedPath, nil
 }
+
+// GetPackageDisplayName will provide the display name for a given package
+func GetPackageDisplayName(pkg PackageData, withTag bool) string {
+	switch pkg.Source {
+	case "github":
+		if withTag {
+			return pkg.Owner + "/" + pkg.Repo + "@" + pkg.Tag
+		} else {
+			return pkg.Owner + "/" + pkg.Repo
+		}
+	default:
+		return pkg.URL
+	}
+}
