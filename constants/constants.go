@@ -23,16 +23,16 @@ var BoldColor = color.New(color.OpBold).Render
 var LoadingSpinner = spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithColor("cyan"), spinner.WithHiddenCursor(true))
 
 // RegexDarwin is a regular express for darwin systems
-var RegexDarwin = `(?i)(darwin|mac(os)?|apple|osx)`
+var RegexDarwin = `(?i)(darwin|mac(os)?|apple|osx|.dmg)`
 
 // RegexWindows is a regular express for windows systems
-var RegexWindows = `(?i)(windows|win)`
+var RegexWindows = `(?i)(windows|win|.msi|.exe|.appx)`
 
 // RegexArm64 is a regular express for arm64 architectures
-var RegexArm64 = `(?i)(arm64|aarch64)`
+var RegexArm64 = `(?i)(arm64|aarch64|arm64e)`
 
 // RegexAmd64 is a regular express for amd64 architectures
-var RegexAmd64 = `(?i)(x86_64|amd64|x64)`
+var RegexAmd64 = `(?i)(x86_64|amd64|x64|amd64e)`
 
 // Regex386 is a regular express for 386 architectures
 var Regex386 = `(?i)(i?386|x86_32|amd32|x32)`
