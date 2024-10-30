@@ -47,6 +47,15 @@
 # Installation
 Stew supports macOS, Linux, and Windows.
 
+### Install using deploy script
+<details>
+  <summary>Install the latest released version</summary>
+  
+  ```sh
+  curl https://github.com/marwanhawari/stew/install.sh | bash
+  ```
+</details>
+
 ### Install using a package manager
 <details>
   <summary>macOS</summary>
