@@ -56,6 +56,10 @@ func getGithubJSON(owner, repo string) (string, error) {
 
 // NewGithubProject creates a new instance of the GithubProject struct
 func NewGithubProject(owner, repo string) (GithubProject, error) {
+	if owner == constants.StewOwner && repo == constants.StewRepo {
+		return GithubProject{}, SelfInstallError{}
+	}
+
 	ghJSON, err := getGithubJSON(owner, repo)
 	if err != nil {
 		return GithubProject{}, err
