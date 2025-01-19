@@ -45,3 +45,9 @@ var RegexGithubSearch = `(?i)^[A-Za-z0-9\_\.\-\/\:]+$`
 
 // RegexURL is a regular express for valid URLs
 var RegexURL = `(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])`
+
+// StewOwner is the username of the stew github repo owner
+var StewOwner = `marwanhawari`
+
+// StewRepo is the name of the stew github repo
+var StewRepo = `stew`
