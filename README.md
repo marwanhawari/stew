@@ -109,6 +109,7 @@ stew install Stewfile.lock.json
 ```sh
 # Search for a GitHub repo and browse its contents with a terminal UI
 stew search ripgrep
+stew search fzf user:junegunn language:go    # Use GitHub search syntax
 ```
 
 ### Browse
