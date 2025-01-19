@@ -562,7 +562,7 @@ var testGithubSearchReadJSON GithubSearch = GithubSearch{
 	Items: []GithubSearchResult{
 		{
 			FullName:    "marwanhawari/ppath",
-			Stars:       7,
+			Stars:       8,
 			Language:    "Go",
 			Description: "🌈 A command-line tool to pretty print your system's PATH environment variable.",
 		},
@@ -575,14 +575,14 @@ var testGithubSearch GithubSearch = GithubSearch{
 	Items: []GithubSearchResult{
 		{
 			FullName:    "marwanhawari/ppath",
-			Stars:       7,
+			Stars:       8,
 			Language:    "Go",
 			Description: "🌈 A command-line tool to pretty print your system's PATH environment variable.",
 		},
 	},
 }
 
-var testFormattedSearchResults = []string{"marwanhawari/ppath [⭐️7] 🌈 A command-line tool to pretty print your system's PATH environment variable."}
+var testFormattedSearchResults = []string{"marwanhawari/ppath [⭐️8] 🌈 A command-line tool to pretty print your system's PATH environment variable."}
 
 func Test_getGithubSearchJSON(t *testing.T) {
 	type args struct {

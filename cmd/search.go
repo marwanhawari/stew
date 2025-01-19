@@ -1,22 +1,29 @@
 package cmd
 
 import (
+	"net/url"
+	"strings"
+
 	"github.com/marwanhawari/stew/constants"
 	stew "github.com/marwanhawari/stew/lib"
 )
 
 // Search is executed when you run `stew search`
-func Search(cliInput string) {
+func Search(cliInput []string) {
 	sp := constants.LoadingSpinner
 
-	err := stew.ValidateCLIInput(cliInput)
-	stew.CatchAndExit(err)
+	if len(cliInput) == 0 {
+		stew.CatchAndExit(stew.EmptyCLIInputError{})
+	}
+	for _, input := range cliInput {
+		err := stew.ValidateGithubSearchQuery(input)
+		stew.CatchAndExit(err)
+	}
 
-	err = stew.ValidateGithubSearchQuery(cliInput)
-	stew.CatchAndExit(err)
+	searchQuery := url.QueryEscape(strings.Join(cliInput, " "))
 
 	sp.Start()
-	githubSearch, err := stew.NewGithubSearch(cliInput)
+	githubSearch, err := stew.NewGithubSearch(searchQuery)
 	sp.Stop()
 	stew.CatchAndExit(err)
 

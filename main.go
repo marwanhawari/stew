@@ -28,7 +28,7 @@ func main() {
 				Usage:   "Search for a GitHub repo then browse the selected repo's releases and assets. [Ex: stew search ripgrep]",
 				Aliases: []string{"s"},
 				Action: func(c *cli.Context) error {
-					cmd.Search(c.Args().First())
+					cmd.Search(c.Args())
 					return nil
 				},
 			},
