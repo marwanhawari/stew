@@ -124,7 +124,7 @@ func assetsFound(releaseAssets []string, releaseTag string) error {
 
 func filterReleaseAssets(assets []string) []string {
 	var filteredAssets []string
-	re := regexp.MustCompile(`\.(sha(256|512)(sum)?)$`)
+	re := regexp.MustCompile(constants.RegexChecksum)
 
 	for _, asset := range assets {
 		if re.MatchString(asset) {
@@ -153,7 +153,6 @@ func DetectAsset(userOS string, userArch string, releaseAssets []string) (string
 	}
 
 	filteredReleaseAssets := filterReleaseAssets(releaseAssets)
-
 	for _, asset := range filteredReleaseAssets {
 		if reOS.MatchString(asset) {
 			detectedOSAssets = append(detectedOSAssets, asset)
@@ -191,7 +190,7 @@ func DetectAsset(userOS string, userArch string, releaseAssets []string) (string
 			}
 		}
 		if finalAsset == "" {
-			finalAsset, err = WarningPromptSelect("Could not automatically detect the release asset matching your OS/Arch. Please select it manually:", detectedFinalAssets)
+			finalAsset, err = WarningPromptSelect("Could not automatically detect the release asset matching your OS/Arch. Please select it manually:", filteredReleaseAssets)
 			if err != nil {
 				return "", err
 			}
