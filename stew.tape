@@ -1,3 +1,5 @@
+# vhs stew.tape
+
 Output assets/demo.gif
 
 Require stew
@@ -24,15 +26,21 @@ Down@300ms 5
 Sleep 750ms
 Up@300ms 5
 Enter@2s
-Down@300ms
-Enter@1500ms
+Ctrl+L
+
+# Browse
+Type "stew browse BurntSushi/ripgrep"
+Sleep 1s
+Enter@2s
+Down@300ms 4
+Enter@2s
 Type "darwin"
-Down@300ms
-Enter@3s
+Down@300ms 2
+Enter@2s
 Ctrl+L
 
 # Upgrade
-Type "stew upgrade fzf"
+Type "stew upgrade rg"
 Sleep 1s
 Enter@3s
 Ctrl+L

@@ -76,8 +76,13 @@ func upgradeOne(binaryName, userOS, userArch string, lockFile stew.LockFile, sys
 		return err
 	}
 
-	// Get the latest tag
+	// Start at the latest tag
 	tagIndex := 0
+	// Find first non-prerelease tag
+	for githubProject.Releases[tagIndex].Prerelease {
+		tagIndex += 1
+	}
+
 	tag := githubProject.Releases[tagIndex].TagName
 
 	if pkg.Tag == tag {
