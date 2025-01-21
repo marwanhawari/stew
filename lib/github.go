@@ -20,8 +20,9 @@ type GithubAPIResponse []GithubRelease
 
 // GithubRelease contains information about a GitHub release, including the associated assets
 type GithubRelease struct {
-	TagName string        `json:"tag_name"`
-	Assets  []GithubAsset `json:"assets"`
+	TagName    string        `json:"tag_name"`
+	Assets     []GithubAsset `json:"assets"`
+	Prerelease bool          `json:"prerelease"`
 }
 
 // GithubAsset contains information about a specific GitHub asset
@@ -54,6 +55,10 @@ func getGithubJSON(owner, repo string) (string, error) {
 
 // NewGithubProject creates a new instance of the GithubProject struct
 func NewGithubProject(owner, repo string) (GithubProject, error) {
+	if owner == constants.StewOwner && repo == constants.StewRepo {
+		return GithubProject{}, SelfInstallError{}
+	}
+
 	ghJSON, err := getGithubJSON(owner, repo)
 	if err != nil {
 		return GithubProject{}, err
@@ -238,7 +243,10 @@ type GithubSearchResult struct {
 }
 
 func getGithubSearchJSON(searchQuery string) (string, error) {
-	url := fmt.Sprintf("https://api.github.com/search/repositories?q=%v%v", searchQuery, "+fork:true")
+	if searchQuery == "" {
+		return "", InvalidGithubSearchQueryError{}
+	}
+	url := fmt.Sprintf("https://api.github.com/search/repositories?q=%v%v", searchQuery, "+fork:true+archived:false")
 
 	response, err := getHTTPResponseBody(url)
 	if err != nil {

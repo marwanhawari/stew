@@ -163,10 +163,19 @@ func (e InvalidGithubSearchQueryError) Error() string {
 	return fmt.Sprintf("%v The search query %v contains invalid characters", constants.RedColor("Error:"), constants.RedColor(e.SearchQuery))
 }
 
+// BinaryMismatchError occurs if the downloaded binary hash doesn't match the hash in the lockfile
 type BinaryMismatchError struct {
 	BinaryName string
 }
 
 func (e BinaryMismatchError) Error() string {
 	return fmt.Sprintf("%v The hash for the downloaded binary %v does not match the hash in the lockfile", constants.RedColor("Error:"), constants.RedColor(e.BinaryName))
+}
+
+// SelfInstallError occurs when attempting to install or upgrade stew using stew
+type SelfInstallError struct {
+}
+
+func (e SelfInstallError) Error() string {
+	return fmt.Sprintf("%v Stew cannot self-install/self-upgrade. You should upgrade stew with the original install method, whether it was manually or through a package manager", constants.RedColor("Error:"))
 }
