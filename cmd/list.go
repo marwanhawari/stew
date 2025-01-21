@@ -22,6 +22,15 @@ func List(cliTagsFlag bool) {
 	}
 
 	for _, pkg := range lockFile.Packages {
-		fmt.Println(stew.GetPackageDisplayName(pkg, cliTagsFlag))
+		switch pkg.Source {
+		case "other":
+			fmt.Println(pkg.URL)
+		case "github":
+			if cliTagsFlag {
+				fmt.Println(pkg.Owner + "/" + pkg.Repo + "@" + pkg.Tag)
+			} else {
+				fmt.Println(pkg.Owner + "/" + pkg.Repo)
+			}
+		}
 	}
 }

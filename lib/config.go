@@ -135,6 +135,7 @@ func NewStewConfig(userOS string) (StewConfig, error) {
 	if err != nil {
 		return StewConfig{}, err
 	}
+	defaultExcludedFromUpgradeAll := []string{}
 
 	configExists, err := PathExists(stewConfigFilePath)
 	if err != nil {
@@ -153,8 +154,13 @@ func NewStewConfig(userOS string) (StewConfig, error) {
 		if stewConfig.StewBinPath == "" {
 			stewConfig.StewBinPath = defaultStewBinPath
 		}
+
+		if len(stewConfig.ExcludedFromUpgradeAll) == 0 {
+			stewConfig.ExcludedFromUpgradeAll = defaultExcludedFromUpgradeAll
+		}
 	} else {
-		selectedStewPath, selectedStewBinPath, excludedFromUpgradeAll, err := PromptConfig(defaultStewPath, defaultStewBinPath, []PackageData{}, []string{})
+		defaultInstalledPackages := []PackageData{}
+		selectedStewPath, selectedStewBinPath, excludedFromUpgradeAll, err := PromptConfig(defaultStewPath, defaultStewBinPath, defaultInstalledPackages, defaultExcludedFromUpgradeAll)
 		if err != nil {
 			return StewConfig{}, err
 		}
@@ -249,17 +255,14 @@ func PromptConfig(suggestedStewPath string, suggestedStewBinPath string, install
 	}
 	excludedFromUpgradeAll := []string{}
 	if len(installedPackages) != 0 {
-		packagesNotInstalledFromUrl := []string{}
+		installedBinaryNames := []string{}
 		for _, pkg := range installedPackages {
-			if pkg.Source != "other" {
-				packagesNotInstalledFromUrl = append(packagesNotInstalledFromUrl, GetPackageDisplayName(pkg, false))
-			}
+			installedBinaryNames = append(installedBinaryNames, pkg.Binary)
 		}
-		packages, err := PromptMultiSelect("Select any packages that you do not wish to be upgraded during stew upgrade --all.", packagesNotInstalledFromUrl, excludedPackages)
+		excludedFromUpgradeAll, err = PromptMultiSelect("Select any packages that you do not wish to be upgraded during stew upgrade --all.", installedBinaryNames, excludedPackages)
 		if err != nil {
 			return "", "", []string{}, err
 		}
-		excludedFromUpgradeAll = append(excludedFromUpgradeAll, packages...)
 	}
 
 	fullStewPath, err := ResolvePath(inputStewPath)

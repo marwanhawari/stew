@@ -133,16 +133,12 @@ func upgradeAll(userOS, userArch string, lockFile stew.LockFile, systemInfo stew
 	stew.CatchAndExit(err)
 	stewConfig, err := stew.ReadStewConfigJSON(stewConfigFilePath)
 	stew.CatchAndExit(err)
-	excludedPackages := stewConfig.ExcludedFromUpgradeAll
+	excludedBinaries := stewConfig.ExcludedFromUpgradeAll
 
 	for _, pkg := range lockFile.Packages {
-		if pkg.Source != "other" {
-			// Skip upgrading explicitly excluded packages
-			pkgName := stew.GetPackageDisplayName(pkg, false)
-			if _, packageIsExcluded := stew.Contains(excludedPackages, pkgName); packageIsExcluded {
-				fmt.Printf("%v (excluded)\n", constants.YellowColor(pkgName))
-				continue
-			}
+		if _, packageIsExcluded := stew.Contains(excludedBinaries, pkg.Binary); packageIsExcluded {
+			fmt.Printf("%v (excluded)\n", constants.YellowColor(pkg.Binary))
+			continue
 		}
 		if err := upgradeOne(pkg.Binary, userOS, userArch, lockFile, systemInfo); err != nil {
 			fmt.Fprintln(os.Stderr, err)

@@ -166,7 +166,7 @@ stew config           # Automatically updates the stew.config.json
 You can configure 2 aspects of `stew`:
 1. The `stewPath`: this is where `stew` data is stored.
 2. The `stewBinPath`: this is where `stew` installs binaries
-3. `excludeFromUpgradeAll`: this is the list of binaries that you don't want to keep upgraded during `stew upgrade --all`, perhaps if they have their own built in upgrade feature, or you want to pin a specific version.
+3. `excludeFromUpgradeAll`: this is the list of binaries that you don't want to be upgraded during `stew upgrade --all`, perhaps because they have their own built in upgrade feature or because you want to pin a specific version.
 
 The default locations for the `stewPath` and `stewBinPath` are:
 |                    | Linux/macOS | Windows |
