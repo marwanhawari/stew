@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"strings"
 
 	"github.com/marwanhawari/stew/constants"
 )
@@ -130,8 +129,10 @@ func assetsFound(releaseAssets []string, releaseTag string) error {
 
 func filterReleaseAssets(assets []string) []string {
 	var filteredAssets []string
+	re := regexp.MustCompile(constants.RegexChecksum)
+
 	for _, asset := range assets {
-		if strings.HasSuffix(asset, ".sha256") {
+		if re.MatchString(asset) {
 			continue
 		}
 		filteredAssets = append(filteredAssets, asset)
