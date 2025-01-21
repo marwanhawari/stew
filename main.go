@@ -12,7 +12,7 @@ func main() {
 
 	app := &cli.App{
 		Name:    "stew",
-		Version: "v0.4.0",
+		Version: "v0.5.0",
 		Commands: []cli.Command{
 			{
 				Name:    "install",
