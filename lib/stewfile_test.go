@@ -129,7 +129,7 @@ func Test_readLockFileJSON(t *testing.T) {
 			lockFilePath := filepath.Join(tempDir, "Stewfile.lock.json")
 			WriteLockFileJSON(testLockfile, lockFilePath)
 
-			got, err := readLockFileJSON(lockFilePath)
+			got, err := ReadLockFileJSON(lockFilePath)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("readLockFileJSON() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -160,7 +160,7 @@ func TestWriteLockFileJSON(t *testing.T) {
 				t.Errorf("WriteLockFileJSON() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			got, _ := readLockFileJSON(lockFilePath)
+			got, _ := ReadLockFileJSON(lockFilePath)
 
 			if !reflect.DeepEqual(got, testLockfile) {
 				t.Errorf("WriteLockFileJSON() = %v, want %v", got, testLockfile)

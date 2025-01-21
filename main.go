@@ -97,7 +97,7 @@ func main() {
 			},
 			{
 				Name:  "config",
-				Usage: "Configure the stew file paths using an interactive UI. [Ex: stew config]",
+				Usage: "Configure stew using an interactive UI. [Ex: stew config]",
 				Action: func(c *cli.Context) error {
 					cmd.Config()
 					return nil

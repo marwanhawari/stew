@@ -12,7 +12,7 @@ import (
 // Upgrade is executed when you run `stew upgrade`
 func Upgrade(upgradeAllCliFlag bool, binaryName string) {
 
-	userOS, userArch, _, systemInfo, err := stew.Initialize()
+	userOS, userArch, stewConfig, systemInfo, err := stew.Initialize()
 	stew.CatchAndExit(err)
 
 	if upgradeAllCliFlag && binaryName != "" {
@@ -38,7 +38,7 @@ func Upgrade(upgradeAllCliFlag bool, binaryName string) {
 	}
 
 	if upgradeAllCliFlag {
-		upgradeAll(userOS, userArch, lockFile, systemInfo)
+		upgradeAll(userOS, userArch, lockFile, systemInfo, stewConfig)
 	} else {
 		err := upgradeOne(binaryName, userOS, userArch, lockFile, systemInfo)
 		stew.CatchAndExit(err)
@@ -128,8 +128,12 @@ func upgradeOne(binaryName, userOS, userArch string, lockFile stew.LockFile, sys
 	return nil
 }
 
-func upgradeAll(userOS, userArch string, lockFile stew.LockFile, systemInfo stew.SystemInfo) {
+func upgradeAll(userOS, userArch string, lockFile stew.LockFile, systemInfo stew.SystemInfo, stewConfig stew.StewConfig) {
 	for _, pkg := range lockFile.Packages {
+		if _, packageIsExcluded := stew.Contains(stewConfig.ExcludedFromUpgradeAll, pkg.Binary); packageIsExcluded {
+			fmt.Printf("%v (Excluded)\n", constants.YellowColor(pkg.Binary))
+			continue
+		}
 		if err := upgradeOne(pkg.Binary, userOS, userArch, lockFile, systemInfo); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue
