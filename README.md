@@ -157,7 +157,6 @@ stew config           # Automatically updates the stew.config.json
 ```
 
 # Configuration
-
 `stew` can be configured with a `stew.config.json` file. The location of this file will also depend on your OS:
 |Linux/macOS | Windows |
 | ------------ | ---------- |
@@ -180,7 +179,6 @@ There are multiple ways to configure these:
 * At any time, you can manually create or edit the `stew.config.json` file. It should have values for `stewPath`, `stewBinPath`, and `excludeFromUpgradeAll`. 
 
 Make sure that the installation path is in your `PATH` environment variable. Otherwise, you won't be able to use any of the binaries installed by `stew`.
-
 
 # FAQ
 ### Why couldn't `stew` automatically find any binaries for X repo?
