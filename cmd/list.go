@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/marwanhawari/stew/constants"
 	stew "github.com/marwanhawari/stew/lib"
 )
 
@@ -26,10 +27,11 @@ func List(cliTagsFlag bool) {
 		case "other":
 			fmt.Println(pkg.URL)
 		case "github":
+			defaultLine := pkg.Owner + "/" + pkg.Repo + constants.GreenColor(":"+pkg.Binary)
 			if cliTagsFlag {
-				fmt.Println(pkg.Owner + "/" + pkg.Repo + "@" + pkg.Tag)
+				fmt.Println(defaultLine + constants.CyanColor("@"+pkg.Tag))
 			} else {
-				fmt.Println(pkg.Owner + "/" + pkg.Repo)
+				fmt.Println(defaultLine)
 			}
 		}
 	}

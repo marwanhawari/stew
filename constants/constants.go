@@ -16,6 +16,9 @@ var GreenColor = color.New(color.FgGreen, color.OpBold).Render
 // YellowColor makes text yellow
 var YellowColor = color.New(color.FgYellow, color.OpBold).Render
 
+// CyanColor makes text cyan
+var CyanColor = color.New(color.FgCyan, color.OpBold).Render
+
 // BoldColor makes text bold
 var BoldColor = color.New(color.OpBold).Render
 
