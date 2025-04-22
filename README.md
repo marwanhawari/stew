@@ -186,3 +186,6 @@ The repo probably uses an unconventional naming scheme for their binaries. You c
 
 ### Will `stew` work with private GitHub repositories?
 Yes, `stew` will automatically detect if you have a `GITHUB_TOKEN` environment variable and allow you to access binaries from your private repositories.
+
+### I'm hitting the GitHub API rate limit with a large `Stewfile.lock.json`. How can I avoid this?
+Unauthenticated GitHub API requests are limited to 60 requests per hour. However, authenticated requests can make up to 5,000 requests per hour. To avoid hitting the limit, set a `GITHUB_TOKEN` environment variable. `Stew` will automatically detect it and use it for authenticated GitHub API requests.
