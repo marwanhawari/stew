@@ -25,7 +25,7 @@ func List(cliTagsFlag bool) {
 	for _, pkg := range lockFile.Packages {
 		switch pkg.Source {
 		case "other":
-			fmt.Println(pkg.URL)
+			fmt.Println(pkg.URL + constants.GreenColor(":"+pkg.Binary))
 		case "github":
 			defaultLine := pkg.Owner + "/" + pkg.Repo + constants.GreenColor(":"+pkg.Binary)
 			if cliTagsFlag {
