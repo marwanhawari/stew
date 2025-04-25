@@ -40,7 +40,7 @@
 * No need for `sudo`.
 * Just a single binary with 0 dependencies.
 * Portable [`Stewfile`](https://github.com/marwanhawari/stew/blob/main/examples/Stewfile) with optional pinned versioning.
-* Headless batch installs from a `Stewfile.lock.json` file.
+* Headless batch installs from a [`Stewfile.lock.json`](https://github.com/marwanhawari/stew/blob/main/examples/Stewfile.lock.json) file.
 
 ![demo](https://github.com/marwanhawari/stew/raw/main/assets/demo.gif)
 
