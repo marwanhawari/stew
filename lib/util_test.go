@@ -465,6 +465,38 @@ func TestParseCLIInput(t *testing.T) {
 			want:    PackageData{},
 			wantErr: true,
 		},
+		{
+			name: "test5",
+			args: args{
+				cliInput: "a/b/c",
+			},
+			want:    PackageData{},
+			wantErr: true,
+		},
+		{
+			name: "test6",
+			args: args{
+				cliInput: "ppath:marwanhawari/ppath",
+			},
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
+			},
+			wantErr: false,
+		},
+		{
+			name: "test7",
+			args: args{
+				cliInput: "ppath:https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
+			},
+			want: PackageData{
+				Source: "other",
+				Asset:  "ppath-v0.0.3-darwin-arm64.tar.gz",
+				URL:    "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -44,7 +44,7 @@ var RegexGithub = `(?i)^[A-Za-z0-9\-]+\/[A-Za-z0-9\_\.\-]+(@.+)?$`
 var RegexGithubSearch = `(?i)^[A-Za-z0-9\_\.\-\/\:]+$`
 
 // RegexURL is a regular express for valid URLs
-var RegexURL = `(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])`
+var RegexURL = `^(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])`
 
 // RegexChecksum is a regular expression for matching checksum files
 var RegexChecksum = `\.(sha(256|512)(sum)?)$`
