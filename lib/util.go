@@ -221,10 +221,10 @@ func ParseCLIInput(cliInput string) (PackageData, error) {
 	var parsedInput PackageData
 	if reGithub.MatchString(cliInput) {
 		parsedInput, err = parseGithubInput(cliInput)
-	} else if len(splitCliInput) == 2 && reGithub.MatchString(splitCliInput[1]) {
-		parsedInput, err = parseGithubInput(splitCliInput[1])
 	} else if reURL.MatchString(cliInput) {
 		parsedInput, err = parseURLInput(cliInput)
+	} else if len(splitCliInput) == 2 && reGithub.MatchString(splitCliInput[1]) {
+		parsedInput, err = parseGithubInput(splitCliInput[1])
 	} else if len(splitCliInput) == 2 && reURL.MatchString(splitCliInput[1]) {
 		parsedInput, err = parseURLInput(splitCliInput[1])
 	} else {
