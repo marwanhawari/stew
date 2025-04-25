@@ -9,6 +9,7 @@ require (
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/schollz/progressbar/v3 v3.14.2
 	github.com/urfave/cli v1.22.14
+	golang.org/x/term v0.19.0
 )
 
 require (
@@ -31,6 +32,5 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/term v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )
