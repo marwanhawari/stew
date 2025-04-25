@@ -225,8 +225,10 @@ func ParseCLIInput(cliInput string) (PackageData, error) {
 		parsedInput, err = parseURLInput(cliInput)
 	} else if len(splitCliInput) == 2 && reGithub.MatchString(splitCliInput[1]) {
 		parsedInput, err = parseGithubInput(splitCliInput[1])
+		parsedInput.Binary = splitCliInput[0]
 	} else if len(splitCliInput) == 2 && reURL.MatchString(splitCliInput[1]) {
 		parsedInput, err = parseURLInput(splitCliInput[1])
+		parsedInput.Binary = splitCliInput[0]
 	} else {
 		return PackageData{}, UnrecognizedInputError{}
 	}
