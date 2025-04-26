@@ -36,7 +36,7 @@
 * Easily distribute binaries across teams and private repositories.
 * Get the latest releases ahead of other package managers.
 * Rapidly browse, install, and experiment with different projects.
-* [Configure](https://github.com/marwanhawari/stew/blob/main/config.md) where to install binaries.
+* [Configure](https://github.com/marwanhawari/stew?tab=readme-ov-file#configuration) where to install binaries.
 * No need for `sudo`.
 * Just a single binary with 0 dependencies.
 * Portable [`Stewfile`](https://github.com/marwanhawari/stew/blob/main/examples/Stewfile) with optional pinned versioning.
@@ -187,5 +187,5 @@ The repo probably uses an unconventional naming scheme for their binaries. You c
 ### Will `stew` work with private GitHub repositories?
 Yes, `stew` will automatically detect if you have a `GITHUB_TOKEN` environment variable and allow you to access binaries from your private repositories.
 
-### I'm hitting the GitHub API rate limit with a large `Stewfile.lock.json`. How can I avoid this?
+### I'm hitting the GitHub API rate limit when installing from a large `Stewfile.lock.json`. How can I avoid this?
 Unauthenticated GitHub API requests are limited to 60 requests per hour. However, authenticated requests can make up to 5,000 requests per hour. To avoid hitting the limit, set a `GITHUB_TOKEN` environment variable. `Stew` will automatically detect it and use it for authenticated GitHub API requests.
