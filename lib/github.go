@@ -150,6 +150,8 @@ func DetectAsset(userOS string, userArch string, releaseAssets []string) (string
 		reOS, err = regexp.Compile(constants.RegexDarwin)
 	case "windows":
 		reOS, err = regexp.Compile(constants.RegexWindows)
+	case "linux":
+		reOS, err = regexp.Compile(constants.RegexLinux)
 	default:
 		reOS, err = regexp.Compile(`(?i)` + userOS)
 	}
@@ -187,7 +189,8 @@ func DetectAsset(userOS string, userArch string, releaseAssets []string) (string
 	}
 
 	var finalAsset string
-	if len(detectedFinalAssets) != 1 {
+	if len(detectedFinalAssets) <= 1 {
+		fmt.Printf("detectedFinalAssets: %v\n", detectedFinalAssets)
 		if userOS == "darwin" && userArch == "arm64" {
 			finalAsset, err = darwinARMFallback(detectedOSAssets)
 			if err != nil {
@@ -196,6 +199,13 @@ func DetectAsset(userOS string, userArch string, releaseAssets []string) (string
 		}
 		if finalAsset == "" {
 			finalAsset, err = WarningPromptSelect("Could not automatically detect the release asset matching your OS/Arch. Please select it manually:", filteredReleaseAssets)
+			if err != nil {
+				return "", err
+			}
+		}
+	} else if len(detectedFinalAssets) >= 1 {
+		if finalAsset == "" {
+			finalAsset, err = WarningPromptSelect("Found several assets. Please select it manually:", detectedFinalAssets)
 			if err != nil {
 				return "", err
 			}

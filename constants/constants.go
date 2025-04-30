@@ -25,6 +25,9 @@ var LoadingSpinner = spinner.New(spinner.CharSets[9], 100*time.Millisecond, spin
 // RegexDarwin is a regular express for darwin systems
 var RegexDarwin = `(?i)(darwin|mac(os)?|apple|osx)`
 
+// RegexLinux is a regular express for linux systems
+var RegexLinux = `(?i)(linux|.deb)`
+
 // RegexWindows is a regular express for windows systems
 var RegexWindows = `(?i)(windows|win|.msi|.exe)`
 
