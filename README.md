@@ -104,7 +104,7 @@ stew install Stewfile
 # Install headlessly from a Stewfile.lock.json
 stew install Stewfile.lock.json
 
-# Install mutliple binaries per repo/asset
+# Install multiple binaries per repo/asset
 stew install astral-sh/uv     # Install uv the first time
 stew install astral-sh/uv     # Install uvx the second time
 ```
