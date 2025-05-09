@@ -66,6 +66,16 @@ Stew supports macOS, Linux, and Windows.
   ```
 </details>
 
+<details>
+  <summary>X-CMD</summary>
+
+  If you are a user of [x-cmd](https://x-cmd.com), you can run:
+  
+  ```sh
+  x install stew
+  ```
+</details>
+
 ### Download a compiled binary
 Compiled binaries can be downloaded from the [releases page](https://github.com/marwanhawari/stew/releases).
 
