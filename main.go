@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -28,7 +27,6 @@ func main() {
 				},
 				Action: func(c *cli.Context) error {
 					constants.Disabled = c.Bool("E")
-					fmt.Println(constants.Disabled)
 					cmd.Install(c.Args().First())
 					return nil
 				},
@@ -37,7 +35,14 @@ func main() {
 				Name:    "search",
 				Usage:   "Search for a GitHub repo then browse the selected repo's releases and assets. [Ex: stew search ripgrep]",
 				Aliases: []string{"s"},
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "E",
+						Usage: "Disable Emojis in output",
+					},
+				},
 				Action: func(c *cli.Context) error {
+					constants.Disabled = c.Bool("E")
 					cmd.Search(c.Args())
 					return nil
 				},
@@ -46,7 +51,14 @@ func main() {
 				Name:    "browse",
 				Usage:   "Browse the releases and assets from a GitHub repo. [Ex: stew browse marwanhawari/ppath]",
 				Aliases: []string{"b"},
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "E",
+						Usage: "Disable Emojis in output",
+					},
+				},
 				Action: func(c *cli.Context) error {
+					constants.Disabled = c.Bool("E")
 					cmd.Browse(c.Args().First())
 					return nil
 				},
@@ -60,8 +72,13 @@ func main() {
 						Name:  "all",
 						Usage: "Upgrade all binaries",
 					},
+					&cli.BoolFlag{
+						Name:  "E",
+						Usage: "Disable Emojis in output",
+					},
 				},
 				Action: func(c *cli.Context) error {
+					constants.Disabled = c.Bool("E")
 					cmd.Upgrade(c.Bool("all"), c.Args().First())
 					return nil
 				},
@@ -75,8 +92,13 @@ func main() {
 						Name:  "all",
 						Usage: "Uninstall all binaries",
 					},
+					&cli.BoolFlag{
+						Name:  "E",
+						Usage: "Disable Emojis in output",
+					},
 				},
 				Action: func(c *cli.Context) error {
+					constants.Disabled = c.Bool("E")
 					cmd.Uninstall(c.Bool("all"), c.Args().First())
 					return nil
 				},
@@ -85,7 +107,14 @@ func main() {
 				Name:    "rename",
 				Usage:   "Rename an installed binary using an interactive UI. [Ex: stew rename fzf]",
 				Aliases: []string{"re"},
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "E",
+						Usage: "Disable Emojis in output",
+					},
+				},
 				Action: func(c *cli.Context) error {
+					constants.Disabled = c.Bool("E")
 					cmd.Rename(c.Args().First())
 					return nil
 				},
@@ -99,8 +128,13 @@ func main() {
 						Name:  "tags",
 						Usage: "include the version tags",
 					},
+					&cli.BoolFlag{
+						Name:  "E",
+						Usage: "Disable Emojis in output",
+					},
 				},
 				Action: func(c *cli.Context) error {
+					constants.Disabled = c.Bool("E")
 					cmd.List(c.Bool("tags"))
 					return nil
 				},
@@ -108,7 +142,14 @@ func main() {
 			{
 				Name:  "config",
 				Usage: "Configure stew using an interactive UI. [Ex: stew config]",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "E",
+						Usage: "Disable Emojis in output",
+					},
+				},
 				Action: func(c *cli.Context) error {
+					constants.Disabled = c.Bool("E")
 					cmd.Config()
 					return nil
 				},
