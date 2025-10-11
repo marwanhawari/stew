@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/marwanhawari/stew/cmd"
+	"github.com/marwanhawari/stew/constants"
 	"github.com/urfave/cli"
 )
 
@@ -18,7 +20,15 @@ func main() {
 				Name:    "install",
 				Usage:   "Install a binary. The input can be a GitHub repo or a URL. [Ex: stew install marwanhawari/ppath]",
 				Aliases: []string{"i"},
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "E",
+						Usage: "Disable Emojis in output",
+					},
+				},
 				Action: func(c *cli.Context) error {
+					constants.Disabled = c.Bool("E")
+					fmt.Println(constants.Disabled)
 					cmd.Install(c.Args().First())
 					return nil
 				},

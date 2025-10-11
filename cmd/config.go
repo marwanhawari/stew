@@ -35,7 +35,7 @@ func Config() {
 	err = stew.WriteStewConfigJSON(newStewConfig, stewConfigFilePath)
 	stew.CatchAndExit(err)
 
-	fmt.Printf("📄 Updated %v\n", constants.GreenColor(stewConfigFilePath))
+	fmt.Printf(constants.GetEmoji("file")+"Updated %v\n", constants.GreenColor(stewConfigFilePath))
 
 	pathVariable := os.Getenv("PATH")
 	stew.ValidateStewBinPath(newStewBinPath, pathVariable)

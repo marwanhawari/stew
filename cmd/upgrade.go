@@ -106,7 +106,7 @@ func upgradeOne(binaryName, userOS, userArch string, lockFile stew.LockFile, sys
 	if err != nil {
 		return err
 	}
-	fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
+	fmt.Printf(constants.GetEmoji("check")+"Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
 
 	_, binaryHash, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, true, pkg.Binary, "")
 	if err != nil {
@@ -124,7 +124,7 @@ func upgradeOne(binaryName, userOS, userArch string, lockFile stew.LockFile, sys
 		return err
 	}
 
-	fmt.Printf("✨ Successfully upgraded the %v binary from %v to %v\n", constants.GreenColor(pkg.Binary), constants.GreenColor(pkg.Tag), constants.GreenColor(tag))
+	fmt.Printf(constants.GetEmoji("sparkle")+"Successfully upgraded the %v binary from %v to %v\n", constants.GreenColor(pkg.Binary), constants.GreenColor(pkg.Tag), constants.GreenColor(tag))
 	return nil
 }
 

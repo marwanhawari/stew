@@ -54,3 +54,25 @@ var StewOwner = `marwanhawari`
 
 // StewRepo is the name of the stew github repo
 var StewRepo = `stew`
+
+var Disabled bool
+
+var Emojis = map[string]string{
+	"check":   "✅ ",
+	"cross":   "❌ ",
+	"rocket":  "🚀 ",
+	"search":  "🔍 ",
+	"box":     "📦 ",
+	"down":    "⬇️ ",
+	"zap":     "⚡ ",
+	"update":  "🔄 ",
+	"sparkle": "✨ ",
+	"file":    "📄 ",
+}
+
+func GetEmoji(name string) string {
+	if !Disabled {
+		return Emojis[name]
+	}
+	return ""
+}

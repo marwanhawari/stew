@@ -58,7 +58,7 @@ func Browse(cliInput string) {
 	downloadPath := filepath.Join(stewPkgPath, asset)
 	err = stew.DownloadFile(downloadPath, downloadURL)
 	stew.CatchAndExit(err)
-	fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
+	fmt.Printf(constants.GetEmoji("check")+"Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
 
 	binaryName, binaryHash, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, false, "", "")
 	if err != nil {
@@ -82,6 +82,6 @@ func Browse(cliInput string) {
 	err = stew.WriteLockFileJSON(lockFile, stewLockFilePath)
 	stew.CatchAndExit(err)
 
-	fmt.Printf("✨ Successfully installed the %v binary in %v\n", constants.GreenColor(binaryName), constants.GreenColor(stewBinPath))
+	fmt.Printf(constants.GetEmoji("sparkle")+"Successfully installed the %v binary in %v\n", constants.GreenColor(binaryName), constants.GreenColor(stewBinPath))
 
 }
