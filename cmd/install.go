@@ -131,7 +131,7 @@ func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.S
 	if err != nil {
 		return err
 	}
-	fmt.Printf("✅ Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
+	fmt.Printf(constants.GetEmoji("check")+"Downloaded %v to %v\n", constants.GreenColor(asset), constants.GreenColor(stewPkgPath))
 
 	binaryName, binaryHash, err := stew.InstallBinary(downloadPath, repo, systemInfo, &lockFile, installingFromLockFile, desiredBinaryRename, expectedBinaryHash)
 	if err != nil {
@@ -178,7 +178,7 @@ func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.S
 		return err
 	}
 
-	fmt.Printf("✨ Successfully installed the %v binary in %v\n", constants.GreenColor(binaryName), constants.GreenColor(stewBinPath))
+	fmt.Printf(constants.GetEmoji("sparkle")+"Successfully installed the %v binary in %v\n", constants.GreenColor(binaryName), constants.GreenColor(stewBinPath))
 	return nil
 }
 

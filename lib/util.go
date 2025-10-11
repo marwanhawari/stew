@@ -88,7 +88,7 @@ func DownloadFile(downloadPath string, url string) error {
 
 	bar := progressbar.DefaultBytes(
 		resp.ContentLength,
-		"⬇️  Downloading asset:",
+		constants.GetEmoji("down")+" Downloading asset:",
 	)
 	_, err = io.Copy(io.MultiWriter(outputFile, bar), resp.Body)
 	if err != nil {

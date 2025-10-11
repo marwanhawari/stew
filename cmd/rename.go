@@ -49,5 +49,5 @@ func Rename(cliInput string) {
 	err = stew.WriteLockFileJSON(lockFile, stewLockFilePath)
 	stew.CatchAndExit(err)
 
-	fmt.Printf("✨ Successfully renamed the %v binary to %v\n", constants.GreenColor(cliInput), constants.GreenColor(renamedBinaryName))
+	fmt.Printf(constants.GetEmoji("sparkle")+"Successfully renamed the %v binary to %v\n", constants.GreenColor(cliInput), constants.GreenColor(renamedBinaryName))
 }

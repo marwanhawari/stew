@@ -57,8 +57,8 @@ func Uninstall(cliFlag bool, binaryName string) {
 	err = stew.WriteLockFileJSON(lockFile, stewLockFilePath)
 	stew.CatchAndExit(err)
 	if cliFlag {
-		fmt.Printf("✨ Successfully uninstalled all binaries from %v\n", constants.GreenColor(stewBinPath))
+		fmt.Printf(constants.GetEmoji("sparkle")+"Successfully uninstalled all binaries from %v\n", constants.GreenColor(stewBinPath))
 	} else {
-		fmt.Printf("✨ Successfully uninstalled the %v binary from %v\n", constants.GreenColor(binaryName), constants.GreenColor(stewBinPath))
+		fmt.Printf(constants.GetEmoji("sparkle")+"Successfully uninstalled the %v binary from %v\n", constants.GreenColor(binaryName), constants.GreenColor(stewBinPath))
 	}
 }
