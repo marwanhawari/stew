@@ -2,8 +2,10 @@ package main
 
 import (
 	"log"
+	"log/slog"
 	"os"
 
+	"github.com/lmittmann/tint" 
 	"github.com/marwanhawari/stew/cmd"
 	"github.com/urfave/cli"
 )
@@ -13,6 +15,12 @@ func main() {
 	app := &cli.App{
 		Name:    "stew",
 		Version: "v0.6.0",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name: "debug,d",
+				Usage: "enable debug output",
+			},
+		},
 		Commands: []cli.Command{
 			{
 				Name:    "install",
@@ -103,6 +111,35 @@ func main() {
 					return nil
 				},
 			},
+		},
+		Before: func(c *cli.Context) error {
+			logLevel := &slog.LevelVar{}
+			logLevel.Set(slog.LevelInfo)
+
+			if c.Bool("debug") {
+				logLevel.Set(slog.LevelDebug)
+			}
+
+			opts := &tint.Options{
+				Level:     logLevel,
+				AddSource: false,
+				ReplaceAttr: func(groups []string, attr slog.Attr) slog.Attr {
+					// Remove time from the output
+					if attr.Key == slog.TimeKey {
+						return slog.Attr{}
+					}
+
+					return attr
+				},
+				//NoColor: IsNoTty(),
+			}
+
+			handler := tint.NewHandler(os.Stderr, opts)
+			logger := slog.New(handler)
+
+			slog.SetDefault(logger)
+
+			return nil
 		},
 	}
 
