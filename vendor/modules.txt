@@ -33,6 +33,9 @@ github.com/gookit/color
 # github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 ## explicit
 github.com/kballard/go-shellquote
+# github.com/lmittmann/tint v1.1.2
+## explicit; go 1.21
+github.com/lmittmann/tint
 # github.com/mattn/go-colorable v0.1.13
 ## explicit; go 1.15
 github.com/mattn/go-colorable
