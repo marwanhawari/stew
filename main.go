@@ -103,6 +103,17 @@ func main() {
 					return nil
 				},
 			},
+			{
+				Name:  "completion",
+				Usage: "Generate completion script for a specified shell (currently: zsh). [Ex: stew completion zsh]",
+				Action: func(c *cli.Context) error {
+					shell := c.Args().First()
+					if shell == "" {
+						shell = "zsh"
+					}
+					return cmd.RunCompletion(shell)
+				},
+			},
 		},
 	}
 
