@@ -12,7 +12,7 @@ func main() {
 
 	app := &cli.App{
 		Name:    "stew",
-		Version: "v0.6.0",
+		Version: "v0.7.0",
 		Commands: []cli.Command{
 			{
 				Name:    "install",
@@ -101,6 +101,17 @@ func main() {
 				Action: func(c *cli.Context) error {
 					cmd.Config()
 					return nil
+				},
+			},
+			{
+				Name:  "completion",
+				Usage: "Generate completion script for a specified shell (currently: zsh). [Ex: stew completion zsh]",
+				Action: func(c *cli.Context) error {
+					shell := c.Args().First()
+					if shell == "" {
+						shell = "zsh"
+					}
+					return cmd.RunCompletion(shell)
 				},
 			},
 		},

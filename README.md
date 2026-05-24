@@ -1,5 +1,5 @@
 <p align="center">
-  <img width=30% height=auto src="https://github.com/marwanhawari/stew/raw/main/assets/stew.png" alt="stew icon"/>
+  <img width=30% height=auto src="https://github.com/jelloeater/stew/raw/main/assets/stew.png" alt="stew icon"/>
 </p>
 
 <h3 align="center">stew</h3>
@@ -8,26 +8,26 @@
 </p>
 <p align="center">
 
-  <a href="https://github.com/marwanhawari/stew/actions/">
-    <img src="https://github.com/marwanhawari/stew/actions/workflows/test.yml/badge.svg" alt="build status"/>
-  </a>
-  
-  <a href="https://goreportcard.com/report/github.com/marwanhawari/stew">
-    <img src="https://goreportcard.com/badge/github.com/marwanhawari/stew" alt="go report card"/>
+  <a href="https://github.com/jelloeater/stew/actions/">
+    <img src="https://github.com/jelloeater/stew/actions/workflows/test.yml/badge.svg" alt="build status"/>
   </a>
 
-  <a href='https://coveralls.io/github/marwanhawari/stew?branch=main'>
-    <img src='https://coveralls.io/repos/github/marwanhawari/stew/badge.svg?branch=main' alt='Coverage Status'/>
+  <a href="https://goreportcard.com/report/github.com/jelloeater/stew">
+    <img src="https://goreportcard.com/badge/github.com/jelloeater/stew" alt="go report card"/>
   </a>
 
-  <a href="https://pkg.go.dev/github.com/marwanhawari/stew">
-    <img src="https://pkg.go.dev/badge/github.com/marwanhawari/stew.svg" alt="pkg.go.dev reference"/>
+  <a href='https://coveralls.io/github/jelloeater/stew?branch=main'>
+    <img src='https://coveralls.io/repos/github/jelloeater/stew/badge.svg?branch=main' alt='Coverage Status'/>
+  </a>
+
+  <a href="https://pkg.go.dev/github.com/jelloeater/stew">
+    <img src="https://pkg.go.dev/badge/github.com/jelloeater/stew.svg" alt="pkg.go.dev reference"/>
   </a>
 
   <a href="https://github.com/avelino/awesome-go">
     <img src="https://awesome.re/mentioned-badge.svg" alt="Mentioned in Awesome Go"/>
   </a>
-  
+
 </p>
 
 
@@ -36,16 +36,25 @@
 * Easily distribute binaries across teams and private repositories.
 * Get the latest releases ahead of other package managers.
 * Rapidly browse, install, and experiment with different projects.
-* [Configure](https://github.com/marwanhawari/stew?tab=readme-ov-file#configuration) where to install binaries.
+* [Configure](https://github.com/jelloeater/stew?tab=readme-ov-file#configuration) where to install binaries.
 * No need for `sudo`.
 * Just a single binary with 0 dependencies.
-* Portable [`Stewfile`](https://github.com/marwanhawari/stew/blob/main/examples/Stewfile) with optional pinned versioning.
-* Headless batch installs from a [`Stewfile.lock.json`](https://github.com/marwanhawari/stew/blob/main/examples/Stewfile.lock.json) file.
+* Portable [`Stewfile`](https://github.com/jelloeater/stew/blob/main/examples/Stewfile) with optional pinned versioning.
+* Headless batch installs from a [`Stewfile.lock.json`](https://github.com/jelloeater/stew/blob/main/examples/Stewfile.lock.json) file.
 
-![demo](https://github.com/marwanhawari/stew/raw/main/assets/demo.gif)
+![demo](https://github.com/jelloeater/stew/raw/main/assets/demo.gif)
 
 # Installation
 Stew supports macOS, Linux, and Windows.
+
+### Install using deploy script
+<details>
+  <summary>Install the latest released version</summary>
+
+  ```sh
+  curl https://github.com/jelloeater/stew/install.sh | bash
+  ```
+</details>
 
 ### Install using a package manager
 <details>
@@ -67,14 +76,14 @@ Stew supports macOS, Linux, and Windows.
 </details>
 
 ### Download a compiled binary
-Compiled binaries can be downloaded from the [releases page](https://github.com/marwanhawari/stew/releases).
+Compiled binaries can be downloaded from the [releases page](https://github.com/jelloeater/stew/releases).
 
 ### Install using Go
 <details>
   <summary>Install the latest released version</summary>
 
   ```sh
-  go install github.com/marwanhawari/stew@latest
+  go install github.com/jelloeater/stew@latest
   ```
 </details>
 
@@ -82,13 +91,20 @@ Compiled binaries can be downloaded from the [releases page](https://github.com/
   <summary>Install the latest unreleased source</summary>
 
   ```sh
-  git clone https://github.com/marwanhawari/stew
+  git clone https://github.com/jelloeater/stew
   cd stew
   go install .
   ```
 </details>
 
 # Usage
+
+### Completions
+To enable `zsh` completions, add the following to your `.zshrc`:
+```sh
+source <(stew completion zsh)
+```
+
 ### Install
 ```sh
 # Install from GitHub releases
@@ -176,7 +192,7 @@ The default locations for the `stewPath` and `stewBinPath` are:
 There are multiple ways to configure these:
 * When you first run `stew`, it will look for a `stew.config.json` file. If it cannot find one, then you will be prompted to set the configuration values.
 * After `stew` is installed, you can use the `stew config` command to set the configuration values.
-* At any time, you can manually create or edit the `stew.config.json` file. It should have values for `stewPath`, `stewBinPath`, and `excludeFromUpgradeAll`. 
+* At any time, you can manually create or edit the `stew.config.json` file. It should have values for `stewPath`, `stewBinPath`, and `excludeFromUpgradeAll`.
 
 Make sure that the installation path is in your `PATH` environment variable. Otherwise, you won't be able to use any of the binaries installed by `stew`.
 

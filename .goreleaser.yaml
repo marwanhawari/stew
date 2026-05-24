@@ -21,9 +21,9 @@ changelog:
 nfpms:
   - builds:
       - stew
-    vendor: marwanhawari
-    homepage: "https://github.com/marwanhawari/stew"
-    maintainer: "Marwan Hawari <marwan.hawari@gmail.com>"
+    vendor: Jelloeater
+    homepage: "https://github.com/Jelloeater/stew"
+    maintainer: "Jelloeater <marwan.hawari@gmail.com>"
     description: "An independent package manager for compiled binaries"
     license: MIT
     formats:
@@ -33,12 +33,12 @@ nfpms:
     bindir: /usr/bin
 brews:
   - repository:
-      owner: marwanhawari
+      owner: Jelloeater
       name: homebrew-tap
     directory: Formula
     commit_author:
-      name: Marwan Hawari
+      name: Jelloeater
       email: marwan.hawari@gmail.com
     license: "MIT"
-    homepage: "https://github.com/marwanhawari/stew"
+    homepage: "https://github.com/Jelloeater/stew"
     description: "An independent package manager for compiled binaries"
