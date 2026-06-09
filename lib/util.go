@@ -305,6 +305,9 @@ func extractBinary(downloadedFilePath, tmpExtractionPath, desiredBinaryRename st
 // InstallBinary will extract the binary and copy it to the ~/.stew/bin path
 func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo, lockFile *LockFile, overwriteFromUpgrade bool, desiredBinaryRename, expectedBinaryHash string) (string, string, error) {
 	tmpExtractionPath, stewPkgPath, binaryInstallPath := systemInfo.StewTmpPath, systemInfo.StewPkgPath, systemInfo.StewBinPath
+	if err := os.MkdirAll(tmpExtractionPath, 0755); err != nil {
+		return "", "", err
+	}
 	if err := extractBinary(downloadedFilePath, tmpExtractionPath, desiredBinaryRename); err != nil {
 		return "", "", err
 	}

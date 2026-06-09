@@ -49,6 +49,14 @@ func upgradeOne(binaryName, userOS, userArch string, lockFile stew.LockFile, sys
 	sp := constants.LoadingSpinner
 	stewPkgPath := systemInfo.StewPkgPath
 	stewLockFilePath := systemInfo.StewLockFilePath
+	stewTmpPath := systemInfo.StewTmpPath
+
+	if err := os.RemoveAll(stewTmpPath); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(stewTmpPath, 0755); err != nil {
+		return err
+	}
 
 	indexInLockFile, binaryFoundInLockFile := stew.FindBinaryInLockFile(lockFile, binaryName)
 	if !binaryFoundInLockFile {
