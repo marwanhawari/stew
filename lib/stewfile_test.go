@@ -242,6 +242,38 @@ func TestRemovePackage(t *testing.T) {
 	}
 }
 
+func TestReadStewfileContents_commentsAndEmptyLines(t *testing.T) {
+	stewfileContents := "# Search tools\njunegunn/fzf@0.29.0\n\n  # An indented comment\n  marwanhawari/ppath@v0.0.3  \r\n\n"
+	want := []PackageData{
+		{
+			Source: "github",
+			Owner:  "junegunn",
+			Repo:   "fzf",
+			Tag:    "0.29.0",
+		},
+		{
+			Source: "github",
+			Owner:  "marwanhawari",
+			Repo:   "ppath",
+			Tag:    "v0.0.3",
+		},
+	}
+
+	testStewfilePath := filepath.Join(t.TempDir(), "Stewfile")
+	if err := os.WriteFile(testStewfilePath, []byte(stewfileContents), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := ReadStewfileContents(testStewfilePath)
+	if err != nil {
+		t.Errorf("ReadStewfileContents() error = %v", err)
+		return
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("ReadStewfileContents() = %v, want %v", got, want)
+	}
+}
+
 func TestReadStewfileContents(t *testing.T) {
 	var testStewfileSlice []PackageData = []PackageData{
 		{

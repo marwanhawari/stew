@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/marwanhawari/stew/constants"
 )
@@ -91,7 +92,11 @@ func ReadStewfileContents(stewfilePath string) ([]PackageData, error) {
 
 	var packages []PackageData
 	for scanner.Scan() {
-		packageText := scanner.Text()
+		packageText := strings.TrimSpace(scanner.Text())
+		// Ignore empty lines and comments
+		if packageText == "" || strings.HasPrefix(packageText, "#") {
+			continue
+		}
 		pkg, err := ParseCLIInput(packageText)
 		if err != nil {
 			return []PackageData{}, err
