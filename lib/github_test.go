@@ -514,6 +514,47 @@ func TestDetectAsset(t *testing.T) {
 	}
 }
 
+func TestDetectAsset_Windows(t *testing.T) {
+	tests := []struct {
+		name          string
+		releaseAssets []string
+		want          string
+	}{
+		{
+			name:          "darwin is not windows",
+			releaseAssets: []string{"program-darwin-amd64.tar.gz", "program-linux-amd64.tar.gz", "program-windows-amd64.zip"},
+			want:          "program-windows-amd64.zip",
+		},
+		{
+			name:          "win",
+			releaseAssets: []string{"program-darwin-x64.tar.gz", "program-win-x64.zip"},
+			want:          "program-win-x64.zip",
+		},
+		{
+			name:          "win64",
+			releaseAssets: []string{"program_darwin_amd64.tar.gz", "program_win64_amd64.zip"},
+			want:          "program_win64_amd64.zip",
+		},
+		{
+			name:          "exe",
+			releaseAssets: []string{"program-darwin-amd64", "program-amd64.exe"},
+			want:          "program-amd64.exe",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := DetectAsset("windows", "amd64", tt.releaseAssets)
+			if err != nil {
+				t.Errorf("DetectAsset() error = %v", err)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("DetectAsset() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_darwinARMFallback(t *testing.T) {
 	type args struct {
 		darwinAssets []string
