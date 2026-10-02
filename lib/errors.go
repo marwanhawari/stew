@@ -77,6 +77,15 @@ func (e NonZeroStatusCodeDownloadError) Error() string {
 	return fmt.Sprintf("%v Received non-zero status code from HTTP request when attempting to download a file: %v", constants.RedColor("Error:"), constants.RedColor(e.StatusCode))
 }
 
+// HTMLDownloadError occurs if the download URL returns a web page and not a file
+type HTMLDownloadError struct {
+	URL string
+}
+
+func (e HTMLDownloadError) Error() string {
+	return fmt.Sprintf("%v The URL %v returned a web page and not a downloadable file. Use the URL of a release asset or the owner/repo of a GitHub repo", constants.RedColor("Error:"), constants.RedColor(e.URL))
+}
+
 // EmptyCLIInputError occurs if the CLI input is empty
 type EmptyCLIInputError struct {
 }

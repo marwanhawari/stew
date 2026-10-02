@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -78,6 +79,10 @@ func DownloadFile(downloadPath string, url string) error {
 
 	if resp.StatusCode != http.StatusOK {
 		return NonZeroStatusCodeDownloadError{StatusCode: resp.StatusCode}
+	}
+
+	if contentType := resp.Header.Get("Content-Type"); strings.HasPrefix(strings.ToLower(contentType), "text/html") {
+		return HTMLDownloadError{URL: url}
 	}
 
 	outputFile, err := os.Create(downloadPath)
@@ -216,15 +221,25 @@ func ParseCLIInput(cliInput string) (PackageData, error) {
 		return PackageData{}, err
 	}
 
+	reGithubURL, err := regexp.Compile(constants.RegexGithubURL)
+	if err != nil {
+		return PackageData{}, err
+	}
+
 	splitCliInput := strings.SplitN(cliInput, ":", 2)
 
 	var parsedInput PackageData
 	if reGithub.MatchString(cliInput) {
 		parsedInput, err = parseGithubInput(cliInput)
+	} else if reGithubURL.MatchString(cliInput) {
+		parsedInput, err = parseGithubURLInput(reGithubURL, cliInput)
 	} else if reURL.MatchString(cliInput) {
 		parsedInput, err = parseURLInput(cliInput)
 	} else if len(splitCliInput) == 2 && reGithub.MatchString(splitCliInput[1]) {
 		parsedInput, err = parseGithubInput(splitCliInput[1])
+		parsedInput.Binary = splitCliInput[0]
+	} else if len(splitCliInput) == 2 && reGithubURL.MatchString(splitCliInput[1]) {
+		parsedInput, err = parseGithubURLInput(reGithubURL, splitCliInput[1])
 		parsedInput.Binary = splitCliInput[0]
 	} else if len(splitCliInput) == 2 && reURL.MatchString(splitCliInput[1]) {
 		parsedInput, err = parseURLInput(splitCliInput[1])
@@ -257,6 +272,21 @@ func parseGithubInput(cliInput string) (PackageData, error) {
 
 	return parsedInput, nil
 
+}
+
+// parseGithubURLInput parses the URL of a GitHub repo page or of one of its release pages
+func parseGithubURLInput(reGithubURL *regexp.Regexp, cliInput string) (PackageData, error) {
+	matches := reGithubURL.FindStringSubmatch(cliInput)
+	if matches == nil {
+		return PackageData{}, UnrecognizedInputError{}
+	}
+
+	tag, err := url.PathUnescape(matches[3])
+	if err != nil {
+		return PackageData{}, err
+	}
+
+	return PackageData{Source: "github", Owner: matches[1], Repo: matches[2], Tag: tag}, nil
 }
 
 func parseURLInput(cliInput string) (PackageData, error) {

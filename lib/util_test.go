@@ -1,6 +1,8 @@
 package stew
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -180,6 +182,23 @@ func TestDownloadFile(t *testing.T) {
 			}
 
 		})
+	}
+}
+
+func TestDownloadFile_HTML(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(`<!DOCTYPE html><html></html>`))
+	}))
+	defer server.Close()
+
+	testDownloadPath := filepath.Join(t.TempDir(), "binary")
+	err := DownloadFile(testDownloadPath, server.URL)
+	if _, ok := err.(HTMLDownloadError); !ok {
+		t.Errorf("DownloadFile() error = %v, want HTMLDownloadError", err)
+	}
+	if fileExists, _ := PathExists(testDownloadPath); fileExists {
+		t.Errorf("The file %v was created for an HTML response", testDownloadPath)
 	}
 }
 
@@ -496,6 +515,104 @@ func TestParseCLIInput(t *testing.T) {
 				Asset:  "ppath-v0.0.3-darwin-arm64.tar.gz",
 				URL:    "https://github.com/marwanhawari/ppath/releases/download/v0.0.3/ppath-v0.0.3-darwin-arm64.tar.gz",
 				Binary: "ppath",
+			},
+			wantErr: false,
+		},
+		{
+			name: "github repo url",
+			args: args{
+				cliInput: "https://github.com/marwanhawari/ppath",
+			},
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
+			},
+			wantErr: false,
+		},
+		{
+			name: "github repo url with trailing slash",
+			args: args{
+				cliInput: "https://github.com/marwanhawari/ppath/",
+			},
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
+			},
+			wantErr: false,
+		},
+		{
+			name: "github repo url without scheme",
+			args: args{
+				cliInput: "github.com/marwanhawari/ppath",
+			},
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
+			},
+			wantErr: false,
+		},
+		{
+			name: "github clone url",
+			args: args{
+				cliInput: "https://github.com/marwanhawari/ppath.git",
+			},
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
+			},
+			wantErr: false,
+		},
+		{
+			name: "github releases url",
+			args: args{
+				cliInput: "https://github.com/marwanhawari/ppath/releases",
+			},
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
+			},
+			wantErr: false,
+		},
+		{
+			name: "github latest release url",
+			args: args{
+				cliInput: "https://github.com/marwanhawari/ppath/releases/latest",
+			},
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
+			},
+			wantErr: false,
+		},
+		{
+			name: "github release tag url",
+			args: args{
+				cliInput: "https://github.com/marwanhawari/ppath/releases/tag/v0.0.3",
+			},
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
+				Tag:    "v0.0.3",
+			},
+			wantErr: false,
+		},
+		{
+			name: "github repo url with binary name",
+			args: args{
+				cliInput: "pp:https://github.com/marwanhawari/ppath",
+			},
+			want: PackageData{
+				Source: "github",
+				Owner:  "marwanhawari",
+				Repo:   "ppath",
+				Binary: "pp",
 			},
 			wantErr: false,
 		},

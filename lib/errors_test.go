@@ -196,6 +196,35 @@ func TestStewpathNotFoundError_Error(t *testing.T) {
 	}
 }
 
+func TestHTMLDownloadError_Error(t *testing.T) {
+	type fields struct {
+		URL string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				URL: "https://example.com/page",
+			},
+			want: fmt.Sprintf("%v The URL %v returned a web page and not a downloadable file. Use the URL of a release asset or the owner/repo of a GitHub repo", constants.RedColor("Error:"), constants.RedColor("https://example.com/page")),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := HTMLDownloadError{
+				URL: tt.fields.URL,
+			}
+			if got := e.Error(); got != tt.want {
+				t.Errorf("HTMLDownloadError.Error() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestNonZeroStatusCodeDownloadError_Error(t *testing.T) {
 	type fields struct {
 		StatusCode int
