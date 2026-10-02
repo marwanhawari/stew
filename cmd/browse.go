@@ -50,7 +50,9 @@ func Browse(cliInput string) {
 
 	releaseAssets, err := stew.GetGithubReleasesAssets(githubProject, tag)
 	stew.CatchAndExit(err)
-	asset, err := stew.PromptSelect("Download and install an asset", releaseAssets)
+	filteredReleaseAssets, err := stew.FilterReleaseAssets(releaseAssets, tag)
+	stew.CatchAndExit(err)
+	asset, err := stew.PromptSelect("Download and install an asset", filteredReleaseAssets)
 	stew.CatchAndExit(err)
 	assetIndex, _ := stew.Contains(releaseAssets, asset)
 

@@ -127,12 +127,16 @@ func assetsFound(releaseAssets []string, releaseTag string) error {
 	return nil
 }
 
+var (
+	reChecksum         = regexp.MustCompile(constants.RegexChecksum)
+	rePackageInstaller = regexp.MustCompile(constants.RegexPackageInstaller)
+)
+
 func filterReleaseAssets(assets []string) []string {
 	var filteredAssets []string
-	re := regexp.MustCompile(constants.RegexChecksum)
 
 	for _, asset := range assets {
-		if re.MatchString(asset) {
+		if reChecksum.MatchString(asset) || rePackageInstaller.MatchString(asset) || reMetadata.MatchString(asset) || reUnsupportedFormat.MatchString(asset) {
 			continue
 		}
 		filteredAssets = append(filteredAssets, asset)
@@ -140,91 +144,34 @@ func filterReleaseAssets(assets []string) []string {
 	return filteredAssets
 }
 
-// DetectAsset will automatically detect a release asset matching your systems OS/arch or prompt you to manually select an asset
-func DetectAsset(userOS string, userArch string, releaseAssets []string) (string, error) {
-	var detectedOSAssets []string
-	var reOS *regexp.Regexp
-	var err error
-	switch userOS {
-	case "darwin":
-		reOS, err = regexp.Compile(constants.RegexDarwin)
-	case "windows":
-		reOS, err = regexp.Compile(constants.RegexWindows)
-	default:
-		reOS, err = regexp.Compile(`(?i)` + userOS)
+func FilterReleaseAssets(assets []string, releaseTag string) ([]string, error) {
+	filteredAssets := filterReleaseAssets(assets)
+	if len(filteredAssets) == 0 {
+		return nil, PortableAssetsNotFoundError{Tag: releaseTag}
 	}
-	if err != nil {
-		return "", err
-	}
-
-	filteredReleaseAssets := filterReleaseAssets(releaseAssets)
-	for _, asset := range filteredReleaseAssets {
-		if reOS.MatchString(asset) {
-			detectedOSAssets = append(detectedOSAssets, asset)
-		}
-	}
-
-	var detectedFinalAssets []string
-	var reArch *regexp.Regexp
-	switch userArch {
-	case "arm64":
-		reArch, err = regexp.Compile(constants.RegexArm64)
-	case "amd64":
-		reArch, err = regexp.Compile(constants.RegexAmd64)
-	case "386":
-		reArch, err = regexp.Compile(constants.Regex386)
-	default:
-		reArch, err = regexp.Compile(`(?i)` + userArch)
-	}
-	if err != nil {
-		return "", err
-	}
-
-	for _, asset := range detectedOSAssets {
-		if reArch.MatchString(asset) {
-			detectedFinalAssets = append(detectedFinalAssets, asset)
-		}
-	}
-
-	var finalAsset string
-	if len(detectedFinalAssets) != 1 {
-		if userOS == "darwin" && userArch == "arm64" {
-			finalAsset, err = darwinARMFallback(detectedOSAssets)
-			if err != nil {
-				return "", err
-			}
-		}
-		if finalAsset == "" {
-			finalAsset, err = WarningPromptSelect("Could not automatically detect the release asset matching your OS/Arch. Please select it manually:", filteredReleaseAssets)
-			if err != nil {
-				return "", err
-			}
-		}
-	} else {
-		finalAsset = detectedFinalAssets[0]
-	}
-
-	return finalAsset, nil
+	return filteredAssets, nil
 }
 
-func darwinARMFallback(darwinAssets []string) (string, error) {
-	reArch, err := regexp.Compile(constants.RegexAmd64)
+// DetectAsset will automatically detect a release asset matching your systems OS/arch or prompt you to manually select an asset.
+// If bypassDetection is true, automatic detection is skipped and the user is shown all available assets (excluding checksums and installers).
+// The releaseTag is only used to give more context in error messages. The repo is used to prefer the asset of the main program.
+func DetectAsset(userOS string, userArch string, releaseAssets []string, releaseTag string, repo string, bypassDetection bool) (string, error) {
+	filteredReleaseAssets, err := FilterReleaseAssets(releaseAssets, releaseTag)
 	if err != nil {
 		return "", err
 	}
 
-	var altAssets []string
-	for _, asset := range darwinAssets {
-		if reArch.MatchString(asset) {
-			altAssets = append(altAssets, asset)
-		}
+	// If bypassDetection is true, skip all detection and show manual selection with all assets
+	if bypassDetection {
+		return WarningPromptSelect("Showing all available release assets. Please select one:", filteredReleaseAssets)
 	}
 
-	if len(altAssets) != 1 {
-		return "", nil
+	bestAssets, assetsForManualSelection := rankAssets(userOS, userArch, repo, filteredReleaseAssets)
+	if len(bestAssets) == 1 {
+		return bestAssets[0], nil
 	}
 
-	return altAssets[0], nil
+	return WarningPromptSelect("Could not automatically detect the release asset matching your OS/Arch. Please select it manually:", assetsForManualSelection)
 }
 
 // GithubSearch contains information about the GitHub search including the GitHub search results

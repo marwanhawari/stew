@@ -10,13 +10,53 @@ import (
 	"strings"
 
 	"github.com/marwanhawari/stew/constants"
-	"github.com/mholt/archiver"
+	"github.com/mholt/archiver/v3"
 	progressbar "github.com/schollz/progressbar/v3"
 )
 
+// unarchiverByExtension returns the unarchiver for an archive file or nil if the file is not an archive
+func unarchiverByExtension(filePath string) archiver.Unarchiver {
+	// The archiver library does not recognize these short extensions
+	if strings.HasSuffix(filePath, ".tbz") {
+		return archiver.NewTarBz2()
+	}
+	if strings.HasSuffix(filePath, ".tzst") {
+		return archiver.NewTarZstd()
+	}
+	format, err := archiver.ByExtension(filePath)
+	if err != nil {
+		return nil
+	}
+	unarchiver, ok := format.(archiver.Unarchiver)
+	if !ok {
+		return nil
+	}
+	return unarchiver
+}
+
+// decompressorByExtension returns the decompressor for a single compressed file or nil if the file is not compressed
+func decompressorByExtension(filePath string) archiver.Decompressor {
+	switch filepath.Ext(filePath) {
+	case ".gz":
+		return archiver.NewGz()
+	case ".bz2":
+		return archiver.NewBz2()
+	case ".xz":
+		return archiver.NewXz()
+	case ".lz4":
+		return archiver.NewLz4()
+	case ".sz":
+		return archiver.NewSnappy()
+	case ".zst":
+		return archiver.NewZstd()
+	case ".br":
+		return archiver.NewBrotli()
+	}
+	return nil
+}
+
 func isArchiveFile(filePath string) bool {
-	_, err := archiver.ByExtension(filePath)
-	return err == nil
+	return unarchiverByExtension(filePath) != nil
 }
 
 func isExecutableFile(filePath string) (bool, error) {
@@ -282,24 +322,52 @@ func FindBinaryInLockFile(lockFile LockFile, binaryName string) (int, bool) {
 	return -1, false
 }
 
-func extractBinary(downloadedFilePath, tmpExtractionPath, desiredBinaryRename string) error {
-	isArchive := isArchiveFile(downloadedFilePath)
-	if isArchive {
-		err := archiver.Unarchive(downloadedFilePath, tmpExtractionPath)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	originalBinaryName := filepath.Base(downloadedFilePath)
-	if desiredBinaryRename != "" {
-		return copyFile(downloadedFilePath, filepath.Join(tmpExtractionPath, desiredBinaryRename))
-	}
-	renamedBinaryName, err := PromptRenameBinary(originalBinaryName)
+func decompressFile(decompressor archiver.Decompressor, srcFile, destFile string) error {
+	srcContents, err := os.Open(srcFile)
 	if err != nil {
 		return err
 	}
-	return copyFile(downloadedFilePath, filepath.Join(tmpExtractionPath, renamedBinaryName))
+	defer srcContents.Close()
+
+	destContents, err := os.Create(destFile)
+	if err != nil {
+		return err
+	}
+	defer destContents.Close()
+
+	err = decompressor.Decompress(srcContents, destContents)
+	if err != nil {
+		return err
+	}
+
+	return os.Chmod(destFile, 0755)
+}
+
+func extractBinary(downloadedFilePath, tmpExtractionPath, desiredBinaryRename string) error {
+	if unarchiver := unarchiverByExtension(downloadedFilePath); unarchiver != nil {
+		return unarchiver.Unarchive(downloadedFilePath, tmpExtractionPath)
+	}
+
+	// A file that is compressed but is not an archive contains only the binary
+	originalBinaryName := filepath.Base(downloadedFilePath)
+	decompressor := decompressorByExtension(downloadedFilePath)
+	if decompressor != nil {
+		originalBinaryName = strings.TrimSuffix(originalBinaryName, filepath.Ext(originalBinaryName))
+	}
+
+	binaryName := desiredBinaryRename
+	if binaryName == "" {
+		var err error
+		binaryName, err = PromptRenameBinary(originalBinaryName)
+		if err != nil {
+			return err
+		}
+	}
+
+	if decompressor != nil {
+		return decompressFile(decompressor, downloadedFilePath, filepath.Join(tmpExtractionPath, binaryName))
+	}
+	return copyFile(downloadedFilePath, filepath.Join(tmpExtractionPath, binaryName))
 }
 
 // InstallBinary will extract the binary and copy it to the ~/.stew/bin path

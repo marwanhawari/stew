@@ -34,6 +34,18 @@ func (e AssetsNotFoundError) Error() string {
 	return fmt.Sprintf("%v Could not find any assets for release %v", constants.RedColor("Error:"), constants.RedColor(e.Tag))
 }
 
+// PortableAssetsNotFoundError occurs if only package-manager or installer assets are found for a GitHub release
+type PortableAssetsNotFoundError struct {
+	Tag string
+}
+
+func (e PortableAssetsNotFoundError) Error() string {
+	if e.Tag == "" {
+		return fmt.Sprintf("%v No portable release assets were found. Only package-manager or installer artifacts are available, and stew filters those out", constants.RedColor("Error:"))
+	}
+	return fmt.Sprintf("%v No portable release assets were found for release %v. Only package-manager or installer artifacts are available, and stew filters those out", constants.RedColor("Error:"), constants.RedColor(e.Tag))
+}
+
 // NoPackagesInLockfileError occurs if you try to remove packages from a lockfile without any packages
 type NoPackagesInLockfileError struct {
 }
@@ -91,6 +103,14 @@ type CLIFlagAndInputError struct {
 
 func (e CLIFlagAndInputError) Error() string {
 	return fmt.Sprintf("%v Cannot use the --all flag with a positional argument", constants.RedColor("Error:"))
+}
+
+// ShowAllAssetsWithAllFlagError occurs if you try to use the --show-all-assets flag with the --all flag at the same time
+type ShowAllAssetsWithAllFlagError struct {
+}
+
+func (e ShowAllAssetsWithAllFlagError) Error() string {
+	return fmt.Sprintf("%v Cannot use the --show-all-assets flag with the --all flag", constants.RedColor("Error:"))
 }
 
 // AbortBinaryOverwriteError occurs if the overwrite of a binary is aborted

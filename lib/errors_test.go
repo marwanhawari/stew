@@ -98,6 +98,32 @@ func TestAssetsNotFoundError_Error(t *testing.T) {
 	}
 }
 
+func TestPortableAssetsNotFoundError_Error(t *testing.T) {
+	tests := []struct {
+		name string
+		err  PortableAssetsNotFoundError
+		want string
+	}{
+		{
+			name: "with tag",
+			err:  PortableAssetsNotFoundError{Tag: "testTag"},
+			want: fmt.Sprintf("%v No portable release assets were found for release %v. Only package-manager or installer artifacts are available, and stew filters those out", constants.RedColor("Error:"), constants.RedColor("testTag")),
+		},
+		{
+			name: "without tag",
+			err:  PortableAssetsNotFoundError{},
+			want: fmt.Sprintf("%v No portable release assets were found. Only package-manager or installer artifacts are available, and stew filters those out", constants.RedColor("Error:")),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.err.Error(); got != tt.want {
+				t.Errorf("PortableAssetsNotFoundError.Error() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestNoPackagesInLockfileError_Error(t *testing.T) {
 	tests := []struct {
 		name string
@@ -260,6 +286,26 @@ func TestCLIFlagAndInputError_Error(t *testing.T) {
 			e := CLIFlagAndInputError{}
 			if got := e.Error(); got != tt.want {
 				t.Errorf("CLIFlagAndInputError.Error() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestShowAllAssetsWithAllFlagError_Error(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{
+			name: "test1",
+			want: fmt.Sprintf("%v Cannot use the --show-all-assets flag with the --all flag", constants.RedColor("Error:")),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := ShowAllAssetsWithAllFlagError{}
+			if got := e.Error(); got != tt.want {
+				t.Errorf("ShowAllAssetsWithAllFlagError.Error() = %v, want %v", got, tt.want)
 			}
 		})
 	}

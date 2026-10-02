@@ -10,7 +10,7 @@ import (
 )
 
 // Install is executed when you run `stew install`
-func Install(cliInput string) {
+func Install(showAllAssets bool, cliInput string) {
 	userOS, userArch, _, systemInfo, err := stew.Initialize()
 	stew.CatchAndExit(err)
 
@@ -32,12 +32,12 @@ func Install(cliInput string) {
 	} else {
 		pkg, err := stew.ParseCLIInput(cliInput)
 		stew.CatchAndExit(err)
-		err = installOne(pkg, userOS, userArch, systemInfo, false)
+		err = installOne(pkg, userOS, userArch, systemInfo, false, showAllAssets)
 		stew.CatchAndExit(err)
 	}
 }
 
-func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.SystemInfo, installingFromLockFile bool) error {
+func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.SystemInfo, installingFromLockFile bool, showAllAssets bool) error {
 	sp := constants.LoadingSpinner
 
 	stewBinPath := systemInfo.StewBinPath
@@ -106,7 +106,7 @@ func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.S
 		}
 
 		if asset == "" {
-			asset, err = stew.DetectAsset(userOS, userArch, releaseAssets)
+			asset, err = stew.DetectAsset(userOS, userArch, releaseAssets, tag, repo, showAllAssets)
 		}
 		if err != nil {
 			return err
@@ -114,7 +114,11 @@ func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.S
 
 		assetIndex, assetFound := stew.Contains(releaseAssets, asset)
 		if !assetFound {
-			asset, err = stew.WarningPromptSelect(fmt.Sprintf("Could not find the asset %v - please select an asset:", constants.YellowColor(asset)), releaseAssets)
+			filteredReleaseAssets, err := stew.FilterReleaseAssets(releaseAssets, tag)
+			if err != nil {
+				return err
+			}
+			asset, err = stew.WarningPromptSelect(fmt.Sprintf("Could not find the asset %v - please select an asset:", constants.YellowColor(asset)), filteredReleaseAssets)
 			if err != nil {
 				return err
 			}
@@ -184,7 +188,7 @@ func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.S
 
 func installFromLockFile(pkgs []stew.PackageData, userOS, userArch string, systemInfo stew.SystemInfo) error {
 	for _, pkg := range pkgs {
-		err := installOne(pkg, userOS, userArch, systemInfo, true)
+		err := installOne(pkg, userOS, userArch, systemInfo, true, false)
 		if err != nil {
 			return err
 		}
@@ -194,7 +198,7 @@ func installFromLockFile(pkgs []stew.PackageData, userOS, userArch string, syste
 
 func installFromStewfile(pkgs []stew.PackageData, userOS, userArch string, systemInfo stew.SystemInfo) {
 	for _, pkg := range pkgs {
-		err := installOne(pkg, userOS, userArch, systemInfo, false)
+		err := installOne(pkg, userOS, userArch, systemInfo, false, false)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue

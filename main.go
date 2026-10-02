@@ -18,8 +18,14 @@ func main() {
 				Name:    "install",
 				Usage:   "Install a binary. The input can be a GitHub repo or a URL. [Ex: stew install marwanhawari/ppath]",
 				Aliases: []string{"i"},
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "show-all-assets",
+						Usage: "Choose from all portable assets (checksums and package installers are hidden) instead of auto-detecting based on OS/Arch",
+					},
+				},
 				Action: func(c *cli.Context) error {
-					cmd.Install(c.Args().First())
+					cmd.Install(c.Bool("show-all-assets"), c.Args().First())
 					return nil
 				},
 			},
@@ -27,8 +33,14 @@ func main() {
 				Name:    "search",
 				Usage:   "Search for a GitHub repo then browse the selected repo's releases and assets. [Ex: stew search ripgrep]",
 				Aliases: []string{"s"},
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "show-all-assets",
+						Usage: "Choose from all portable assets (checksums and package installers are hidden) instead of auto-detecting based on OS/Arch",
+					},
+				},
 				Action: func(c *cli.Context) error {
-					cmd.Search(c.Args())
+					cmd.Search(c.Bool("show-all-assets"), c.Args())
 					return nil
 				},
 			},
@@ -50,9 +62,13 @@ func main() {
 						Name:  "all",
 						Usage: "Upgrade all binaries",
 					},
+					&cli.BoolFlag{
+						Name:  "show-all-assets",
+						Usage: "Choose from all portable assets (checksums and package installers are hidden) instead of auto-detecting based on OS/Arch. Cannot be used with --all",
+					},
 				},
 				Action: func(c *cli.Context) error {
-					cmd.Upgrade(c.Bool("all"), c.Args().First())
+					cmd.Upgrade(c.Bool("all"), c.Bool("show-all-assets"), c.Args().First())
 					return nil
 				},
 			},

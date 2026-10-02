@@ -417,6 +417,75 @@ func Test_assetsFound(t *testing.T) {
 	}
 }
 
+func Test_filterReleaseAssets(t *testing.T) {
+	tests := []struct {
+		name   string
+		assets []string
+		want   []string
+	}{
+		{
+			name: "filters checksums and installer assets",
+			assets: []string{
+				"program-linux-amd64.tar.gz",
+				"program-linux-amd64.deb",
+				"program-linux-amd64.rpm",
+				"program-linux-amd64.apk",
+				"program-macos.pkg",
+				"program-macos.dmg",
+				"program.pkg.tar.zst",
+				"program.exe",
+				"program.sha256",
+			},
+			want: []string{"program-linux-amd64.tar.gz", "program.exe"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := filterReleaseAssets(tt.assets)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("filterReleaseAssets() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFilterReleaseAssets(t *testing.T) {
+	tests := []struct {
+		name       string
+		assets     []string
+		releaseTag string
+		want       []string
+		wantErr    bool
+	}{
+		{
+			name:       "returns filtered assets",
+			assets:     []string{"program-linux-amd64.tar.gz", "program-linux-amd64.deb"},
+			releaseTag: "v1.0.0",
+			want:       []string{"program-linux-amd64.tar.gz"},
+			wantErr:    false,
+		},
+		{
+			name:       "errors when only installers remain",
+			assets:     []string{"program-linux-amd64.deb", "program-linux-amd64.rpm"},
+			releaseTag: "v1.0.0",
+			want:       nil,
+			wantErr:    true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := FilterReleaseAssets(tt.assets, tt.releaseTag)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FilterReleaseAssets() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("FilterReleaseAssets() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestDetectAsset(t *testing.T) {
 	type args struct {
 		userOS        string
@@ -499,57 +568,94 @@ func TestDetectAsset(t *testing.T) {
 			want:    "ppath-v0.0.1-windows-unexpectedArch.tar.gz",
 			wantErr: false,
 		},
+		{
+			name: "linux-multiple-assets-prefers-gnu",
+			args: args{
+				userOS:   "linux",
+				userArch: "amd64",
+				releaseAssets: []string{
+					"program-v1.0.0-linux-amd64-gnu.tar.gz",
+					"program-v1.0.0-linux-amd64-musl.tar.gz",
+				},
+			},
+			want:    "program-v1.0.0-linux-amd64-gnu.tar.gz",
+			wantErr: false,
+		},
+		{
+			name: "linux-multiple-assets-fallback-unspecified-over-musl",
+			args: args{
+				userOS:   "linux",
+				userArch: "amd64",
+				releaseAssets: []string{
+					"program-v1.0.0-linux-amd64-musl.tar.gz",
+					"program-v1.0.0-linux-amd64.tar.gz",
+				},
+			},
+			want:    "program-v1.0.0-linux-amd64.tar.gz",
+			wantErr: false,
+		},
+		{
+			name: "linux-multiple-assets-fallback-unspecified",
+			args: args{
+				userOS:   "linux",
+				userArch: "amd64",
+				releaseAssets: []string{
+					"program-v1.0.0-linux-amd64.tar.gz",
+				},
+			},
+			want:    "program-v1.0.0-linux-amd64.tar.gz",
+			wantErr: false,
+		},
+		{
+			name: "linux-ignores-installer-assets",
+			args: args{
+				userOS:   "linux",
+				userArch: "amd64",
+				releaseAssets: []string{
+					"program-v1.0.0-linux-amd64.deb",
+					"program-v1.0.0-linux-amd64.rpm",
+					"program-v1.0.0-linux-amd64.tar.gz",
+				},
+			},
+			want:    "program-v1.0.0-linux-amd64.tar.gz",
+			wantErr: false,
+		},
+		{
+			name: "errors when only installer assets exist",
+			args: args{
+				userOS:   "linux",
+				userArch: "amd64",
+				releaseAssets: []string{
+					"program-v1.0.0-linux-amd64.deb",
+					"program-v1.0.0-linux-amd64.rpm",
+				},
+			},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name: "linux-two-variants-triggers-manual",
+			args: args{
+				userOS:   "linux",
+				userArch: "amd64",
+				releaseAssets: []string{
+					"program-v1.0.0-linux-amd64-gnu-full.tar.gz",
+					"program-v1.0.0-linux-amd64-gnu-lite.tar.gz",
+				},
+			},
+			want:    "",
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := DetectAsset(tt.args.userOS, tt.args.userArch, tt.args.releaseAssets)
+			got, err := DetectAsset(tt.args.userOS, tt.args.userArch, tt.args.releaseAssets, "", "", false)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DetectAsset() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
 				t.Errorf("DetectAsset() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_darwinARMFallback(t *testing.T) {
-	type args struct {
-		darwinAssets []string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				darwinAssets: testDarwinAssets,
-			},
-			want:    "ppath-v0.0.1-darwin-amd64.tar.gz",
-			wantErr: false,
-		},
-		{
-			name: "test2",
-			args: args{
-				darwinAssets: []string{},
-			},
-			want:    "",
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := darwinARMFallback(tt.args.darwinAssets)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("darwinARMFallback() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("darwinARMFallback() = %v, want %v", got, tt.want)
 			}
 		})
 	}

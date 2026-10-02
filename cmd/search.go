@@ -9,7 +9,7 @@ import (
 )
 
 // Search is executed when you run `stew search`
-func Search(cliInput []string) {
+func Search(showAllAssets bool, cliInput []string) {
 	sp := constants.LoadingSpinner
 
 	if len(cliInput) == 0 {
@@ -38,6 +38,6 @@ func Search(cliInput []string) {
 
 	searchResultIndex, _ := stew.Contains(formattedSearchResults, githubProjectName)
 
-	Install(githubSearch.Items[searchResultIndex].FullName)
+	Install(showAllAssets, githubSearch.Items[searchResultIndex].FullName)
 
 }

@@ -10,13 +10,15 @@ import (
 )
 
 // Upgrade is executed when you run `stew upgrade`
-func Upgrade(upgradeAllCliFlag bool, binaryName string) {
+func Upgrade(upgradeAllCliFlag bool, showAllAssets bool, binaryName string) {
 
 	userOS, userArch, stewConfig, systemInfo, err := stew.Initialize()
 	stew.CatchAndExit(err)
 
 	if upgradeAllCliFlag && binaryName != "" {
 		stew.CatchAndExit(stew.CLIFlagAndInputError{})
+	} else if upgradeAllCliFlag && showAllAssets {
+		stew.CatchAndExit(stew.ShowAllAssetsWithAllFlagError{})
 	} else if !upgradeAllCliFlag {
 		err := stew.ValidateCLIInput(binaryName)
 		stew.CatchAndExit(err)
@@ -40,12 +42,12 @@ func Upgrade(upgradeAllCliFlag bool, binaryName string) {
 	if upgradeAllCliFlag {
 		upgradeAll(userOS, userArch, lockFile, systemInfo, stewConfig)
 	} else {
-		err := upgradeOne(binaryName, userOS, userArch, lockFile, systemInfo)
+		err := upgradeOne(binaryName, userOS, userArch, lockFile, systemInfo, showAllAssets)
 		stew.CatchAndExit(err)
 	}
 }
 
-func upgradeOne(binaryName, userOS, userArch string, lockFile stew.LockFile, systemInfo stew.SystemInfo) error {
+func upgradeOne(binaryName, userOS, userArch string, lockFile stew.LockFile, systemInfo stew.SystemInfo, showAllAssets bool) error {
 	sp := constants.LoadingSpinner
 	stewPkgPath := systemInfo.StewPkgPath
 	stewLockFilePath := systemInfo.StewLockFilePath
@@ -95,9 +97,13 @@ func upgradeOne(binaryName, userOS, userArch string, lockFile stew.LockFile, sys
 		return err
 	}
 
-	asset, err := stew.DetectAsset(userOS, userArch, releaseAssets)
-	if err != nil {
-		return err
+	// Prefer the asset that has the same name as the installed asset, to keep the selection of the user
+	asset, assetMatchesPrevious := stew.MatchPreviousAsset(pkg.Asset, pkg.Tag, tag, releaseAssets)
+	if !assetMatchesPrevious || showAllAssets {
+		asset, err = stew.DetectAsset(userOS, userArch, releaseAssets, tag, repo, showAllAssets)
+		if err != nil {
+			return err
+		}
 	}
 	assetIndex, _ := stew.Contains(releaseAssets, asset)
 	downloadURL := githubProject.Releases[tagIndex].Assets[assetIndex].DownloadURL
@@ -134,7 +140,7 @@ func upgradeAll(userOS, userArch string, lockFile stew.LockFile, systemInfo stew
 			fmt.Printf("%v (Excluded)\n", constants.YellowColor(pkg.Binary))
 			continue
 		}
-		if err := upgradeOne(pkg.Binary, userOS, userArch, lockFile, systemInfo); err != nil {
+		if err := upgradeOne(pkg.Binary, userOS, userArch, lockFile, systemInfo, false); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue
 		}

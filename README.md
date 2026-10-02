@@ -94,6 +94,7 @@ Compiled binaries can be downloaded from the [releases page](https://github.com/
 # Install from GitHub releases
 stew install junegunn/fzf              # Install the latest release
 stew install junegunn/fzf@0.27.1       # Install a specific, tagged version
+stew install --show-all-assets junegunn/fzf   # Select the release asset manually
 
 # Install directly from a URL
 stew install https://github.com/cli/cli/releases/download/v2.4.0/gh_2.4.0_macOS_amd64.tar.gz
@@ -127,6 +128,7 @@ stew browse sharkdp/hyperfine
 # Upgrade a binary to its latest version. Not for binaries installed from a URL.
 stew upgrade rg           # Upgrade using the name of the binary directly
 stew upgrade --all        # Upgrade all binaries
+stew upgrade --show-all-assets rg   # Select a different release asset during the upgrade
 ```
 
 ### Uninstall
