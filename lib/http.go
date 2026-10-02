@@ -4,9 +4,18 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
-	"strings"
 )
+
+// isGithubAPIURL checks that the host of a URL is the GitHub API. The GITHUB_TOKEN must only be sent to this host.
+func isGithubAPIURL(rawURL string) bool {
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		return false
+	}
+	return parsedURL.Scheme == "https" && parsedURL.Hostname() == "api.github.com"
+}
 
 func getHTTPResponseBody(url string) (string, error) {
 	client := &http.Client{}
@@ -15,7 +24,7 @@ func getHTTPResponseBody(url string) (string, error) {
 		return "", err
 	}
 
-	if strings.Contains(url, "api.github.com") {
+	if isGithubAPIURL(url) {
 		req.Header.Add("Accept", "application/vnd.github.v3+json")
 		githubToken := os.Getenv("GITHUB_TOKEN")
 		if githubToken != "" {

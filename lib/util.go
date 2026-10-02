@@ -59,7 +59,7 @@ func DownloadFile(downloadPath string, url string) error {
 		return err
 	}
 
-	if strings.Contains(url, "api.github.com") {
+	if isGithubAPIURL(url) {
 		req.Header.Add("Accept", "application/octet-stream")
 		githubToken := os.Getenv("GITHUB_TOKEN")
 		if githubToken != "" {
