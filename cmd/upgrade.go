@@ -76,11 +76,11 @@ func upgradeOne(binaryName, userOS, userArch string, lockFile stew.LockFile, sys
 		return err
 	}
 
-	// Start at the latest tag
-	tagIndex := 0
 	// Find first non-prerelease tag
-	for githubProject.Releases[tagIndex].Prerelease {
-		tagIndex += 1
+	tagIndex, stableReleaseFound := stew.GetLatestStableReleaseIndex(githubProject)
+	if !stableReleaseFound {
+		// All the releases are prereleases, so use the latest one
+		tagIndex = 0
 	}
 
 	tag := githubProject.Releases[tagIndex].TagName

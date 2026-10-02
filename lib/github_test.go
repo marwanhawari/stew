@@ -289,6 +289,48 @@ func TestGetGithubReleasesTags(t *testing.T) {
 	}
 }
 
+func TestGetLatestStableReleaseIndex(t *testing.T) {
+	tests := []struct {
+		name      string
+		releases  GithubAPIResponse
+		want      int
+		wantFound bool
+	}{
+		{
+			name:      "latest release is stable",
+			releases:  GithubAPIResponse{{TagName: "v2"}, {TagName: "v1"}},
+			want:      0,
+			wantFound: true,
+		},
+		{
+			name:      "skips prereleases",
+			releases:  GithubAPIResponse{{TagName: "v3-rc1", Prerelease: true}, {TagName: "v2-rc1", Prerelease: true}, {TagName: "v1"}},
+			want:      2,
+			wantFound: true,
+		},
+		{
+			name:      "only prereleases",
+			releases:  GithubAPIResponse{{TagName: "v2-rc1", Prerelease: true}, {TagName: "v1-rc1", Prerelease: true}},
+			want:      -1,
+			wantFound: false,
+		},
+		{
+			name:      "no releases",
+			releases:  GithubAPIResponse{},
+			want:      -1,
+			wantFound: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotFound := GetLatestStableReleaseIndex(GithubProject{Releases: tt.releases})
+			if got != tt.want || gotFound != tt.wantFound {
+				t.Errorf("GetLatestStableReleaseIndex() = %v, %v, want %v, %v", got, gotFound, tt.want, tt.wantFound)
+			}
+		})
+	}
+}
+
 func Test_releasesFound(t *testing.T) {
 	type args struct {
 		releaseTags []string

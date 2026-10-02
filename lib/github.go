@@ -91,6 +91,16 @@ func GetGithubReleasesTags(ghProject GithubProject) ([]string, error) {
 
 }
 
+// GetLatestStableReleaseIndex gets the index of the latest release that is not a prerelease. The bool is false if all the releases are prereleases.
+func GetLatestStableReleaseIndex(ghProject GithubProject) (int, bool) {
+	for index, release := range ghProject.Releases {
+		if !release.Prerelease {
+			return index, true
+		}
+	}
+	return -1, false
+}
+
 func releasesFound(releaseTags []string, owner string, repo string) error {
 	if len(releaseTags) == 0 {
 		return ReleasesNotFoundError{Owner: owner, Repo: repo}

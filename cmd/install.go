@@ -83,11 +83,8 @@ func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.S
 
 		if tag == "" || tag == "latest" {
 			// Find first non-prerelease tag
-			for _, release := range githubProject.Releases {
-				if !release.Prerelease {
-					tag = release.TagName
-					break
-				}
+			if stableIndex, stableReleaseFound := stew.GetLatestStableReleaseIndex(githubProject); stableReleaseFound {
+				tag = releaseTags[stableIndex]
 			}
 		}
 
