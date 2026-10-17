@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/marwanhawari/stew/constants"
@@ -123,6 +124,58 @@ func copyFile(srcFile, destFile string) error {
 	}
 
 	return os.Chmod(destFile, 0755)
+}
+
+// replaceFile copies srcFile to destFile without writing into an existing destFile.
+// The copy goes into a temporary file in the same directory, which is then renamed to destFile.
+// Thus a program that is running from destFile, for example stew itself, can be replaced.
+func replaceFile(srcFile, destFile string) error {
+	srcContents, err := os.Open(srcFile)
+	if err != nil {
+		return err
+	}
+	defer srcContents.Close()
+
+	tmpContents, err := os.CreateTemp(filepath.Dir(destFile), "."+filepath.Base(destFile)+".tmp-*")
+	if err != nil {
+		return err
+	}
+	tmpFile := tmpContents.Name()
+
+	_, err = io.Copy(tmpContents, srcContents)
+	if closeErr := tmpContents.Close(); err == nil {
+		err = closeErr
+	}
+	if err == nil {
+		err = os.Chmod(tmpFile, 0755)
+	}
+	if err == nil {
+		err = renameOverFile(tmpFile, destFile)
+	}
+	if err != nil {
+		os.Remove(tmpFile)
+		return err
+	}
+	return nil
+}
+
+// renameOverFile renames srcFile to destFile and replaces destFile if it exists.
+// Windows cannot replace a running program, but it can rename it. Thus on Windows a destFile that cannot be replaced
+// is first renamed to destFile.old. That file is deleted at the next replacement.
+func renameOverFile(srcFile, destFile string) error {
+	err := os.Rename(srcFile, destFile)
+	if err == nil || runtime.GOOS != "windows" {
+		return err
+	}
+
+	oldFile := destFile + ".old"
+	if removeErr := os.Remove(oldFile); removeErr != nil && !os.IsNotExist(removeErr) {
+		return err
+	}
+	if renameErr := os.Rename(destFile, oldFile); renameErr != nil {
+		return err
+	}
+	return os.Rename(srcFile, destFile)
 }
 
 func walkDir(rootDir string) ([]string, error) {
@@ -323,7 +376,7 @@ func InstallBinary(downloadedFilePath string, repo string, systemInfo SystemInfo
 		return "", "", err
 	}
 
-	err = copyFile(binaryFileInTmpExtractionPath, filepath.Join(binaryInstallPath, binaryName))
+	err = replaceFile(binaryFileInTmpExtractionPath, filepath.Join(binaryInstallPath, binaryName))
 	if err != nil {
 		return "", "", err
 	}
