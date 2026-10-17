@@ -2,7 +2,10 @@ package stew
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
+	"net/url"
 	"regexp"
 
 	"github.com/marwanhawari/stew/constants"
@@ -72,6 +75,32 @@ func NewGithubProject(owner, repo string) (GithubProject, error) {
 	ghProject := GithubProject{Owner: owner, Repo: repo, Releases: ghAPIResponse}
 
 	return ghProject, nil
+}
+
+// AddGithubReleaseByTag loads the release with the given tag and adds it to the GithubProject.
+// NewGithubProject loads only the newest 100 releases, thus an older release is not in the GithubProject.
+// The bool is false if the project has no release with the tag.
+func AddGithubReleaseByTag(ghProject *GithubProject, tag string) (bool, error) {
+	releaseURL := fmt.Sprintf("https://api.github.com/repos/%v/%v/releases/tags/%v", ghProject.Owner, ghProject.Repo, url.PathEscape(tag))
+	response, err := getHTTPResponseBody(releaseURL)
+	if err != nil {
+		var statusCodeError NonZeroStatusCodeError
+		if errors.As(err, &statusCodeError) && statusCodeError.StatusCode == http.StatusNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	var release GithubRelease
+	if err := json.Unmarshal([]byte(response), &release); err != nil {
+		return false, err
+	}
+	if release.TagName != tag {
+		return false, nil
+	}
+
+	ghProject.Releases = append(ghProject.Releases, release)
+	return true, nil
 }
 
 // GetGithubReleasesTags gets a string slice of the releases for a GithubProject
