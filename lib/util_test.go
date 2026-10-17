@@ -382,6 +382,44 @@ func Test_getBinaryError(t *testing.T) {
 	}
 }
 
+func Test_getBinary_desiredBinaryName(t *testing.T) {
+	tempDir := t.TempDir()
+	filePaths := []string{}
+	for _, name := range []string{"ffmpeg", "ffplay", "ffprobe"} {
+		filePath := filepath.Join(tempDir, name)
+		if err := os.WriteFile(filePath, []byte("An executable file named "+name), 0755); err != nil {
+			t.Fatal(err)
+		}
+		filePaths = append(filePaths, filePath)
+	}
+	wantBinaryFile := filepath.Join(tempDir, "ffprobe")
+	wantBinaryHash, _ := CalculateFileHash(wantBinaryFile)
+
+	tests := []struct {
+		name               string
+		expectedBinaryHash string
+		wantErr            error
+	}{
+		{name: "no hash", expectedBinaryHash: ""},
+		{name: "matching hash", expectedBinaryHash: wantBinaryHash},
+		{name: "different hash", expectedBinaryHash: "0000", wantErr: BinaryMismatchError{BinaryName: "ffprobe"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotBinaryFile, gotBinaryName, gotBinaryHash, err := getBinary(filePaths, "ffprobe", tt.expectedBinaryHash)
+			if err != tt.wantErr {
+				t.Fatalf("getBinary() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if err != nil {
+				return
+			}
+			if gotBinaryFile != wantBinaryFile || gotBinaryName != "ffprobe" || gotBinaryHash != wantBinaryHash {
+				t.Errorf("getBinary() = %v, %v, %v, want %v, ffprobe, %v", gotBinaryFile, gotBinaryName, gotBinaryHash, wantBinaryFile, wantBinaryHash)
+			}
+		})
+	}
+}
+
 func TestValidateCLIInput(t *testing.T) {
 	type args struct {
 		cliInput string
