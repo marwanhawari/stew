@@ -2,6 +2,7 @@ package stew
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/marwanhawari/stew/constants"
 )
@@ -178,4 +179,23 @@ type SelfInstallError struct {
 
 func (e SelfInstallError) Error() string {
 	return fmt.Sprintf("%v Stew cannot self-install/self-upgrade. You should upgrade stew with the original install method, whether it was manually or through a package manager", constants.RedColor("Error:"))
+}
+
+// NonInteractivePromptError occurs when stew must ask the user, but there is no terminal or the --yes flag is set
+type NonInteractivePromptError struct {
+	Message string
+}
+
+func (e NonInteractivePromptError) Error() string {
+	return fmt.Sprintf("%v Cannot ask the user without a terminal or with the --yes flag: %v", constants.RedColor("Error:"), e.Message)
+}
+
+// InstallFailedError occurs when one or more packages of a Stewfile or a lockfile could not be installed
+type InstallFailedError struct {
+	Packages []string
+	Total    int
+}
+
+func (e InstallFailedError) Error() string {
+	return fmt.Sprintf("%v Could not install %v of %v packages: %v", constants.RedColor("Error:"), len(e.Packages), e.Total, constants.RedColor(strings.Join(e.Packages, ", ")))
 }

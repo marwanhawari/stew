@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/marwanhawari/stew/constants"
 	stew "github.com/marwanhawari/stew/lib"
@@ -14,7 +15,7 @@ func Install(cliInput string) {
 	userOS, userArch, _, systemInfo, err := stew.Initialize()
 	stew.CatchAndExit(err)
 
-	if filepath.Base(cliInput) == "Stewfile.lock.json" {
+	if isLockFileInput(cliInput) {
 		pkgs, err := stew.ReadStewLockFileContents(cliInput)
 		stew.CatchAndExit(err)
 		if len(pkgs) == 0 {
@@ -28,7 +29,8 @@ func Install(cliInput string) {
 		if len(pkgs) == 0 {
 			stew.CatchAndExit(stew.EmptyCLIInputError{})
 		}
-		installFromStewfile(pkgs, userOS, userArch, systemInfo)
+		err = installFromStewfile(pkgs, userOS, userArch, systemInfo)
+		stew.CatchAndExit(err)
 	} else {
 		pkg, err := stew.ParseCLIInput(cliInput)
 		stew.CatchAndExit(err)
@@ -182,22 +184,54 @@ func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.S
 	return nil
 }
 
+// isLockFileInput checks if the input is a lockfile: Stewfile.lock.json, or an existing file whose name ends with .lock.json
+func isLockFileInput(cliInput string) bool {
+	if filepath.Base(cliInput) == "Stewfile.lock.json" {
+		return true
+	}
+	if !strings.HasSuffix(cliInput, ".lock.json") {
+		return false
+	}
+	fileInfo, err := os.Stat(cliInput)
+	return err == nil && fileInfo.Mode().IsRegular()
+}
+
 func installFromLockFile(pkgs []stew.PackageData, userOS, userArch string, systemInfo stew.SystemInfo) error {
+	return installAll(pkgs, userOS, userArch, systemInfo, true)
+}
+
+func installFromStewfile(pkgs []stew.PackageData, userOS, userArch string, systemInfo stew.SystemInfo) error {
+	return installAll(pkgs, userOS, userArch, systemInfo, false)
+}
+
+// installAll installs each package. After an error, it continues with the next package.
+// It returns an InstallFailedError that names the packages that could not be installed.
+func installAll(pkgs []stew.PackageData, userOS, userArch string, systemInfo stew.SystemInfo, installingFromLockFile bool) error {
+	failedPackages := []string{}
 	for _, pkg := range pkgs {
-		err := installOne(pkg, userOS, userArch, systemInfo, true)
-		if err != nil {
-			return err
+		err := installOne(pkg, userOS, userArch, systemInfo, installingFromLockFile)
+		if err == nil {
+			continue
 		}
+		fmt.Fprintln(os.Stderr, err)
+		// The user chose not to overwrite the binary, thus this is not a failure
+		if _, aborted := err.(stew.AbortBinaryOverwriteError); aborted {
+			continue
+		}
+		failedPackages = append(failedPackages, packageName(pkg))
+	}
+	if len(failedPackages) > 0 {
+		return stew.InstallFailedError{Packages: failedPackages, Total: len(pkgs)}
 	}
 	return nil
 }
 
-func installFromStewfile(pkgs []stew.PackageData, userOS, userArch string, systemInfo stew.SystemInfo) {
-	for _, pkg := range pkgs {
-		err := installOne(pkg, userOS, userArch, systemInfo, false)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			continue
-		}
+func packageName(pkg stew.PackageData) string {
+	if pkg.Source == "github" {
+		return pkg.Owner + "/" + pkg.Repo
 	}
+	if pkg.Binary != "" {
+		return pkg.Binary
+	}
+	return pkg.Asset
 }
