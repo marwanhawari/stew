@@ -248,6 +248,43 @@ func TestNewGithubProject(t *testing.T) {
 	}
 }
 
+func TestAddGithubReleaseByTag(t *testing.T) {
+	tests := []struct {
+		name      string
+		tag       string
+		wantFound bool
+	}{
+		// cli/cli has more than 100 releases, thus v0.5.0 is not in the first page
+		{name: "old tag", tag: "v0.5.0", wantFound: true},
+		{name: "missing tag", tag: "v0.0.0-does-not-exist", wantFound: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ghProject := GithubProject{Owner: "cli", Repo: "cli"}
+			gotFound, err := AddGithubReleaseByTag(&ghProject, tt.tag)
+			if err != nil {
+				t.Fatalf("AddGithubReleaseByTag() error = %v", err)
+			}
+			if gotFound != tt.wantFound {
+				t.Fatalf("AddGithubReleaseByTag() = %v, want %v", gotFound, tt.wantFound)
+			}
+			if !tt.wantFound {
+				if len(ghProject.Releases) != 0 {
+					t.Errorf("AddGithubReleaseByTag() added %v releases, want 0", len(ghProject.Releases))
+				}
+				return
+			}
+			if len(ghProject.Releases) != 1 || ghProject.Releases[0].TagName != tt.tag {
+				t.Fatalf("AddGithubReleaseByTag() releases = %v, want one release with tag %v", ghProject.Releases, tt.tag)
+			}
+			releaseAssets, err := GetGithubReleasesAssets(ghProject, tt.tag)
+			if err != nil || len(releaseAssets) == 0 {
+				t.Errorf("GetGithubReleasesAssets() = %v, %v, want assets", releaseAssets, err)
+			}
+		})
+	}
+}
+
 func TestGetGithubReleasesTags(t *testing.T) {
 	type args struct {
 		ghProject GithubProject

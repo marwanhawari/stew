@@ -92,6 +92,19 @@ func installOne(pkg stew.PackageData, userOS, userArch string, systemInfo stew.S
 		}
 
 		tagIndex, tagFound := stew.Contains(releaseTags, tag)
+		if !tagFound && tag != "" && tag != "latest" {
+			// The tag can be older than the newest 100 releases
+			sp.Start()
+			tagFound, err = stew.AddGithubReleaseByTag(&githubProject, tag)
+			sp.Stop()
+			if err != nil {
+				return err
+			}
+			if tagFound {
+				releaseTags = append(releaseTags, tag)
+				tagIndex = len(releaseTags) - 1
+			}
+		}
 		if !tagFound {
 			tag, err = stew.WarningPromptSelect(fmt.Sprintf("Could not find a release with the tag %v - please select a release:", constants.YellowColor(tag)), releaseTags)
 			if err != nil {
