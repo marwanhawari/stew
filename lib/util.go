@@ -167,6 +167,16 @@ func getBinary(filePaths []string, desiredBinaryRename, expectedBinaryHash strin
 		executableFiles = append(executableFiles, ExecutableFileInfo{fileName: fileNameBase, filePath: fullPath, fileHash: fileHash})
 	}
 
+	// The lockfile or Stewfile can name the binary. If the hash did not match, use the executable with that name.
+	if desiredBinaryRename != "" && len(executableFiles) > 1 {
+		for _, executableFile := range executableFiles {
+			if executableFile.fileName == desiredBinaryRename {
+				executableFiles = []ExecutableFileInfo{executableFile}
+				break
+			}
+		}
+	}
+
 	if len(executableFiles) != 1 {
 		binaryFilePath, err := WarningPromptSelect("Could not automatically detect the binary. Please select it manually:", filePaths)
 		if err != nil {
