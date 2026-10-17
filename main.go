@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/marwanhawari/stew/cmd"
+	stew "github.com/marwanhawari/stew/lib"
 	"github.com/urfave/cli"
 )
 
@@ -18,7 +19,14 @@ func main() {
 				Name:    "install",
 				Usage:   "Install a binary. The input can be a GitHub repo or a URL. [Ex: stew install marwanhawari/ppath]",
 				Aliases: []string{"i"},
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:  "yes, y",
+						Usage: "Do not ask the user: overwrite installed binaries, keep binary names, and fail when a tag, asset, or binary must be selected",
+					},
+				},
 				Action: func(c *cli.Context) error {
+					stew.NonInteractive = c.Bool("yes")
 					cmd.Install(c.Args().First())
 					return nil
 				},
@@ -50,8 +58,13 @@ func main() {
 						Name:  "all",
 						Usage: "Upgrade all binaries",
 					},
+					&cli.BoolFlag{
+						Name:  "yes, y",
+						Usage: "Do not ask the user: overwrite installed binaries, keep binary names, and fail when a tag, asset, or binary must be selected",
+					},
 				},
 				Action: func(c *cli.Context) error {
+					stew.NonInteractive = c.Bool("yes")
 					cmd.Upgrade(c.Bool("all"), c.Args().First())
 					return nil
 				},

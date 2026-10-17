@@ -507,3 +507,19 @@ func TestBinaryMismatchError_Error(t *testing.T) {
 		})
 	}
 }
+
+func TestNonInteractivePromptError_Error(t *testing.T) {
+	e := NonInteractivePromptError{Message: "Please select an asset:"}
+	want := fmt.Sprintf("%v Cannot ask the user without a terminal or with the --yes flag: Please select an asset:", constants.RedColor("Error:"))
+	if got := e.Error(); got != want {
+		t.Errorf("NonInteractivePromptError.Error() = %v, want %v", got, want)
+	}
+}
+
+func TestInstallFailedError_Error(t *testing.T) {
+	e := InstallFailedError{Packages: []string{"junegunn/fzf", "cli/cli"}, Total: 5}
+	want := fmt.Sprintf("%v Could not install 2 of 5 packages: %v", constants.RedColor("Error:"), constants.RedColor("junegunn/fzf, cli/cli"))
+	if got := e.Error(); got != want {
+		t.Errorf("InstallFailedError.Error() = %v, want %v", got, want)
+	}
+}

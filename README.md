@@ -104,6 +104,9 @@ stew install Stewfile
 # Install headlessly from a Stewfile.lock.json
 stew install Stewfile.lock.json
 
+# Install without prompts, for example in CI or a script
+stew install --yes junegunn/fzf
+
 # Install multiple binaries per repo/asset
 stew install astral-sh/uv     # Install uv the first time
 stew install astral-sh/uv     # Install uvx the second time
