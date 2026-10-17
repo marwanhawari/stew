@@ -1,9 +1,12 @@
 package stew
 
 import (
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"testing"
 )
 
@@ -233,6 +236,89 @@ func Test_copyFile(t *testing.T) {
 			}
 
 		})
+	}
+}
+
+func Test_replaceFile(t *testing.T) {
+	tempDir := t.TempDir()
+	srcFilePath := filepath.Join(tempDir, "new")
+	destFilePath := filepath.Join(tempDir, "binary")
+	if err := os.WriteFile(srcFilePath, []byte("new contents"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(destFilePath, []byte("old contents"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	// A reader of the old file must continue to see the old contents
+	oldFile, err := os.Open(destFilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer oldFile.Close()
+
+	if err := replaceFile(srcFilePath, destFilePath); err != nil {
+		t.Fatalf("replaceFile() error = %v", err)
+	}
+
+	got, err := os.ReadFile(destFilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "new contents" {
+		t.Errorf("replaceFile() wrote %q, want %q", got, "new contents")
+	}
+	if isExecutable, _ := isExecutableFile(destFilePath); !isExecutable {
+		t.Errorf("replaceFile() did not make %v executable", destFilePath)
+	}
+	if runtime.GOOS != "windows" {
+		oldContents, err := io.ReadAll(oldFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if string(oldContents) != "old contents" {
+			t.Errorf("replaceFile() changed the old file to %q", oldContents)
+		}
+		entries, err := os.ReadDir(tempDir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(entries) != 2 {
+			t.Errorf("replaceFile() left a temporary file: %v", entries)
+		}
+	}
+}
+
+func Test_replaceFile_runningProgram(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("the test uses the sleep program of Linux")
+	}
+	sleepPath, err := exec.LookPath("sleep")
+	if err != nil {
+		t.Skip("sleep is not available")
+	}
+
+	tempDir := t.TempDir()
+	destFilePath := filepath.Join(tempDir, "sleep")
+	if err := copyFile(sleepPath, destFilePath); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command(destFilePath, "30")
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		cmd.Process.Kill()
+		cmd.Wait()
+	}()
+
+	// Linux refuses to write into a running program with the error "text file busy"
+	srcFilePath := filepath.Join(tempDir, "new")
+	if err := os.WriteFile(srcFilePath, []byte("new contents"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := replaceFile(srcFilePath, destFilePath); err != nil {
+		t.Fatalf("replaceFile() error = %v", err)
 	}
 }
 
