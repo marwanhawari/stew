@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -196,6 +197,11 @@ func installFromStewfile(pkgs []stew.PackageData, userOS, userArch string, syste
 	for _, pkg := range pkgs {
 		err := installOne(pkg, userOS, userArch, systemInfo, false)
 		if err != nil {
+			// All the remaining packages will also fail, so stop
+			var rateLimitErr stew.GithubRateLimitError
+			if errors.As(err, &rateLimitErr) {
+				stew.CatchAndExit(err)
+			}
 			fmt.Fprintln(os.Stderr, err)
 			continue
 		}
