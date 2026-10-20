@@ -406,7 +406,7 @@ func TestAlreadyInstalledLatestTagError_Error(t *testing.T) {
 			fields: fields{
 				Tag: "testTag",
 			},
-			want: fmt.Sprintf("%v The latest tag %v is already installed", constants.RedColor("Error:"), constants.RedColor("testTag")),
+			want: fmt.Sprintf("%v The latest tag %v is already installed", constants.YellowColor("Warning:"), constants.YellowColor("testTag")),
 		},
 	}
 	for _, tt := range tests {

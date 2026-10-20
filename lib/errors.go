@@ -136,13 +136,13 @@ func (e InstalledFromURLError) Error() string {
 	return fmt.Sprintf("%v The %v binary was installed directly from a URL", constants.RedColor("Error:"), constants.RedColor(e.Binary))
 }
 
-// AlreadyInstalledLatestTagError occurs if you try to upgrade a binary but the latest version is already installed
+// AlreadyInstalledLatestTagError occurs if you try to upgrade a binary but the latest version is already installed. It is a warning, not a failure
 type AlreadyInstalledLatestTagError struct {
 	Tag string
 }
 
 func (e AlreadyInstalledLatestTagError) Error() string {
-	return fmt.Sprintf("%v The latest tag %v is already installed", constants.RedColor("Error:"), constants.RedColor(e.Tag))
+	return fmt.Sprintf("%v The latest tag %v is already installed", constants.YellowColor("Warning:"), constants.YellowColor(e.Tag))
 }
 
 // NoGithubSearchResultsError occurs if the GitHub search API returns no items

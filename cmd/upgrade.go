@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -41,6 +42,12 @@ func Upgrade(upgradeAllCliFlag bool, binaryName string) {
 		upgradeAll(userOS, userArch, lockFile, systemInfo, stewConfig)
 	} else {
 		err := upgradeOne(binaryName, userOS, userArch, lockFile, systemInfo)
+		var latestTagErr stew.AlreadyInstalledLatestTagError
+		if errors.As(err, &latestTagErr) {
+			// The binary is up to date, so this is not a failure
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
 		stew.CatchAndExit(err)
 	}
 }
