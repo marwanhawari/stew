@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/marwanhawari/stew/constants"
 )
@@ -503,6 +504,38 @@ func TestBinaryMismatchError_Error(t *testing.T) {
 			}
 			if got := e.Error(); got != tt.want {
 				t.Errorf("BinaryMismatchError.Error() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGithubRateLimitError_Error(t *testing.T) {
+	reset := time.Date(2026, 10, 20, 12, 20, 40, 0, time.UTC)
+	tests := []struct {
+		name string
+		err  GithubRateLimitError
+		want string
+	}{
+		{
+			name: "no token",
+			err:  GithubRateLimitError{Reset: reset},
+			want: fmt.Sprintf("%v The GitHub API rate limit is used up. It resets at %v. Set the GITHUB_TOKEN environment variable to get a higher rate limit", constants.RedColor("Error:"), constants.RedColor("12:20:40")),
+		},
+		{
+			name: "with token",
+			err:  GithubRateLimitError{Reset: reset, HasToken: true},
+			want: fmt.Sprintf("%v The GitHub API rate limit is used up. It resets at %v", constants.RedColor("Error:"), constants.RedColor("12:20:40")),
+		},
+		{
+			name: "no reset time",
+			err:  GithubRateLimitError{HasToken: true},
+			want: fmt.Sprintf("%v The GitHub API rate limit is used up", constants.RedColor("Error:")),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.err.Error(); got != tt.want {
+				t.Errorf("GithubRateLimitError.Error() = %v, want %v", got, tt.want)
 			}
 		})
 	}
